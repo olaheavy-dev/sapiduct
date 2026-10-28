@@ -133,3 +133,14 @@ Saved in `.design/sapiduct/screenshots/`, captured with headless Chrome. Desktop
 - **Margin notes as help.** Explanations sit beside the field they explain, and fall back under it on narrow screens.
 - **Inset only for machine strings.** The URL, token, snippet and logs are the only dark surfaces on the light shell, so the technical half is easy to find.
 - **One control family** with its states on a single page.
+
+---
+
+# Round 3: sign-in and large collections
+
+Two owner requests after v2: sign-in by GitHub or Google only, and what happens to a collection with many documents.
+
+- **Sign-in:** the password pages are gone. One page, `/sign-in`, offers Continue with GitHub and Continue with Google, says plainly that signing in creates an account, and has a designed cancelled or failed state (`v3-signin-light-1280.png`). The brand panel now carries the three steps, which answers the round 2 note that it was thin.
+- **Large collections:** the documents tab has a sample-size switch (14 or 1,284). The large view adds search, status chips with counts, a sort, a cursor pager (25 at a time), a batch progress strip and "Retry all failed" (`v3-documents-large-light-1280.png`, `v3-documents-large-dark-375.png`). The counts add up (1,255 + 12 + 6 + 11 = 1,284). The `list_sources` tool is paginated in the playground.
+- **Limits not decided:** the maximum documents per collection and the page-size maximums are for the limits record (issue #5).
+- **Not covered:** the Activity list at scale, selection and bulk actions beyond "Retry all failed", and a virtualized list (25 rows per page makes it unnecessary for now).

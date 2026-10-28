@@ -23,6 +23,7 @@ A collection can be switched into **course mode** (CourseLens): the same documen
 | Backend and frontend | FastAPI with pgvector, Next.js, from the house templates | Owner |
 | MCP library | FastMCP mounted inside the FastAPI app, token auth per collection, stateless HTTP | Recommendation accepted in the conversation; to be confirmed in an architecture record |
 | User login | Supabase Auth behind one swappable `authenticate()` function | Recommendation accepted ("go"); to be verified against Supabase's current limits before build |
+| Sign-in methods | GitHub and Google only; no email-and-password | Owner, 2026-10-28 |
 | Look | Hybrid: calm warm shell for collections and documents, dense warm-dark panels for the MCP, playground and activity areas | Recommendation accepted |
 | Theme | Light and dark, following the system; designed light first | Recommendation accepted |
 | Playground | Link to MCPJam plus an in-app tool list and manual-call form; a chat panel comes last | Owner asked for B and C panels |
@@ -80,7 +81,8 @@ The frontend was generated from `house-template-nextjs` v0.3.0 and the backend f
 |---|---|---|
 | Design tokens (extended) | Modify | Same names, new values, plus the missing categories above |
 | App shell (top bar, collection switcher, user menu) | New | Calm shell; the technical areas switch to the dark surface palette |
-| Auth pages: sign in, sign up, reset password, check your email | New | Split layout with a brand panel; email-and-password first, providers second; see Key Interactions |
+| Sign-in page | New | One page: Continue with GitHub or Google, a cancelled or failed state, and a brand panel; no password pages (owner decision, 2026-10-28) |
+| Document list for large collections | New | Search, status chips with server counts, sort, cursor pager, batch progress strip, Retry all failed |
 | Collection card | New | Name, mode badge (Knowledge or Course), document count, last indexed, calls this week, health dot |
 | Create-collection flow | New | Name, optional mode, first documents; ends on the Documents tab |
 | Collection tab bar (Documents, MCP server, Playground, Activity, Settings) | New | Course mode adds a Course tab |
@@ -108,7 +110,8 @@ The frontend was generated from `house-template-nextjs` v0.3.0 and the backend f
 - **Token management:** rotate creates a new token and keeps the old one valid for a short, stated overlap; revoke is immediate and asks for confirmation naming the collection.
 - **Activity:** new calls appear without a reload. The motif pulses once per call, only while the tab is open and motion is allowed.
 - **Course mode:** switching a collection to course mode adds the Course tab; the syllabus and digests are generated from the indexed documents and every claim cites a passage. Assignment help gives hints, never full solutions (from the CourseLens definition).
-- **Auth:** email-and-password fields first with a "Forgot password?" link; providers below an "or" divider; errors appear inline under the field and never reveal whether an email exists; successful sign-in returns to the page the user came from.
+- **Auth:** GitHub or Google only, on one page for new and returning users. A cancelled or failed sign-in returns to the page with a plain message and the other provider offered. A successful sign-in returns to the page the user came from.
+- **Large collections:** the document list shows 25 at a time with search, status filters and a cursor pager. A batch upload is one progress strip, and the list does not reorder while documents finish. The MCP `list_sources` tool is paginated the same way.
 - **Theme:** toggle in the user menu; follows the system by default; persisted; no flash on load.
 
 ## Responsive Behavior

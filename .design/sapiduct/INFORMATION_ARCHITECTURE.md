@@ -11,13 +11,9 @@ Routes are Next.js App Router paths. "Auth" means a signed-in user is required; 
   - Try the demo `/demo`: a read-only sample collection with the playground, built from openly licensed documents (public)
   - Connect guides `/docs/connect/claude-desktop` and `/docs/connect/cursor` (public): the same snippets the app shows, with the date each was last tested
   - Privacy `/privacy` and Terms `/terms` (public; linked from every auth page)
-- Auth pages (public; signed-in visitors are redirected to `/collections`, except `/reset-password` and `/auth/callback`, which must accept the session a recovery link creates)
-  - Sign in `/sign-in`
-  - Sign up `/sign-up`
-  - Forgot password `/forgot-password`
-  - Reset password `/reset-password` (reached from the email link)
-  - Check your email `/check-email` (after sign-up or a reset request; carries the address in the session, never in the URL)
-  - Auth callback `/auth/callback` (no UI; completes provider and email-link sign-ins)
+- Auth (public; signed-in visitors are redirected to `/collections`). Sign-in is GitHub or Google only (owner decision, 2026-10-28), so there are no password pages
+  - Sign in `/sign-in` (one page for new and returning users; `/sign-up` redirects here)
+  - Auth callback `/auth/callback` (no UI; completes the provider sign-in and shows the cancelled or failed state if the provider returns an error)
 - App (Auth)
   - Collections `/collections`: the home of the app
     - New collection `/collections/new`
@@ -32,7 +28,7 @@ Routes are Next.js App Router paths. "Auth" means a signed-in user is required; 
         - Practice (quizzes, spaced repetition) `/collections/[collectionId]/course/practice`
         - Assignment hints `/collections/[collectionId]/course/hints`
       - Settings `/collections/[collectionId]/settings` (name, mode, rotate or revoke token, delete collection)
-  - Account `/account` (email, password, sign-out everywhere, delete account)
+  - Account `/account` (name and avatar from the provider, linked sign-in methods, sign-out everywhere, delete account)
 - System
   - Not found and error pages (the template's, restyled)
   - `/health` (the template's liveness and readiness)
@@ -51,7 +47,7 @@ The template's `/api/*` proxy passes only a short list of request headers to the
 - **Secondary navigation:** the collection tab bar: Documents · MCP server · Playground · Activity · (Course) · Settings. At most six tabs. Course appears only in course mode and sits before Settings. The active tab uses a visible state that does not depend on colour alone.
 - **Utility navigation:** the user menu (Account, theme toggle, sign out) and a "Connect guides" link in the footer of the rail.
 - **Public navigation (landing, demo, guides):** a small top bar: logo, Demo, Guides, Sign in, and a primary "Get started" button. No mega menus.
-- **Auth pages:** no navigation beyond the logo (back to `/`) and the links between sign-in, sign-up and forgot-password.
+- **Auth page:** no navigation beyond the logo (back to `/`).
 - **Mobile navigation:** the rail becomes a collection switcher in a top bar; the tab bar becomes a horizontally scrollable strip; the account menu moves into the top bar. No hamburger for the five main tabs, since they are the content of the page.
 - **Depth:** at most three levels: Collections → Collection → Tab. The Course module adds a fourth level, kept to a side list inside the Course tab and not in the main navigation.
 
@@ -71,10 +67,12 @@ The template's `/api/*` proxy passes only a short list of request headers to the
 3. A summary line above the cards only if it carries real figures from the API (collections, documents, calls this week); otherwise omitted.
 
 ### Collection → Documents
-1. The upload zone with the accepted types and size limit written beside it, then the document table — adding material is the repeated action.
-2. Status per document (queued, parsing, indexed, failed with the reason).
-3. A one-line collection health summary: indexed count, failed count, last indexed time.
-4. Row actions (re-index, remove) — secondary, behind a menu.
+1. The upload zone with the accepted types and size limit written beside it, then the document list — adding material is the repeated action.
+2. A batch strip while an upload is indexing ("18 of 240 left"), so a large upload is one line, not hundreds of moving rows.
+3. For a long list: search by name, status chips with counts that come from the server (All, Indexed, Processing, Queued, Failed), a sort, and a cursor pager showing "Showing a to b of N". The list does not reorder under the user while documents finish.
+4. Status per document (queued, parsing, indexed, failed with the reason).
+5. With the Failed chip selected, one "Retry all failed" action.
+6. Row actions (re-index, remove) — secondary, behind a menu.
 
 ### Collection → MCP server
 1. Server status (running or not) and the URL with a copy button — the answer to "is it up, and where is it".
@@ -98,24 +96,20 @@ The template's `/api/*` proxy passes only a short list of request headers to the
 2. The next thing to do: due reviews or the next session — drives the learning loop.
 3. Concept map, digests, practice and hints as the section's sub-pages.
 
-### Sign in `/sign-in` and Sign up `/sign-up`
-1. The form: email and password, one primary button.
-2. "Forgot password?" (sign in) or password requirements (sign up).
-3. Provider buttons below an "or" divider (which providers is decided at the auth build).
-4. The brand panel on the right (wide screens only): the product in one image; it carries no form and no required information.
+### Sign in `/sign-in`
+1. One line saying there is no password and that signing in creates an account for a new user — so a new visitor knows what will happen.
+2. Two buttons of equal weight, Continue with GitHub (primary) and Continue with Google.
+3. The failure state: a cancelled or failed provider sign-in returns here with a plain message naming the provider and offering the other one.
+4. The brand panel on the right (wide screens only): the annotated sentence and the three steps; it carries no form and no required information.
 5. Terms and privacy links at the foot.
-
-### Forgot password, Reset password, Check your email
-1. One field or one message and one action each — no extras.
-2. A way back to sign in.
 
 ## User Flows
 
 ### New user to first working connection
 1. User lands on `/` and chooses Get started (or Try the demo first).
-2. Sign up: email and password (or a provider).
-   - If email confirmation is required → `/check-email` with a resend action; the link returns to `/auth/callback`, then `/collections`.
-   - If the email already has an account → the page says "check your email" without revealing that it exists.
+2. Continue with GitHub or Google at `/sign-in`; the provider returns the user to `/auth/callback`, then `/collections`.
+   - If the user cancels or the provider fails → back to `/sign-in` with the failure message.
+   - If the same verified email signs in with the other provider → Supabase links the identities automatically; an unverified email is never linked (see the auth record).
 3. `/collections` shows the empty state; the user chooses "Create your first collection".
 4. `/collections/new`: name, mode (Knowledge by default), then Create.
 5. Documents tab opens with the upload zone; the user adds files.
@@ -143,12 +137,6 @@ The template's `/api/*` proxy passes only a short list of request headers to the
 2. A Course tab appears; its syllabus starts generating from the indexed documents.
    - If there are no indexed documents → the tab shows an empty state with a link to Documents.
 3. The user opens the syllabus, a digest, or practice.
-
-### Password reset
-1. Sign in → Forgot password → email field → `/check-email`.
-2. The user opens the email link → `/auth/callback` → `/reset-password` → new password.
-   - If the link has expired or been used → the page says so and offers a new link.
-3. The user is signed in and sent to `/collections`.
 
 ### Delete a collection
 1. Settings → Delete collection; the dialog states what will be removed (documents, index, token, activity) and asks the user to type the collection's name.
@@ -188,7 +176,8 @@ The template's `/api/*` proxy passes only a short list of request headers to the
 
 ## Content Growth Plan
 
-- **Collections per user and documents per collection** are the lists that grow. Both use keyset pagination (the template's `Page[T]`, limits of 1 to 100) with a search field once a list passes one page.
+- **Collections per user and documents per collection** are the lists that grow. Both use keyset pagination (the template's `Page[T]`, limits of 1 to 100) with a search field once a list passes one page. A document list shows 25 at a time with a cursor pager rather than page numbers, and its status counts and totals come from the server, never from the rows on screen. A collection's maximum number of documents is a limit for the limits record (issue #5), not decided here.
+- **The MCP `list_sources` tool paginates too**: it takes a `limit` (up to a stated maximum) and a `cursor`, and returns the total with a next cursor, so an assistant is never handed a thousand file names at once.
 - **Activity** is the fastest-growing list. It is paginated, filterable by status, tool and time, and has a retention period that the architecture records must set; the IA only requires that the screen states the period it keeps.
 - **Course content** grows per session; the outline groups by section and collapses completed ones.
 - **Public pages** stay small: landing, demo, two connect guides, privacy and terms. New connect guides (other clients) are added under `/docs/connect/[client]`.
@@ -199,4 +188,4 @@ The template's `/api/*` proxy passes only a short list of request headers to the
 - **Identifiers:** `collectionId` in app URLs is the collection's internal id, so renaming a collection never breaks a link. The public MCP URL uses a separate, unguessable `publicId` (a short random string), so the URL does not reveal the id or the name; the access token is still required.
 - **Query parameters:** `?status=`, `?tool=`, `?range=` for Activity filters; `?cursor=` and `?limit=` for pagination; `?next=` on auth pages for the post-sign-in return path, accepted only for same-site paths. Nothing personal (email, tokens) ever appears in a URL.
 - **Indexing:** public pages are indexable; app, auth and demo-result pages are `noindex`.
-- **Redirects:** `/collections/[collectionId]` → `/documents`; signed-in visitors on auth pages → `/collections`, except `/reset-password` and `/auth/callback`: opening a recovery link signs the user in before they set a new password, so those two accept a signed-in session and a recovery session reaches the password form; signed-out visitors on app pages → `/sign-in?next=...`.
+- **Redirects:** `/collections/[collectionId]` → `/documents`; signed-in visitors on `/sign-in` → `/collections`; `/sign-up`, `/forgot-password` and `/check-email` → `/sign-in`; signed-out visitors on app pages → `/sign-in?next=...`.
