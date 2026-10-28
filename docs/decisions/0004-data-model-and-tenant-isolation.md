@@ -27,13 +27,19 @@ Facts that shape the choice:
 3. **How the owner is set.** The owner id is set for the transaction, not the connection (`set_config(name, value, true)` applies only during the current transaction, per the same page), so a pooled connection never carries one user's id to another request. The mechanism that re-applies it after each commit is chosen in the tenant-isolation spike (issue #6); the requirement is a test that fails if any statement runs without it.
 4. **The MCP path uses the same layers.** After a token is verified (record 0006), the server sets the owner id from the token's collection and filters on that collection as well.
 5. **Pagination.** Every list is keyset-paginated on `(created_at desc, id desc)` with a cursor, through the template's `Page[T]` helper; totals and status counts come from the database, not from the page being shown.
-6. **Deletion.** Deleting a collection deletes its documents, chunks, tokens, activity, jobs and stored files in one transaction plus a storage cleanup job; deleting an account does the same for every collection. A foreign key with `ON DELETE CASCADE` carries the database part.
+6. **Bootstrap paths: the places where the owner is not known yet.** Forced RLS would hide the very rows these paths need, so each one is defined, narrow and tested:
+   - *MCP token lookup.* A request carries only a bearer token and a `public_id`. A `SECURITY DEFINER` function, `resolve_access_token(token_hash, public_id)`, returns at most one row (owner id, collection id, token id, end of life) and nothing else; it is created with `SET search_path` to a trusted schema followed by `pg_temp`, schema-qualifies every object, and has `EXECUTE` revoked from `PUBLIC` and granted only to the API role, all in one transaction, as the PostgreSQL docs describe. After it returns, the owner id is set and every later query goes through the policies.
+   - *Web requests* need no bootstrap: the owner id is the verified token's `sub` (record 0007).
+   - *Ingestion workers* run as a separate database role. It may claim rows from `jobs` across owners (the only table whose policy lets it), and then sets the owner id from the job before it reads or writes `documents` and `chunks`, which stay forced for it too.
+   - *Migrations* run as the table owner and never as the API or worker role.
+7. **Deletion.** Deleting a collection deletes its documents, chunks, tokens, activity, jobs and stored files in one transaction plus a storage cleanup job; deleting an account does the same for every collection. A foreign key with `ON DELETE CASCADE` carries the database part.
 
 ## Consequences
 
 - A cross-tenant test suite is part of the definition of done for issue #6: user B cannot read, list, change or delete user A's rows through any endpoint or MCP tool, and the tests fail when either layer is removed.
 - Policies stay row-local, which avoids the sub-select race the PostgreSQL docs warn about, at the cost of repeating `owner_id` on child tables.
-- Migrations and the application must connect as different roles from the table owner, or tables must be forced; the spike verifies which this repository's Compose and production setup gives.
+- There are three database roles: the owner that runs migrations, the API role and the worker role. None of the last two is a superuser or `BYPASSRLS`. Compose and production setup create them; the spike verifies this repository's setup does.
+- The token-lookup function is the one deliberate hole in the isolation. It is small enough to review line by line, and the cross-tenant tests include calling it with another collection's `public_id` and with a revoked token.
 - RLS does not protect truncation or referential-integrity checks (the PostgreSQL docs say both bypass it), so deletes by cascade are tested explicitly.
 
 ## Alternatives considered
@@ -47,5 +53,6 @@ Facts that shape the choice:
 
 - PostgreSQL 18 documentation, Row Security Policies (PostgreSQL 18.6), read 2026-10-28: https://www.postgresql.org/docs/current/ddl-rowsecurity.html
 - This repository's database session code, read 2026-10-28: `backend/src/app/db.py` (house-template-fastapi v0.6.1).
+- PostgreSQL 18 documentation, CREATE FUNCTION, "Writing SECURITY DEFINER Functions Safely" (PostgreSQL 18.6), read 2026-10-28: https://www.postgresql.org/docs/current/sql-createfunction.html
 - PostgreSQL 18 documentation, System Administration Functions (`current_setting`, `set_config`), read 2026-10-28: https://www.postgresql.org/docs/current/functions-admin.html
 - Template pagination (`Page[T]`, limits 1 to 100): `house-template-fastapi` README, read 2026-10-28: https://github.com/olaheavy-dev/house-template-fastapi
