@@ -177,12 +177,26 @@ button,input,select{font:inherit;color:inherit}
 /* documents */
 .drop{border:1.5px dashed var(--color-border-secondary);border-radius:var(--radius-lg);padding:18px 20px;display:flex;gap:16px;align-items:center;flex-wrap:wrap;background:var(--color-bg-secondary)}
 .docs{border:1px solid var(--color-border-primary);border-radius:var(--radius-lg);overflow:hidden;background:var(--color-bg-primary)}
-.doc{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:4px 12px;padding:14px 16px;border-bottom:1px solid var(--color-border-primary);cursor:pointer;text-align:left;width:100%;background:transparent;border-inline:0;border-top:0}
-.doc:last-child{border-bottom:0}.doc:hover{background:var(--color-bg-secondary)}
-.doc[aria-pressed="true"]{background:var(--color-bg-tertiary)}
-.doc .nm{display:flex;gap:10px;align-items:center;min-width:0;font-weight:500}.doc .nm span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.doc .st{justify-self:end}.doc .tr{grid-column:1/-1;margin-top:6px}
-.doc .mt{font-size:.875rem;color:var(--color-text-tertiary);grid-column:1/-1;padding-left:28px}
+.dhead{display:none}
+.doc{display:grid;grid-template-columns:28px minmax(0,1fr) auto;gap:2px 12px;align-items:center;padding:8px 16px;border-bottom:1px solid var(--color-border-primary);cursor:pointer}
+.doc:last-child{border-bottom:0}.doc:hover{background:var(--color-bg-secondary)}.doc[aria-selected="true"]{background:var(--color-bg-tertiary)}
+.chk{width:18px;height:18px;accent-color:var(--color-accent-primary);margin:0;cursor:pointer}
+.doc .nm{background:transparent;border:0;text-align:left;font-weight:500;display:flex;gap:10px;align-items:center;min-width:0;cursor:pointer;padding:6px 0;min-height:44px;color:inherit}
+.doc .nm span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.doc .c{display:none;color:var(--color-text-secondary);font-size:.9375rem;font-variant-numeric:tabular-nums}
+.doc .mt{grid-column:2/-1;font-size:.875rem;color:var(--color-text-tertiary);margin-top:-4px;padding-bottom:4px}
+.doc .tr{grid-column:2/-1;margin:2px 0 6px}
+.bulk{display:none;align-items:center;gap:10px;flex-wrap:wrap;padding:10px 14px;margin-bottom:10px;border-radius:var(--radius-md);background:var(--color-bg-inverse);color:var(--color-text-inverse)}
+.bulk.on{display:flex}.bulk .btn{color:var(--color-text-inverse);border-color:var(--color-text-inverse)}.bulk .btn:hover{background:var(--color-text-inverse);color:var(--color-bg-inverse)}
+@media(min-width:1100px){.dhead,.doc{grid-template-columns:28px minmax(0,1fr) 92px 84px 122px}
+ .dhead{display:grid;gap:12px;padding:10px 16px;border-bottom:1px solid var(--color-border-primary);font:500 .8125rem/1.2 var(--font-sans);letter-spacing:.06em;text-transform:uppercase;color:var(--color-text-tertiary);align-items:center;background:var(--color-bg-secondary)}
+ .doc .c{display:block}.doc .mt{display:none}.doc{padding:4px 16px}}
+.protoctl-r{display:flex;justify-content:flex-end;gap:8px;align-items:center;margin:-8px 0 12px;font-size:.8125rem;color:var(--color-text-tertiary)}
+.protoctl-r .seg{border-color:var(--color-border-secondary)}.protoctl-r .seg button{color:var(--color-text-secondary);min-height:30px;padding:2px 12px}.protoctl-r .seg button[aria-pressed="true"]{background:var(--color-bg-tertiary);color:var(--color-text-primary)}
+.rej{padding:10px 14px;margin-top:12px;border-color:var(--color-status-danger)}.rej summary{cursor:pointer}
+.batch{padding:12px 16px;margin-top:12px}
+.idetail{grid-column:1/-1;padding:12px 4px 16px 40px}
+@media(max-width:1099px){#docside{display:none}.doc .nm span{white-space:normal;overflow-wrap:anywhere}}
 /* playground */
 .pg{display:grid;gap:20px;grid-template-columns:minmax(0,1fr)}
 @media(min-width:1000px){.pg{grid-template-columns:330px minmax(0,1fr)}}
@@ -239,7 +253,7 @@ button,input,select{font:inherit;color:inherit}
   <symbol id="i-logo" viewBox="0 0 32 32"><rect x="1.5" y="1.5" width="29" height="29" rx="9" fill="currentColor" stroke="none"/><path d="M7 12h9M7 20h9M16 12c4 0 4 4 9 4M16 20c4 0 4-4 9-4" stroke="var(--color-bg-primary)" stroke-width="1.9" fill="none" stroke-linecap="round"/><circle cx="25" cy="16" r="2.2" fill="var(--color-bg-primary)" stroke="none"/></symbol>
 </svg>
 
-<div class="banner"><span>Prototype v3 with sample data. Names, figures and passages are made up to show the layout.</span><nav aria-label="Prototype screens"><a href="#landing">Landing</a><a href="#sign-in">Sign in</a><a href="#collections">Collections</a><a href="#documents">Documents</a><a href="#mcp-server">MCP server</a><a href="#playground">Playground</a><a href="#activity">Activity</a><a href="#course">Course</a><a href="#states">States</a></nav></div>
+<div class="banner"><span>Prototype v4 with sample data. Names, figures and passages are made up to show the layout.</span><nav aria-label="Prototype screens"><a href="#landing">Landing</a><a href="#sign-in">Sign in</a><a href="#collections">Collections</a><a href="#documents">Documents</a><a href="#mcp-server">MCP server</a><a href="#playground">Playground</a><a href="#activity">Activity</a><a href="#course">Course</a><a href="#states">States</a></nav></div>
 
 <!-- LANDING -->
 <div data-screen="landing">
@@ -349,7 +363,7 @@ button,input,select{font:inherit;color:inherit}
       <div data-screen="collections" data-app>
         <div class="pagehead"><div><h1 style="font-size:clamp(2rem,1.4rem + 2vw,2.8rem)">Your collections</h1><p class="muted" style="margin-top:8px">Each collection is a set of documents with one server of its own.</p></div></div>
         <ul class="toc">
-          <li class="row"><a class="item-wrap" href="#documents" style="text-decoration:none;color:inherit;display:block"><div class="item" style="display:flex;align-items:baseline;gap:8px"><h3 style="font-size:1.6rem">Physics notes</h3><span class="dots"></span><span class="count">14 documents</span></div>
+          <li class="row"><a class="item-wrap" href="#documents" style="text-decoration:none;color:inherit;display:block"><div class="item" style="display:flex;align-items:baseline;gap:8px"><h3 style="font-size:1.6rem">Physics notes</h3><span class="dots"></span><span class="count">1,284 documents</span></div>
             <div class="sub"><span class="badge ok"><span class="dot"></span>Server running</span><span>Indexed 2 hours ago</span><span>212 calls this week</span></div></a>
             <aside class="note"><b class="n">&#9679;</b>Last call 4 minutes ago, from a connected assistant.</aside></li>
           <li class="row"><a class="item-wrap" href="#documents" style="text-decoration:none;color:inherit;display:block"><div class="item" style="display:flex;align-items:baseline;gap:8px"><h3 style="font-size:1.6rem">FastAPI reading</h3><span class="dots"></span><span class="count">6 documents</span></div>
@@ -374,16 +388,18 @@ button,input,select{font:inherit;color:inherit}
       <template id="t-documents">
         <div class="split">
           <div style="min-width:0">
-            <div class="drop"><svg class="ico" style="width:24px;height:24px"><use href="#i-up"/></svg><div style="flex:1;min-width:200px"><b>Drop files here</b><div class="xs muted">PDF, Word, Markdown and VTT, up to 25 MB each (sample limit).</div></div><button class="btn sm" data-toast="File picker opens here (sample)">Choose files</button></div>
-            <div class="paper" id="batch" hidden style="padding:14px 16px;margin-top:14px"><div style="display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;margin-bottom:8px"><b>Indexing a batch from 14:20</b><span class="small muted">18 of 240 left, 6 of them queued</span></div><div class="trace run"><i></i></div><p class="xs muted" style="margin-top:8px">The list below does not jump while documents finish; counts update.</p></div>
-            <div class="protoctl" style="margin-top:16px"><span class="xs muted">Prototype: sample size</span><div class="seg" role="group" aria-label="Sample size" style="border-color:var(--color-border-secondary)"><button aria-pressed="true" data-size="small">14 documents</button><button aria-pressed="false" data-size="large">1,284 documents</button></div></div>
-            <div id="dtools" hidden style="margin-top:14px;display:none;gap:12px">
-              <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center"><label class="sr" for="dq">Search documents</label><input class="input" id="dq" placeholder="Search by name" style="flex:1 1 220px;max-width:340px"><label class="sr" for="dsort">Sort</label><select class="input" id="dsort" style="width:auto"><option value="new">Newest first</option><option value="name">Name A to Z</option><option value="failed">Failed first</option></select></div>
+            <div class="protoctl-r"><span>Prototype: sample size</span><div class="seg" role="group" aria-label="Sample size"><button aria-pressed="true" data-size="small">14</button><button aria-pressed="false" data-size="large">1,284</button></div></div>
+            <div class="drop" id="dropbig"><svg class="ico" style="width:24px;height:24px"><use href="#i-up"/></svg><div style="flex:1;min-width:200px"><b>Drop files here</b><div class="xs muted">PDF, Word, Markdown and VTT, up to 25 MB each (sample limit).</div></div><button class="btn sm" data-toast="File picker opens here (sample)">Choose files</button></div>
+            <div id="dtools" style="display:none;gap:12px">
+              <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center"><label class="sr" for="dq">Search documents</label><input class="input" id="dq" placeholder="Search by name" style="flex:1 1 200px;min-width:0"><label class="sr" for="dsort">Sort</label><select class="input" id="dsort" style="width:auto"><option value="new">Newest first</option><option value="name">Name A to Z</option><option value="failed">Failed first</option></select><button class="btn primary" id="addbtn" data-toast="File picker opens here. You can also drop files anywhere on this page (sample)">Add documents</button></div>
               <div id="dchips" class="chips" role="group" aria-label="Filter by status"></div></div>
-            <p class="small muted" id="dsummary" style="margin:16px 0 10px"></p>
+            <details class="paper rej" id="rejected"><summary><b class="err">2 files were not added</b> <span class="small muted">· show why</span></summary><ul class="small" style="margin:8px 0 8px;padding-left:18px"><li><span class="mono">complete-textbook-scan.pdf</span> is 148 MB and the limit is 25 MB (sample). Split it into chapters and add those.</li><li><span class="mono">lecture-recording.mp4</span>: video is not supported. Add its transcript (.vtt) instead.</li></ul><button class="btn sm ghost" type="button" data-dismiss="rejected">Dismiss</button></details>
+            <div class="paper batch" id="batch" hidden><div style="display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;margin-bottom:8px"><b>Indexing a batch from 14:20</b><span class="small muted">18 of 240 left, 6 of them queued</span></div><div class="trace run"><i></i></div></div>
+            <div class="bulk" id="bulk" role="region" aria-label="Selected documents"><b id="bulkn"></b><button class="btn sm" type="button" data-bulk="reindex">Re-index</button><button class="btn sm" type="button" data-bulk="remove">Remove</button><button class="btn sm" type="button" data-bulk="clear" style="border-color:transparent">Clear</button></div>
+            <p class="small muted" id="dsummary" style="margin:14px 0 10px"></p>
             <div class="docs" id="doclist"></div>
-            <div id="dpager" hidden style="display:none;margin-top:12px;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap"><span class="small muted" id="drange"></span><div class="stack"><button class="btn sm" id="dprev">Previous</button><button class="btn sm" id="dnext">Next</button></div></div>
-            <p class="xs muted" id="dnote" style="margin-top:8px" hidden>Newest first, 25 at a time. The list uses a cursor rather than page numbers, so it stays stable while new documents arrive.</p>
+            <div id="dpager" style="display:none;margin-top:12px;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap"><span class="small muted" id="drange"></span><div class="stack"><button class="btn sm" id="dprev">Previous</button><button class="btn sm" id="dnext">Next</button></div></div>
+            <p class="xs muted" id="dnote" style="margin-top:8px" hidden>Newest first, 25 at a time. The list uses a cursor rather than page numbers, so it stays stable while new documents arrive and does not jump while documents finish.</p>
           </div>
           <aside class="paper" id="docside" style="padding:20px;align-self:start" aria-live="polite"></aside>
         </div>
@@ -476,43 +492,55 @@ document.addEventListener('mouseout',function(e){var f=e.target.closest('.fn[dat
 var sp=$('#si-preview');if(sp)sp.addEventListener('click',function(){var e=$('#si-err');e.hidden=!e.hidden});
 // collection pages
 var TABS=[['documents','Documents'],['mcp-server','MCP server'],['playground','Playground'],['activity','Activity'],['settings-x','Settings']];
-function head(cur){return '<div class="crumb"><a href="#collections">Collections</a> / Physics notes</div><div class="pagehead"><div><h1 style="font-size:clamp(2rem,1.4rem + 2vw,2.8rem)">Physics notes</h1><div class="meta"><span class="badge">Knowledge</span><span id="hcount">14 documents</span><span>one MCP server</span></div></div></div><div class="tabs" aria-label="Collection sections">'+TABS.map(function(x){return '<a href="#'+(x[0]==='settings-x'?'documents':x[0])+'"'+(x[0]===cur?' aria-current="page"':'')+'>'+x[1]+'</a>'}).join('')+'</div>'}
+function head(cur){return '<div class="crumb"><a href="#collections">Collections</a> / Physics notes</div><div class="pagehead"><div><h1 style="font-size:clamp(2rem,1.4rem + 2vw,2.8rem)">Physics notes</h1><div class="meta"><span class="badge">Knowledge</span><span class="hcount">1,284 documents</span><span>one MCP server</span></div></div></div><div class="tabs" aria-label="Collection sections">'+TABS.map(function(x){return '<a href="#'+(x[0]==='settings-x'?'documents':x[0])+'"'+(x[0]===cur?' aria-current="page"':'')+'>'+x[1]+'</a>'}).join('')+'</div>'}
 $$('[data-coll]').forEach(function(el){var n=el.getAttribute('data-screen');el.innerHTML=head(n)+'<div class="body"></div>';$('.body',el).appendChild($('#t-'+n).content.cloneNode(true))});
 // client config
 var CFG={claude:'{ "mcpServers": { "physics-notes": {\n    "url": "https://sapiduct.olaheavy.dev/mcp/k7f2q9xw3m",\n    "headers": { "Authorization": "Bearer <your token>" } } } }',cursor:'{ "mcpServers": { "physics-notes": {\n    "url": "https://sapiduct.olaheavy.dev/mcp/k7f2q9xw3m",\n    "headers": { "Authorization": "Bearer <your token>" } } } }'};
 if($('#cfg')){$('#cfg').textContent=CFG.claude;$$('[data-cfg]').forEach(function(b){b.addEventListener('click',function(){$$('[data-cfg]').forEach(function(x){x.setAttribute('aria-pressed',x===b?'true':'false')});$('#cfg').textContent=CFG[b.getAttribute('data-cfg')]})})}
 // documents
-var DOCS=[{n:'kinematics-chapter.pdf',h:'Read as 38 passages across 14 pages.',p:[['p. 4','Speed has magnitude only. Velocity has magnitude and direction.'],['p. 6','Average velocity is displacement divided by elapsed time.']],s:'ok',t:'PDF',z:'2.1 MB',m:'PDF · 2.1 MB · 38 passages'},{n:'lecture-03-transcript.vtt',h:'Read as 52 passages with timestamps.',p:[['12:40','Average velocity is displacement divided by elapsed time.'],['14:05','Speed is the magnitude of the velocity.']],s:'ok',t:'Transcript',z:'86 KB',m:'Transcript · 86 KB · 52 passages'},{n:'lab-manual.docx',h:'Parsing. Reading page 12 of 31.',p:[],s:'parse',t:'Word',z:'640 KB',m:'Word · 640 KB'},{n:'notes-week-4.md',h:'Queued. Waiting for a worker.',p:[],s:'queue',t:'Markdown',z:'12 KB',m:'Markdown · 12 KB'},{n:'scan-appendix.pdf',h:'Failed: no text layer found. Upload a text version or run OCR first, then retry.',p:[],s:'fail',t:'PDF',z:'9.8 MB',m:'PDF · 9.8 MB'}];
+var DOCS=[{n:'kinematics-chapter.pdf',s:'ok',t:'PDF',z:'2.1 MB',pc:38,p:[['p. 4','Speed has magnitude only. Velocity has magnitude and direction.'],['p. 6','Average velocity is displacement divided by elapsed time.']]},{n:'lecture-03-transcript.vtt',s:'ok',t:'Transcript',z:'86 KB',pc:52,p:[['12:40','Average velocity is displacement divided by elapsed time.'],['14:05','Speed is the magnitude of the velocity.']]},{n:'lab-manual.docx',s:'parse',t:'Word',z:'640 KB'},{n:'notes-week-4.md',s:'queue',t:'Markdown',z:'12 KB'},{n:'scan-appendix.pdf',s:'fail',t:'PDF',z:'9.8 MB'}];
 var TOPICS=['kinematics','dynamics','energy','momentum','waves','optics','thermo','electricity'],EXT=['pdf','vtt','docx','md'],TYPE=['PDF','Transcript','Word','Markdown'];
-var BIG=[];(function(){for(var i=0;i<1284;i++){var st='ok';if(i%117===5)st='fail';else if(i%107===2)st='parse';else if(i%214===9)st='queue';var k=i%4;BIG.push({n:TOPICS[i%8]+'-'+String(1284-i).padStart(4,'0')+'.'+EXT[k],s:st,t:TYPE[k],z:((i*37)%900+20)+' KB',pc:(i%60)+3,i:i})}})();
+var BIG=[];(function(){for(var i=0;i<1284;i++){var st='ok';if(i%117===5)st='fail';else if(i%107===2)st='parse';else if(i%214===9)st='queue';var k=i%4;var d={n:TOPICS[i%8]+'-'+String(1284-i).padStart(4,'0')+'.'+EXT[k],s:st,t:TYPE[k],z:((i*37)%900+20)+' KB',pc:(i%60)+3};if(i===3){d={n:'physics-textbook-complete.pdf',s:'parse',t:'PDF',z:'21.4 MB',big:1,pages:842,at:312}}BIG.push(d)}})();
 var BADGE={ok:'<span class="st badge ok"><svg class="ico"><use href="#i-check"/></svg>Indexed</span>',parse:'<span class="st badge warn"><svg class="ico"><use href="#i-spin"/></svg>Parsing</span>',queue:'<span class="st badge"><svg class="ico"><use href="#i-clock"/></svg>Queued</span>',fail:'<span class="st badge bad"><svg class="ico"><use href="#i-x"/></svg>Failed</span>'};
-var ST={size:/[?&]size=large/.test(location.search)?'large':'small',filter:'all',q:'',sort:'new',start:0,sel:0},PS=25;
+var ST={size:/[?&]size=small/.test(location.search)?'small':'large',filter:'all',q:'',sort:'new',start:0,sel:0,chk:{}},PS=25,PAGE=[];
 function counts(list){var c={all:list.length,ok:0,parse:0,queue:0,fail:0};list.forEach(function(d){c[d.s]++});return c}
-function view(){var list=ST.size==='large'?BIG:DOCS;var out=list.filter(function(d){return (ST.filter==='all'||d.s===ST.filter)&&(!ST.q||d.n.toLowerCase().indexOf(ST.q.toLowerCase())>=0)});
+function docView(){var list=ST.size==='large'?BIG:DOCS;var out=list.filter(function(d){return (ST.filter==='all'||d.s===ST.filter)&&(!ST.q||d.n.toLowerCase().indexOf(ST.q.toLowerCase())>=0)});
  if(ST.sort==='name')out=out.slice().sort(function(a,b){return a.n<b.n?-1:1});else if(ST.sort==='failed')out=out.slice().sort(function(a,b){return (b.s==='fail')-(a.s==='fail')});return out}
-function rowHtml(d,idx){var tr=d.s==='parse'?'<span class="tr trace run"><i></i></span>':d.s==='fail'?'<span class="tr trace fail"><i></i></span>':'';var icon=d.t==='Transcript'?'i-video':d.t==='Markdown'?'i-note':'i-file';return '<button class="doc" aria-pressed="'+(idx===ST.sel)+'" data-d="'+idx+'"><span class="nm"><svg class="ico"><use href="#'+icon+'"/></svg><span>'+esc(d.n)+'</span></span>'+BADGE[d.s]+'<span class="mt">'+esc(d.m||(d.t+' · '+d.z+(d.pc?' · '+d.pc+' passages':'')))+'</span>'+tr+'</button>'}
-function docside(d){if(!d){$('#docside').innerHTML='<p class="muted small">No documents match.</p>';return}
- var P=d.p||(d.s==='ok'?[['p. 4',DOCS[0].p[0][1]],['p. 6',DOCS[0].p[1][1]]]:[]);var h='<div class="eyebrow" style="margin-bottom:8px">Selected document</div><h4 style="margin-bottom:6px;overflow-wrap:anywhere">'+esc(d.n)+'</h4><p class="small muted" style="margin-bottom:14px">'+esc(d.h||(d.s==='ok'?'Read as '+d.pc+' passages.':d.s==='fail'?'Failed: no text layer found. Upload a text version or run OCR first, then retry.':d.s==='parse'?'Parsing.':'Queued. Waiting for a worker.'))+'</p>';
- if(d.s==='ok'&&P.length){h+=P.map(function(x,k){return '<div class="note" style="margin-bottom:12px"><b class="n">'+(k+1)+'</b><span class="src">'+esc(x[0])+'</span>'+esc(x[1])+'</div>'}).join('')+'<p class="xs muted">Sample passages.</p>'}
- else if(d.s==='fail'){h+='<div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn sm" data-toast="Retry queued (sample)">Retry</button><button class="btn sm ghost" data-toast="Remove asks you to confirm (sample)">Remove</button></div>'}
- else{h+='<div class="trace run"><i></i></div>'}
- $('#docside').innerHTML=h}
-function renderDocs(){var big=ST.size==='large',all=big?BIG:DOCS,c=counts(all),vs=view();
- var hc=$('#hcount');if(hc)hc.textContent=(big?'1,284':'14')+' documents';
- $('#batch').hidden=!big;$('#dtools').style.display=big?'grid':'none';$('#dpager').style.display=big?'flex':'none';$('#dnote').hidden=!big;
+function meta(d){if(d.big)return d.t+' · '+d.z+' · '+d.pages+' pages · reading page '+d.at;return d.t+' · '+d.z+(d.pc?' · '+d.pc+' passages':'')}
+function rowHtml(d,idx){var tr=d.big?'<span class="tr trace"><i style="width:'+Math.round(d.at/d.pages*100)+'%"></i></span>':d.s==='parse'?'<span class="tr trace run"><i></i></span>':d.s==='fail'?'<span class="tr trace fail"><i></i></span>':'';var icon=d.t==='Transcript'?'i-video':d.t==='Markdown'?'i-note':'i-file';
+ return '<div class="doc" role="row" aria-selected="'+(idx===ST.sel)+'" data-d="'+idx+'"><input class="chk" type="checkbox" data-k="'+esc(d.n)+'" aria-label="Select '+esc(d.n)+'"'+(ST.chk[d.n]?' checked':'')+'><button class="nm" type="button" title="'+esc(d.n)+'"><svg class="ico"><use href="#'+icon+'"/></svg><span>'+esc(d.n)+'</span></button><span class="c">'+esc(d.t)+'</span><span class="c">'+esc(d.z)+'</span>'+BADGE[d.s]+'<span class="mt">'+esc(meta(d))+'</span>'+tr+'</div>'}
+function sideHtml(d){if(!d)return '<p class="muted small">No documents match.</p>';
+ var h='<div class="eyebrow" style="margin-bottom:8px">Selected document</div><h4 style="margin-bottom:6px;overflow-wrap:anywhere">'+esc(d.n)+'</h4><p class="xs muted" style="margin-bottom:12px">'+esc(d.t+' · '+d.z)+'</p>';
+ if(d.big){var pct=Math.round(d.at/d.pages*100);h+='<div class="progress" role="progressbar" aria-valuenow="'+pct+'" aria-valuemin="0" aria-valuemax="100" aria-label="Reading progress" style="margin-bottom:10px"><i style="width:'+pct+'%"></i></div><p class="small" style="margin-bottom:10px"><b>Reading page '+d.at+' of '+d.pages+'</b> ('+pct+'%)</p><div class="note"><b class="n">1</b>Pages 1 to '+(d.at-1)+' are already searchable. The rest become searchable as they finish, so you do not wait for the whole file. A time estimate appears once the first pages finish. (Sample.)</div>'}
+ else if(d.s==='ok'){var P=d.p||DOCS[0].p;h+='<p class="small muted" style="margin-bottom:14px">Read as '+d.pc+' passages.</p>'+P.map(function(x,k){return '<div class="note" style="margin-bottom:12px"><b class="n">'+(k+1)+'</b><span class="src">'+esc(x[0])+'</span>'+esc(x[1])+'</div>'}).join('')+'<p class="xs muted">Sample passages.</p>'}
+ else if(d.s==='fail'){h+='<p class="small err" style="margin-bottom:6px"><b>Could not read this file</b></p><p class="small muted" style="margin-bottom:12px">No text layer found. Upload a text version or run OCR first, then retry.</p><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn sm" data-toast="Retry queued (sample)">Retry</button><button class="btn sm ghost" data-toast="Remove asks you to confirm (sample)">Remove</button></div>'}
+ else if(d.s==='parse'){h+='<p class="small muted" style="margin-bottom:10px">Parsing.</p><div class="trace run"><i></i></div>'}
+ else{h+='<p class="small muted">Queued. Waiting for a worker.</p>'}
+ return h}
+function docside(d){$('#docside').innerHTML=sideHtml(d);$$('.idetail').forEach(function(x){x.remove()});
+ if(innerWidth<1100&&d){var r=$$('.doc')[ST.sel];if(r){var div=document.createElement('div');div.className='idetail';div.innerHTML=sideHtml(d);r.insertAdjacentElement('afterend',div)}}}
+function bulk(){var n=Object.keys(ST.chk).length;$('#bulk').classList.toggle('on',n>0);$('#bulkn').textContent=n+' selected'}
+function renderDocs(){var big=ST.size==='large',all=big?BIG:DOCS,c=counts(all),vs=docView();
+ $$('.hcount').forEach(function(x){x.textContent=(big?'1,284':'14')+' documents'});
+ $('#batch').hidden=!big;$('#dropbig').style.display=big?'none':'flex';$('#rejected').hidden=!big;$('#dtools').style.display=big?'grid':'none';$('#dpager').style.display=big?'flex':'none';$('#dnote').hidden=!big;
  var base=[['all','All',c.all],['ok','Indexed',c.ok],['parse','Processing',c.parse],['queue','Queued',c.queue],['fail','Failed',c.fail]];
  if(big)$('#dchips').innerHTML=base.map(function(x){return '<button class="chip" aria-pressed="'+(ST.filter===x[0])+'" data-f="'+x[0]+'">'+x[1]+' <b>'+x[2].toLocaleString()+'</b></button>'}).join('')+(ST.filter==='fail'&&c.fail?'<button class="btn sm" data-toast="Retry queued for '+c.fail+' failed documents (sample)">Retry all '+c.fail+' failed</button>':'');
- var page=big?vs.slice(ST.start,ST.start+PS):vs;
- $('#dsummary').textContent=big?(vs.length.toLocaleString()+(ST.filter==='all'&&!ST.q?' documents':' matching documents')+' · '+c.ok.toLocaleString()+' indexed · '+(c.parse+c.queue)+' processing · '+c.fail+' failed'):(all.length+14-5+' documents · 12 indexed · 1 processing · 1 failed');
- $('#doclist').innerHTML=page.length?page.map(function(d,i){return rowHtml(d,i)}).join(''):'<div style="padding:20px"><b>No documents match</b><p class="small muted">Clear the search or choose another status.</p></div>';
- if(ST.sel>=page.length)ST.sel=0;var rows=$$('.doc');rows.forEach(function(b,i){b.setAttribute('aria-pressed',i===ST.sel?'true':'false')});docside(page[ST.sel]);
+ PAGE=big?vs.slice(ST.start,ST.start+PS):vs;
+ $('#dsummary').textContent=big?(vs.length.toLocaleString()+(ST.filter==='all'&&!ST.q?' documents':' matching documents')+' · '+c.ok.toLocaleString()+' indexed · '+(c.parse+c.queue)+' processing · '+c.fail+' failed'):'14 documents · 12 indexed · 1 processing · 1 failed';
+ var head='<div class="dhead" role="row"><input class="chk" id="selall" type="checkbox" aria-label="Select all on this page"><span>Name</span><span>Type</span><span>Size</span><span>Status</span></div>';
+ $('#doclist').innerHTML=PAGE.length?head+PAGE.map(function(d,i){return rowHtml(d,i)}).join(''):'<div style="padding:20px"><b>No documents match</b><p class="small muted">Clear the search or choose another status.</p></div>';
+ if(ST.sel>=PAGE.length)ST.sel=0;docside(PAGE[ST.sel]);bulk();
  if(big){var a1=vs.length?ST.start+1:0,b1=Math.min(ST.start+PS,vs.length);$('#drange').textContent='Showing '+a1+' to '+b1+' of '+vs.length.toLocaleString();$('#dprev').disabled=ST.start===0;$('#dnext').disabled=b1>=vs.length}
- $$('.doc').forEach(function(b){b.addEventListener('click',function(){ST.sel=+b.getAttribute('data-d');$$('.doc').forEach(function(x,i){x.setAttribute('aria-pressed',i===ST.sel?'true':'false')});docside(page[ST.sel])})});
+ var sa=$('#selall');if(sa){sa.checked=PAGE.length&&PAGE.every(function(d){return ST.chk[d.n]});sa.addEventListener('change',function(){PAGE.forEach(function(d){if(sa.checked)ST.chk[d.n]=1;else delete ST.chk[d.n]});renderDocs()})}
+ $$('.doc').forEach(function(r){r.addEventListener('click',function(e){if(e.target.classList.contains('chk'))return;ST.sel=+r.getAttribute('data-d');$$('.doc').forEach(function(x){x.setAttribute('aria-selected',x===r?'true':'false')});docside(PAGE[ST.sel])})});
+ $$('.doc .chk').forEach(function(k){k.addEventListener('change',function(){var n=k.getAttribute('data-k');if(k.checked)ST.chk[n]=1;else delete ST.chk[n];bulk();var sa2=$('#selall');if(sa2)sa2.checked=PAGE.every(function(d){return ST.chk[d.n]})})});
  $$('[data-f]').forEach(function(b){b.addEventListener('click',function(){ST.filter=b.getAttribute('data-f');ST.start=0;ST.sel=0;renderDocs()})})}
 if($('#doclist')){$$('[data-size]').forEach(function(x){x.setAttribute('aria-pressed',x.getAttribute('data-size')===ST.size?'true':'false')});renderDocs();
- $$('[data-size]').forEach(function(b){b.addEventListener('click',function(){ST={size:b.getAttribute('data-size'),filter:'all',q:'',sort:'new',start:0,sel:0};$('#dq').value='';$('#dsort').value='new';$$('[data-size]').forEach(function(x){x.setAttribute('aria-pressed',x===b?'true':'false')});renderDocs()})});
+ $$('[data-size]').forEach(function(b){b.addEventListener('click',function(){ST={size:b.getAttribute('data-size'),filter:'all',q:'',sort:'new',start:0,sel:0,chk:{}};$('#dq').value='';$('#dsort').value='new';$$('[data-size]').forEach(function(x){x.setAttribute('aria-pressed',x===b?'true':'false')});renderDocs()})});
  $('#dq').addEventListener('input',function(){ST.q=this.value;ST.start=0;ST.sel=0;renderDocs()});$('#dsort').addEventListener('change',function(){ST.sort=this.value;ST.start=0;ST.sel=0;renderDocs()});
- $('#dnext').addEventListener('click',function(){ST.start+=PS;ST.sel=0;renderDocs()});$('#dprev').addEventListener('click',function(){ST.start=Math.max(0,ST.start-PS);ST.sel=0;renderDocs()})}
+ $('#dnext').addEventListener('click',function(){ST.start+=PS;ST.sel=0;renderDocs()});$('#dprev').addEventListener('click',function(){ST.start=Math.max(0,ST.start-PS);ST.sel=0;renderDocs()});
+ $$('[data-bulk]').forEach(function(b){b.addEventListener('click',function(){var a=b.getAttribute('data-bulk');if(a==='clear'){ST.chk={};renderDocs();return}toast((a==='reindex'?'Re-indexing ':'Remove asks you to confirm for ')+Object.keys(ST.chk).length+' documents (sample)')})});
+ $$('[data-dismiss]').forEach(function(b){b.addEventListener('click',function(){var t=document.getElementById(b.getAttribute('data-dismiss'));if(t)t.hidden=true})})}
 // playground
 var SCHEMAS={search:[['query','text','What is the difference between speed and velocity?'],['limit','number','2']],get_document:[['document_id','text','doc_kinematics_01']],list_sources:[['limit','number','3'],['cursor','text','']]};
 var tool='search',view='result',last=null;

@@ -138,9 +138,18 @@ Saved in `.design/sapiduct/screenshots/`, captured with headless Chrome. Desktop
 
 # Round 3: sign-in and large collections
 
-Two owner requests after v2: sign-in by GitHub or Google only, and what happens to a collection with many documents.
+Two owner requests after v2: sign-in by GitHub or Google only, and what happens to a collection with many documents. The owner then reported that the Documents tab looked the same for a large collection, which was right: the large view sat behind a prototype switch and defaulted off.
 
-- **Sign-in:** the password pages are gone. One page, `/sign-in`, offers Continue with GitHub and Continue with Google, says plainly that signing in creates an account, and has a designed cancelled or failed state (`v3-signin-light-1280.png`). The brand panel now carries the three steps, which answers the round 2 note that it was thin.
-- **Large collections:** the documents tab has a sample-size switch (14 or 1,284). The large view adds search, status chips with counts, a sort, a cursor pager (25 at a time), a batch progress strip and "Retry all failed" (`v3-documents-large-light-1280.png`, `v3-documents-large-dark-375.png`). The counts add up (1,255 + 12 + 6 + 11 = 1,284). The `list_sources` tool is paginated in the playground.
-- **Limits not decided:** the maximum documents per collection and the page-size maximums are for the limits record (issue #5).
-- **Not covered:** the Activity list at scale, selection and bulk actions beyond "Retry all failed", and a virtualized list (25 rows per page makes it unnecessary for now).
+- **Sign-in:** the password pages are gone. One page, `/sign-in`, offers Continue with GitHub and Continue with Google, says plainly that signing in creates an account, and has a designed cancelled or failed state (`v3-signin-light-1280.png`). The brand panel carries the three steps.
+- **Large collection is now the default** for Physics notes (1,284 documents); the 14-document view is one click away. The Documents tab was redesigned for it (`v4-documents-light-1280.png`, `v4-documents-dark-375.png`):
+  - Search, sort and an Add documents button in one toolbar, with status chips and counts that add up (1,254 + 13 + 6 + 11 = 1,284).
+  - A column layout on desktop (name, type, size, status) with a select-all box, and a two-line layout on phones where names wrap instead of truncating.
+  - Row selection with a bulk bar (Re-index, Remove, Clear), and Retry all failed when the Failed chip is chosen.
+  - A cursor pager, 25 at a time, and a note that the list does not jump while documents finish.
+  - A batch strip for a large upload, one line instead of hundreds of moving rows.
+  - Rejected files are summarised in one collapsed line with the reasons inside (a 148 MB file over the limit, an unsupported video).
+  - A very large single document (842 pages, 21.4 MB) shows determinate progress, "reading page 312 of 842", and says that pages 1 to 311 are already searchable.
+  - On phones and tablets the selected document's detail opens inline under its row instead of in a panel far below the list.
+- **Tested:** a scripted run in headless Chrome clicked the status chips (25 rows to 11), the search box, Next (rows 26 to 50), the checkboxes (bulk bar shows 2 selected) and the size switch (5 rows in the small view). It found a real bug, a variable named `view` that shadowed a function, which broke every interaction after the first render; fixed.
+- **Limits not decided:** the maximum documents per collection, the maximum upload size and the page-size maximums are for the limits record (issue #5). The 25 MB figure in the prototype is a sample.
+- **Not covered:** the Activity list at scale, drag-and-drop anywhere on the page (the Add documents button toasts), keyboard use of the bulk bar, and a virtualized list (25 rows per page makes it unnecessary for now).
