@@ -1,4 +1,5 @@
 <title>Sapiduct Prototype</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400..700;1,9..144,400..600&family=Geist:wght@400..700&family=Geist+Mono:wght@400..600&display=swap">
 <style>
@@ -367,7 +368,7 @@ button,input,select{font:inherit;color:inherit}
       <a href="#course" data-rail="python"><span>Intro to Python</span><span class="xs muted">Course</span></a>
       <a href="#collections" style="margin-top:6px" data-rail="all">All collections</a>
       <a href="#collections" class="btn sm primary" style="margin-top:12px;justify-content:center;align-items:center;color:var(--color-text-inverse)">New collection</a></nav>
-    <div class="railsel"><label class="sr" for="cs">Collection</label><select class="input" id="cs"><option>Physics notes</option><option>FastAPI reading</option><option>Intro to Python</option></select></div>
+    <div class="railsel"><label class="sr" for="cs">Collection</label><select class="input" id="cs"><option value="physics">Physics notes</option><option value="fastapi">FastAPI reading</option><option value="python">Intro to Python</option></select></div>
     <main style="min-width:0">
 
       <div data-screen="collections" data-app>
@@ -547,7 +548,9 @@ function route(){var h=(location.hash||'#landing').slice(1);if(PUB.indexOf(h)<0&
  var isApp=APP.indexOf(h)>=0;$$('[data-screen]').forEach(function(s){var n=s.getAttribute('data-screen');var on=isApp?(s.hasAttribute('data-app')&&n===h):n===h;s.classList.toggle('on',on)});
  $('#app').style.display=isApp?'block':'none';
  $$('.rail a[data-rail]').forEach(function(a){var k=a.getAttribute('data-rail');var cur=(h==='course'&&k==='python')||(h!=='course'&&h!=='collections'&&k==='physics')||(h==='collections'&&k==='all');a.setAttribute('aria-current',cur?'true':'false')});
+ var cs=$('#cs');if(cs){if(h==='course')cs.value='python';else if(cs.value==='python')cs.value='physics'}
  window.scrollTo(0,0)}
+var csel=$('#cs');if(csel)csel.addEventListener('change',function(){location.hash=csel.value==='python'?'course':'documents'});
 addEventListener('hashchange',route);route();
 })();
 </script>
