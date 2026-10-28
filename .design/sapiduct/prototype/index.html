@@ -1,0 +1,436 @@
+<title>Sapiduct Prototype</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400..700&family=Geist:wght@400..700&family=Geist+Mono:wght@400..600&display=swap">
+<style>
+/* Layout concept: a calm paper shell for reading and choosing, with dark "tech" panels for the server, playground and activity. One flow motif (documents into a duct, out as tools) is the only decoration. Tokens are DESIGN_TOKENS.css. */
+:root{
+  --color-bg-primary:#fbf8f3;--color-bg-secondary:#f4efe7;--color-bg-tertiary:#eae3d8;--color-bg-inverse:#1c1815;
+  --color-text-primary:#1c1815;--color-text-secondary:#4a433b;--color-text-tertiary:#645c52;--color-text-inverse:#fbf8f3;--color-text-link:#98390a;
+  --color-border-primary:#e3dbce;--color-border-secondary:#857b6c;--color-focus-ring:#a8400d;
+  --color-accent-primary:#a8400d;--color-accent-primary-hover:#8a3009;
+  --color-status-success:#1b6b43;--color-status-warning:#8a5100;--color-status-danger:#b42318;
+  --color-tech-bg:#14110f;--color-tech-raised:#1e1915;--color-tech-code:#0e0c0a;--color-tech-text:#f1ebe1;--color-tech-muted:#b5ab9b;
+  --color-tech-accent:#f2a878;--color-tech-success:#5fd39b;--color-tech-danger:#f97066;--color-tech-border:#6f6558;--color-tech-hairline:#2e2822;
+  --font-display:"Fraunces","Iowan Old Style",Georgia,serif;--font-sans:"Geist",ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;--font-mono:"Geist Mono",ui-monospace,"SFMono-Regular",Menlo,Consolas,monospace;
+  --radius-sm:.375rem;--radius-md:.625rem;--radius-lg:1rem;
+  --shadow-md:0 4px 12px rgb(28 24 21/.08),0 1px 3px rgb(28 24 21/.06);
+  --ease-out:cubic-bezier(.22,1,.36,1);--flow-duration:2400ms;--tech-panel:var(--color-tech-bg);
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --color-bg-primary:#14110f;--color-bg-secondary:#1c1814;--color-bg-tertiary:#26211c;--color-bg-inverse:#f4efe7;
+  --color-text-primary:#f4efe7;--color-text-secondary:#cfc6b8;--color-text-tertiary:#a39a8c;--color-text-inverse:#14110f;--color-text-link:#f2a878;
+  --color-border-primary:#332c25;--color-border-secondary:#857a6c;--color-focus-ring:#f2a878;
+  --color-accent-primary:#f2a878;--color-accent-primary-hover:#f8c4a2;
+  --color-status-success:#5fd39b;--color-status-warning:#f5b94a;--color-status-danger:#f97066;
+  --shadow-md:0 4px 12px rgb(0 0 0/.45),0 1px 3px rgb(0 0 0/.4);--tech-panel:var(--color-tech-raised);color-scheme:dark}}
+:root[data-theme="dark"]{
+  --color-bg-primary:#14110f;--color-bg-secondary:#1c1814;--color-bg-tertiary:#26211c;--color-bg-inverse:#f4efe7;
+  --color-text-primary:#f4efe7;--color-text-secondary:#cfc6b8;--color-text-tertiary:#a39a8c;--color-text-inverse:#14110f;--color-text-link:#f2a878;
+  --color-border-primary:#332c25;--color-border-secondary:#857a6c;--color-focus-ring:#f2a878;
+  --color-accent-primary:#f2a878;--color-accent-primary-hover:#f8c4a2;
+  --color-status-success:#5fd39b;--color-status-warning:#f5b94a;--color-status-danger:#f97066;
+  --shadow-md:0 4px 12px rgb(0 0 0/.45),0 1px 3px rgb(0 0 0/.4);--tech-panel:var(--color-tech-raised);color-scheme:dark}
+*{box-sizing:border-box}
+body{max-width:82rem;margin-inline:auto;background:var(--color-bg-primary);color:var(--color-text-primary);font:400 17px/1.6 var(--font-sans);padding-block:0 48px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+h1,h2,h3{font-family:var(--font-display);letter-spacing:-.025em;line-height:1.1;margin:0;text-wrap:balance;font-weight:600}
+h1{font-size:clamp(2.2rem,1.4rem + 3.4vw,3.6rem)}h2{font-size:1.875rem}h3{font-size:1.25rem}
+p{margin:0}a{color:var(--color-text-link)}
+button,input,select{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--color-focus-ring);outline-offset:2px;border-radius:4px}
+.mono{font-family:var(--font-mono)}.muted{color:var(--color-text-secondary)}.small{font-size:.9375rem;line-height:1.5}.xs{font-size:.8125rem;line-height:1.4}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+.ico{width:1.1em;height:1.1em;flex:none;stroke:currentColor;fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;vertical-align:-.18em}
+.banner{margin:0 0 0;padding:8px 0;font-size:.8125rem;color:var(--color-text-tertiary);border-bottom:1px solid var(--color-border-primary);display:flex;gap:8px;flex-wrap:wrap;align-items:center;justify-content:space-between}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:0 20px;border-radius:var(--radius-md);border:1px solid var(--color-border-secondary);background:transparent;cursor:pointer;text-decoration:none;font-weight:500;color:var(--color-text-primary);transition:background .15s,border-color .15s}
+.btn:hover{background:var(--color-bg-tertiary)}
+.btn.primary{background:var(--color-accent-primary);border-color:var(--color-accent-primary);color:var(--color-text-inverse)}
+.btn.primary:hover{background:var(--color-accent-primary-hover);border-color:var(--color-accent-primary-hover)}
+.btn.sm{min-height:36px;padding:0 12px;font-size:.9375rem}
+.btn.block{width:100%}
+.topbar{display:flex;align-items:center;gap:16px;min-height:64px;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:10px;font-family:var(--font-display);font-weight:700;font-size:1.35rem;letter-spacing:-.03em;color:var(--color-text-primary);text-decoration:none}
+.brand svg{width:30px;height:30px}
+.spacer{flex:1}
+.nav{display:flex;gap:4px;align-items:center;flex-wrap:wrap}
+.nav a{padding:8px 12px;text-decoration:none;color:var(--color-text-secondary);border-radius:var(--radius-sm)}
+.nav a:hover{background:var(--color-bg-tertiary);color:var(--color-text-primary)}
+.icon-btn{width:44px;height:44px;display:inline-flex;align-items:center;justify-content:center;border-radius:var(--radius-md);border:1px solid transparent;background:transparent;cursor:pointer}
+.icon-btn:hover{background:var(--color-bg-tertiary)}
+[data-screen]{display:none}[data-screen].on{display:block}
+/* shared pieces */
+.card{background:var(--color-bg-secondary);border:1px solid var(--color-border-primary);border-radius:var(--radius-lg);padding:24px}
+.badge{display:inline-flex;align-items:center;gap:6px;font-size:.8125rem;line-height:1;padding:5px 10px;border-radius:9999px;border:1px solid var(--color-border-secondary);color:var(--color-text-secondary);white-space:nowrap}
+.badge.ok{color:var(--color-status-success);border-color:currentColor}.badge.warn{color:var(--color-status-warning);border-color:currentColor}.badge.bad{color:var(--color-status-danger);border-color:currentColor}
+.tech{background:var(--tech-panel);color:var(--color-tech-text);border:1px solid var(--color-tech-hairline);border-radius:var(--radius-lg);padding:20px;min-width:0}
+.tech .muted,.tech .cap{color:var(--color-tech-muted)}
+.tech .cap{font-size:.8125rem;letter-spacing:.06em;text-transform:uppercase;font-family:var(--font-mono)}
+.tech a{color:var(--color-tech-accent)}
+.tech :focus-visible{outline-color:var(--color-tech-accent)}
+.code{background:var(--color-tech-code);border:1px solid var(--color-tech-hairline);border-radius:var(--radius-md);padding:14px 16px;font:400 .875rem/1.6 var(--font-mono);color:var(--color-tech-text);overflow-x:auto;white-space:pre;margin:0}
+.copyrow{display:flex;gap:8px;align-items:stretch}
+.copyrow .code{flex:1;min-width:0;display:flex;align-items:center}
+.tbtn{display:inline-flex;align-items:center;gap:6px;min-height:40px;padding:0 14px;border-radius:var(--radius-md);border:1px solid var(--color-tech-border);background:transparent;color:var(--color-tech-text);cursor:pointer;font-size:.9375rem}
+.tbtn:hover{background:var(--color-tech-hairline)}.tbtn.pri{background:var(--color-tech-accent);border-color:var(--color-tech-accent);color:#14110f;font-weight:600}.tbtn.pri:hover{background:#f8c4a2}
+.tabs{display:flex;gap:4px;overflow-x:auto;border-bottom:1px solid var(--color-border-primary);scrollbar-width:thin}
+.tabs a{display:inline-flex;align-items:center;min-height:44px;padding:0 14px;color:var(--color-text-secondary);text-decoration:none;border-bottom:2px solid transparent;white-space:nowrap;margin-bottom:-1px}
+.tabs a:hover{color:var(--color-text-primary)}
+.tabs a[aria-current="page"]{color:var(--color-text-primary);border-bottom-color:var(--color-accent-primary);font-weight:600}
+.seg{display:inline-flex;border:1px solid var(--color-tech-border);border-radius:var(--radius-md);overflow:hidden}
+.seg button{background:transparent;border:0;color:var(--color-tech-muted);padding:8px 14px;cursor:pointer;min-height:40px}
+.seg button[aria-pressed="true"]{background:var(--color-tech-hairline);color:var(--color-tech-text)}
+table{border-collapse:collapse;width:100%}th{font-weight:500;font-size:.8125rem;letter-spacing:.06em;text-transform:uppercase;text-align:left;color:var(--color-text-tertiary);padding:10px 12px;border-bottom:1px solid var(--color-border-primary)}
+td{padding:12px;border-bottom:1px solid var(--color-border-primary);vertical-align:middle}
+.scroll{overflow-x:auto}
+.tech th{color:var(--color-tech-muted);border-bottom-color:var(--color-tech-hairline)}.tech td{border-bottom-color:var(--color-tech-hairline)}
+.field{display:flex;flex-direction:column;gap:6px;margin-bottom:16px}
+.field label{font-weight:500;font-size:.9375rem}
+.field input,.field select{min-height:44px;border-radius:var(--radius-sm);border:1px solid var(--color-border-secondary);background:var(--color-bg-primary);padding:0 12px}
+.err{color:var(--color-status-danger);font-size:.9375rem}
+.toast{position:fixed;left:50%;bottom:24px;transform:translate(-50%,20px);background:var(--color-bg-inverse);color:var(--color-text-inverse);padding:10px 18px;border-radius:var(--radius-md);opacity:0;pointer-events:none;transition:opacity .25s var(--ease-out),transform .25s var(--ease-out);z-index:30;font-size:.9375rem}
+.toast.on{opacity:1;transform:translate(-50%,0)}
+.hl{background:linear-gradient(transparent 62%,color-mix(in srgb,var(--color-accent-primary) 28%,transparent) 62%);padding:0 .06em}
+/* flow motif: static unless .live */
+.flow{width:100%;height:auto;display:block}
+.flow .line{fill:none;stroke:var(--color-tech-accent);stroke-width:1.5;stroke-dasharray:2 6;opacity:.85}
+.flow .node{fill:var(--color-tech-code);stroke:var(--color-tech-border);stroke-width:1}
+.flow text{fill:var(--color-tech-text);font:500 12px var(--font-mono)}
+.flow .duct{fill:none;stroke:var(--color-tech-accent);stroke-width:2}
+@media (prefers-reduced-motion:no-preference){.flow.live .line{animation:dash var(--flow-duration) linear infinite}}
+@keyframes dash{to{stroke-dashoffset:-32}}
+/* landing */
+.hero{display:grid;gap:40px;grid-template-columns:minmax(0,1fr);padding-block:56px 40px}
+.hero .lede{font-size:1.25rem;line-height:1.55;color:var(--color-text-secondary);max-width:44ch}
+.actions{display:flex;gap:12px;flex-wrap:wrap}
+.steps{display:grid;gap:16px;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));margin-top:16px}
+.steps .card h3{margin-bottom:8px}
+.section{padding-block:40px;display:grid;gap:20px}
+@media(min-width:960px){.hero{grid-template-columns:minmax(0,5fr) minmax(0,6fr);align-items:center}}
+/* auth */
+.auth{display:grid;min-height:calc(100vh - 120px);gap:0;grid-template-columns:minmax(0,1fr)}
+.auth .formside{padding-block:32px;display:flex;flex-direction:column;justify-content:center;max-width:420px;width:100%;margin-inline:auto}
+.auth .brandside{display:none}
+.divider{display:flex;align-items:center;gap:12px;color:var(--color-text-tertiary);font-size:.875rem;margin:16px 0}.divider::before,.divider::after{content:"";flex:1;height:1px;background:var(--color-border-primary)}
+@media(min-width:1024px){.auth{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}.auth .brandside{display:flex;flex-direction:column;justify-content:center;gap:24px;padding:48px}}
+/* app shell */
+.shell{display:grid;gap:24px;grid-template-columns:minmax(0,1fr);padding-top:16px}
+.rail{display:none}
+.railsel{display:block}
+@media(min-width:1024px){.shell{grid-template-columns:240px minmax(0,1fr)}.rail{display:flex;flex-direction:column;gap:4px}.railsel{display:none}}
+.rail a{display:flex;justify-content:space-between;gap:8px;align-items:center;padding:10px 12px;border-radius:var(--radius-sm);color:var(--color-text-secondary);text-decoration:none}
+.rail a:hover{background:var(--color-bg-tertiary)}.rail a[aria-current="true"]{background:var(--color-bg-tertiary);color:var(--color-text-primary);font-weight:600}
+.rail .head{font-size:.8125rem;letter-spacing:.06em;text-transform:uppercase;color:var(--color-text-tertiary);padding:8px 12px}
+.cards{display:grid;gap:16px;grid-template-columns:repeat(auto-fill,minmax(280px,1fr))}
+.ccard{display:flex;flex-direction:column;gap:12px;text-decoration:none;color:inherit;transition:transform .25s var(--ease-out),box-shadow .25s var(--ease-out)}
+.ccard:hover{transform:translateY(-3px);box-shadow:var(--shadow-md)}
+.stat{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:.9375rem;color:var(--color-text-secondary)}
+.pagehead{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;flex-wrap:wrap;margin-bottom:8px}
+.dot{width:9px;height:9px;border-radius:50%;background:var(--color-status-success);display:inline-block}
+.drop{border:1.5px dashed var(--color-border-secondary);border-radius:var(--radius-lg);padding:28px;text-align:center;display:grid;gap:8px;justify-items:center;background:var(--color-bg-secondary)}
+.grid2{display:grid;gap:16px;grid-template-columns:minmax(0,1fr)}
+@media(min-width:1100px){.grid2{grid-template-columns:minmax(0,5fr) minmax(0,7fr)}}
+.tool{display:block;width:100%;text-align:left;background:transparent;border:1px solid var(--color-tech-hairline);color:inherit;border-radius:var(--radius-md);padding:12px 14px;cursor:pointer;margin-bottom:8px}
+.tool:hover{background:var(--color-tech-hairline)}.tool[aria-pressed="true"]{border-color:var(--color-tech-accent);background:var(--color-tech-hairline)}
+.tool b{font-family:var(--font-mono);font-weight:500}
+.tfield{display:flex;flex-direction:column;gap:6px;margin-bottom:14px}.tfield label{font-size:.9375rem}
+.tfield input{min-height:40px;background:var(--color-tech-code);border:1px solid var(--color-tech-border);border-radius:var(--radius-sm);color:var(--color-tech-text);padding:0 10px;font-family:var(--font-mono)}
+.chip{display:inline-flex;align-items:center;gap:6px;font:500 .8125rem var(--font-mono);padding:4px 10px;border-radius:9999px;border:1px solid var(--color-tech-border);color:var(--color-tech-accent);background:transparent;cursor:pointer}
+.chip:hover{background:var(--color-tech-hairline)}
+.passage{border-top:1px solid var(--color-tech-hairline);padding-top:14px;margin-top:14px;display:grid;gap:8px}
+.live-dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--color-tech-success);margin-right:6px}
+.outline li{display:flex;gap:12px;align-items:center;padding:12px 0;border-bottom:1px solid var(--color-border-primary)}
+.outline{list-style:none;padding:0;margin:0}
+.course{display:grid;gap:24px;grid-template-columns:minmax(0,1fr)}
+@media(min-width:1100px){.course{grid-template-columns:240px minmax(0,1fr)}}
+.units a{display:block;padding:10px 12px;border-radius:var(--radius-sm);text-decoration:none;color:var(--color-text-secondary)}
+.units a[aria-current="true"]{background:var(--color-bg-tertiary);color:var(--color-text-primary);font-weight:600}
+.units a:hover{background:var(--color-bg-tertiary)}
+.progress{height:6px;border-radius:9999px;background:var(--color-bg-tertiary);overflow:hidden}.progress i{display:block;height:100%;background:var(--color-accent-primary)}
+.checks{list-style:none;padding:0;margin:0;display:grid;gap:8px;grid-template-columns:repeat(auto-fit,minmax(260px,1fr))}.checks li{display:flex;gap:10px}
+</style>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-copy" viewBox="0 0 24 24"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V6a2 2 0 0 1 2-2h8"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></symbol>
+  <symbol id="i-x" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></symbol>
+  <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></symbol>
+  <symbol id="i-spin" viewBox="0 0 24 24"><path d="M12 3.5a8.5 8.5 0 1 0 8.5 8.5"/></symbol>
+  <symbol id="i-file" viewBox="0 0 24 24"><path d="M7 3.5h7l4 4V20a.5.5 0 0 1-.5.5h-10A.5.5 0 0 1 7 20z"/><path d="M14 3.5v4h4"/></symbol>
+  <symbol id="i-up" viewBox="0 0 24 24"><path d="M12 16V5M7.5 9.5L12 5l4.5 4.5M5 19.5h14"/></symbol>
+  <symbol id="i-play" viewBox="0 0 24 24"><path d="M8 5.5v13l10.5-6.5z"/></symbol>
+  <symbol id="i-video" viewBox="0 0 24 24"><rect x="3.5" y="6" width="12" height="12" rx="2"/><path d="M15.5 10.5l5-2.5v8l-5-2.5"/></symbol>
+  <symbol id="i-note" viewBox="0 0 24 24"><path d="M6 4h12v16H6zM9 9h6M9 13h6"/></symbol>
+  <symbol id="i-pen" viewBox="0 0 24 24"><path d="M5 19l1-4L16.5 4.5l3 3L9 18z"/></symbol>
+  <symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 3v2M12 19v2M3 12h2M19 12h2M5.6 5.6L7 7M17 17l1.4 1.4M5.6 18.4L7 17M17 7l1.4-1.4"/></symbol>
+  <symbol id="i-link" viewBox="0 0 24 24"><path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/></symbol>
+  <symbol id="i-logo" viewBox="0 0 32 32"><rect x="1.5" y="1.5" width="29" height="29" rx="9" fill="currentColor" stroke="none"/><path d="M6 11c5 0 6 5 10 5s5-5 10-5M6 21c5 0 6-5 10-5s5 5 10 5" stroke="var(--color-bg-primary)" stroke-width="1.8" fill="none" stroke-linecap="round"/></symbol>
+</svg>
+
+<div class="banner"><span>Prototype with sample data. Names, figures and passages are made up to show the layout; nothing here is measured.</span><span>Screens: <a href="#landing">Landing</a> · <a href="#sign-in">Sign in</a> · <a href="#collections">Collections</a> · <a href="#documents">Documents</a> · <a href="#mcp-server">MCP server</a> · <a href="#playground">Playground</a> · <a href="#activity">Activity</a> · <a href="#course">Course</a></span></div>
+
+<!-- LANDING -->
+<div data-screen="landing" data-wrap="public">
+  <header class="topbar">
+    <a class="brand" href="#landing"><svg class="ico" style="width:30px;height:30px"><use href="#i-logo"/></svg>Sapiduct</a>
+    <nav class="nav" aria-label="Main"><a href="#playground">Demo</a><a href="#mcp-server">Connect guides</a></nav>
+    <span class="spacer"></span>
+    <button class="icon-btn" data-theme-toggle aria-label="Switch colour theme"><svg class="ico"><use href="#i-sun"/></svg></button>
+    <a class="btn" href="#sign-in">Sign in</a><a class="btn primary" href="#sign-up">Get started</a>
+  </header>
+  <section class="hero">
+    <div style="display:grid;gap:24px">
+      <h1>Turn your documents into an <span class="hl">MCP server</span>.</h1>
+      <p class="lede">Add PDFs, transcripts and notes to a collection. Sapiduct indexes them and gives the collection one server your assistant can call, with a citation on every answer.</p>
+      <div class="actions"><a class="btn primary" href="#sign-up">Create a collection</a><a class="btn" href="#playground">Try the demo</a></div>
+      <div class="tech" style="padding:14px"><div class="cap" style="margin-bottom:8px">Connect in one line (illustrative)</div>
+        <div class="copyrow"><pre class="code">https://sapiduct.olaheavy.dev/mcp/k7f2q9xw3m</pre><button class="tbtn" data-copy="https://sapiduct.olaheavy.dev/mcp/k7f2q9xw3m"><svg class="ico"><use href="#i-copy"/></svg>Copy</button></div></div>
+    </div>
+    <div class="tech" aria-label="Product preview">
+      <div style="display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;margin-bottom:12px"><span class="cap">Playground · search</span><span class="badge" style="color:var(--color-tech-success);border-color:var(--color-tech-success)"><span class="live-dot" style="margin:0"></span>Server running</span></div>
+      <pre class="code" style="white-space:pre-wrap">search({ "query": "speed versus velocity", "limit": 2 })</pre>
+      <div class="passage"><div class="xs mono muted">Result 1 of 2</div><p class="small">Speed has magnitude only. Velocity has magnitude and direction, so an object moving in a circle at constant speed is still changing its velocity.</p><div><span class="chip"><svg class="ico"><use href="#i-file"/></svg>kinematics-chapter.pdf · p. 4</span></div></div>
+      <div class="passage"><div class="xs mono muted">Result 2 of 2</div><p class="small">Average velocity is displacement divided by elapsed time; average speed is distance divided by elapsed time.</p><div><span class="chip"><svg class="ico"><use href="#i-video"/></svg>lecture-03-transcript.vtt · 12:40</span></div></div>
+      <div style="margin-top:18px">
+        <svg class="flow" viewBox="0 0 560 150" role="img" aria-label="Documents flow through the server and come out as three tools">
+          <rect class="node" x="6" y="12" width="92" height="26" rx="8"/><text x="18" y="29">pdf</text>
+          <rect class="node" x="6" y="52" width="92" height="26" rx="8"/><text x="18" y="69">vtt</text>
+          <rect class="node" x="6" y="92" width="92" height="26" rx="8"/><text x="18" y="109">docx · md</text>
+          <path class="line" d="M98 25 C190 25 190 65 250 65"/><path class="line" d="M98 65 C170 65 190 65 250 65"/><path class="line" d="M98 105 C190 105 190 65 250 65"/>
+          <rect class="duct" x="250" y="40" width="60" height="50" rx="14"/>
+          <path class="line" d="M310 65 C380 65 380 25 440 25"/><path class="line" d="M310 65 H440"/><path class="line" d="M310 65 C380 65 380 105 440 105"/>
+          <rect class="node" x="440" y="12" width="110" height="26" rx="13"/><text x="456" y="29">search</text>
+          <rect class="node" x="440" y="52" width="110" height="26" rx="13"/><text x="456" y="69">get_document</text>
+          <rect class="node" x="440" y="92" width="110" height="26" rx="13"/><text x="456" y="109">list_sources</text>
+        </svg></div>
+    </div>
+  </section>
+  <section class="section" aria-labelledby="how">
+    <h2 id="how">Three steps, no pipeline to run</h2>
+    <div class="steps">
+      <div class="card"><h3>Add documents</h3><p class="muted">Drop in PDFs, Word files, Markdown and lecture transcripts. Each one shows its status as it is read and indexed.</p></div>
+      <div class="card"><h3>Connect an assistant</h3><p class="muted">Copy the server URL and your access token into Claude Desktop or Cursor. Tokens can be rotated or revoked at any time.</p></div>
+      <div class="card"><h3>Ask, and see the source</h3><p class="muted">Every answer comes back with the passages it used, so you can check it. Try it in the playground before you connect anything.</p></div>
+    </div>
+  </section>
+  <section class="section" aria-labelledby="cl"><h2 id="cl">Studying from a course? Turn on course mode.</h2>
+    <p class="muted" style="max-width:60ch">The same documents also become a syllabus, session digests, quizzes with spaced repetition and hints for assignments. CourseLens is a module of Sapiduct, so the server keeps working alongside it.</p>
+    <div><a class="btn" href="#course">See course mode</a></div></section>
+</div>
+
+<!-- AUTH -->
+<div data-screen="sign-in" data-wrap="auth"><div class="auth">
+  <div class="formside"><a class="brand" href="#landing" style="margin-bottom:32px"><svg class="ico" style="width:30px;height:30px"><use href="#i-logo"/></svg>Sapiduct</a>
+    <h2 style="margin-bottom:6px">Welcome back</h2><p class="muted" style="margin-bottom:24px">Sign in to your collections.</p>
+    <form data-go="collections" novalidate>
+      <div class="field"><label for="si-email">Email</label><input id="si-email" type="email" autocomplete="email" placeholder="you@example.com" required></div>
+      <div class="field"><div style="display:flex;justify-content:space-between"><label for="si-pw">Password</label><a class="small" href="#forgot-password">Forgot password?</a></div><input id="si-pw" type="password" autocomplete="current-password" required></div>
+      <p class="err" id="si-err" role="alert" hidden>That email and password don't match. Check both and try again.</p>
+      <button class="btn primary block" type="submit">Sign in</button>
+    </form>
+    <div class="divider">or</div>
+    <button class="btn block" type="button" data-go-btn="collections" style="margin-bottom:10px">Continue with GitHub</button>
+    <button class="btn block" type="button" data-go-btn="collections">Continue with Google</button>
+    <p class="xs muted" style="margin-top:12px">Which providers to offer is decided at the auth build.</p>
+    <p class="small" style="margin-top:24px">New here? <a href="#sign-up">Create an account</a></p>
+    <p class="xs muted" style="margin-top:32px">By signing in you agree to the <a href="#landing">terms</a> and <a href="#landing">privacy policy</a>.</p></div>
+  <aside class="brandside tech" style="border-radius:var(--radius-lg)" aria-hidden="true"><div class="cap">Your documents, as tools</div>
+    <svg class="flow live" viewBox="0 0 560 150"><rect class="node" x="6" y="12" width="92" height="26" rx="8"/><text x="18" y="29">pdf</text><rect class="node" x="6" y="52" width="92" height="26" rx="8"/><text x="18" y="69">vtt</text><rect class="node" x="6" y="92" width="92" height="26" rx="8"/><text x="18" y="109">docx · md</text><path class="line" d="M98 25 C190 25 190 65 250 65"/><path class="line" d="M98 65 C170 65 190 65 250 65"/><path class="line" d="M98 105 C190 105 190 65 250 65"/><rect class="duct" x="250" y="40" width="60" height="50" rx="14"/><path class="line" d="M310 65 C380 65 380 25 440 25"/><path class="line" d="M310 65 H440"/><path class="line" d="M310 65 C380 65 380 105 440 105"/><rect class="node" x="440" y="12" width="110" height="26" rx="13"/><text x="456" y="29">search</text><rect class="node" x="440" y="52" width="110" height="26" rx="13"/><text x="456" y="69">get_document</text><rect class="node" x="440" y="92" width="110" height="26" rx="13"/><text x="456" y="109">list_sources</text></svg>
+    <p class="muted">One collection, one server. Every answer cites its source.</p></aside>
+</div></div>
+
+<div data-screen="sign-up" data-wrap="auth"><div class="auth">
+  <div class="formside"><a class="brand" href="#landing" style="margin-bottom:32px"><svg class="ico" style="width:30px;height:30px"><use href="#i-logo"/></svg>Sapiduct</a>
+    <h2 style="margin-bottom:6px">Create your account</h2><p class="muted" style="margin-bottom:24px">Then make a collection and connect it.</p>
+    <form data-go="check-email" novalidate>
+      <div class="field"><label for="su-email">Email</label><input id="su-email" type="email" autocomplete="email" required></div>
+      <div class="field"><label for="su-pw">Password</label><input id="su-pw" type="password" autocomplete="new-password" aria-describedby="su-hint" required><span class="xs muted" id="su-hint">Use at least 12 characters. The final rule comes from the auth provider's settings.</span></div>
+      <button class="btn primary block" type="submit">Create account</button></form>
+    <div class="divider">or</div><button class="btn block" type="button" data-go-btn="collections">Continue with GitHub</button>
+    <p class="small" style="margin-top:24px">Already have an account? <a href="#sign-in">Sign in</a></p></div>
+  <aside class="brandside tech" style="border-radius:var(--radius-lg)" aria-hidden="true"><div class="cap">What you get</div><p>A server URL, an access token you control, and a playground to try every tool before you connect.</p><p class="muted small">Prototype copy. No plan or pricing is decided.</p></aside>
+</div></div>
+
+<div data-screen="forgot-password" data-wrap="auth"><div class="auth"><div class="formside"><a class="brand" href="#landing" style="margin-bottom:32px"><svg class="ico" style="width:30px;height:30px"><use href="#i-logo"/></svg>Sapiduct</a>
+  <h2 style="margin-bottom:6px">Reset your password</h2><p class="muted" style="margin-bottom:24px">Enter your email and we'll send a link if an account exists.</p>
+  <form data-go="check-email" novalidate><div class="field"><label for="fp-email">Email</label><input id="fp-email" type="email" autocomplete="email" required></div><button class="btn primary block" type="submit">Send reset link</button></form>
+  <p class="small" style="margin-top:24px"><a href="#sign-in">Back to sign in</a></p></div>
+  <aside class="brandside tech" style="border-radius:var(--radius-lg)" aria-hidden="true"><div class="cap">Reset</div><p class="muted">The message is the same whether or not the address has an account.</p></aside></div></div>
+
+<div data-screen="check-email" data-wrap="auth"><div class="auth"><div class="formside"><a class="brand" href="#landing" style="margin-bottom:32px"><svg class="ico" style="width:30px;height:30px"><use href="#i-logo"/></svg>Sapiduct</a>
+  <h2 style="margin-bottom:6px">Check your email</h2><p class="muted" style="margin-bottom:24px">If that address can receive a message from us, a link is on its way. It may take a minute.</p>
+  <button class="btn block" type="button" data-toast="Link sent again (sample)">Send it again</button><p class="small" style="margin-top:24px"><a href="#sign-in">Back to sign in</a></p></div>
+  <aside class="brandside tech" style="border-radius:var(--radius-lg)" aria-hidden="true"><div class="cap">Next</div><p class="muted">The link signs you in and, for a reset, takes you to the new password form.</p></aside></div></div>
+
+<!-- APP SHELL -->
+<div data-wrap="app" id="app">
+  <header class="topbar">
+    <a class="brand" href="#collections"><svg class="ico" style="width:30px;height:30px"><use href="#i-logo"/></svg>Sapiduct</a>
+    <span class="spacer"></span>
+    <button class="icon-btn" data-theme-toggle aria-label="Switch colour theme"><svg class="ico"><use href="#i-sun"/></svg></button>
+    <a class="btn sm" href="#landing">Sign out</a>
+  </header>
+  <div class="shell">
+    <nav class="rail" aria-label="Collections"><div class="head">Collections</div>
+      <a href="#documents" aria-current="true"><span>Physics notes</span><span class="xs muted">Knowledge</span></a>
+      <a href="#documents"><span>FastAPI reading</span><span class="xs muted">Knowledge</span></a>
+      <a href="#course"><span>Intro to Python</span><span class="xs muted">Course</span></a>
+      <a href="#collections" style="margin-top:8px">All collections</a>
+      <a href="#collections" class="btn sm primary" style="margin-top:12px;justify-content:center;color:var(--color-text-inverse)">New collection</a></nav>
+    <div class="railsel"><label class="sr" for="cs">Collection</label><div class="field" style="margin:0"><select id="cs"><option>Physics notes</option><option>FastAPI reading</option><option>Intro to Python</option></select></div></div>
+    <main style="min-width:0">
+
+      <!-- Collections -->
+      <div data-screen="collections" data-app>
+        <div class="pagehead"><div><h2>Your collections</h2><p class="muted small">Each collection is a set of documents with its own server.</p></div><button class="btn primary" data-toast="Create flow is the next prototype step">New collection</button></div>
+        <div class="cards" style="margin-top:16px">
+          <a class="card ccard" href="#documents"><div style="display:flex;justify-content:space-between;gap:8px"><h3>Physics notes</h3><span class="badge">Knowledge</span></div><div class="stat"><span>14 documents</span><span>Indexed 2 hours ago</span><span>212 calls this week</span></div><span class="badge ok"><span class="dot"></span>Server running</span></a>
+          <a class="card ccard" href="#documents"><div style="display:flex;justify-content:space-between;gap:8px"><h3>FastAPI reading</h3><span class="badge">Knowledge</span></div><div class="stat"><span>6 documents</span><span>Indexed yesterday</span><span>0 calls this week</span></div><span class="badge warn"><svg class="ico"><use href="#i-clock"/></svg>Not connected yet</span></a>
+          <a class="card ccard" href="#course"><div style="display:flex;justify-content:space-between;gap:8px"><h3>Intro to Python</h3><span class="badge">Course</span></div><div class="stat"><span>31 documents</span><span>Indexed 3 days ago</span><span>6 reviews due</span></div><span class="badge ok"><span class="dot"></span>Server running</span></a>
+        </div>
+        <p class="xs muted" style="margin-top:16px">First-run empty state, shown when there are no collections: one centred action, "Create your first collection", and a link to a sample collection.</p>
+      </div>
+
+      <!-- Collection header (shared) -->
+      <div data-screen="documents" data-app data-coll>
+      </div>
+      <div data-screen="mcp-server" data-app data-coll></div>
+      <div data-screen="playground" data-app data-coll></div>
+      <div data-screen="activity" data-app data-coll></div>
+
+      <!-- Documents body -->
+      <template id="t-documents">
+        <div class="drop"><svg class="ico" style="width:28px;height:28px"><use href="#i-up"/></svg><div><b>Drop files here</b> or <button class="btn sm" type="button" data-toast="File picker opens here (sample)">Choose files</button></div><p class="xs muted">PDF, Word, Markdown and VTT. Up to 25 MB each (sample limit).</p></div>
+        <p class="small muted" style="margin:16px 0 8px">14 documents · 12 indexed · 1 processing · 1 failed</p>
+        <div class="card" style="padding:4px 8px"><div class="scroll"><table><thead><tr><th>Document</th><th>Type</th><th>Size</th><th>Status</th><th><span class="sr">Actions</span></th></tr></thead><tbody>
+          <tr><td><svg class="ico"><use href="#i-file"/></svg> kinematics-chapter.pdf</td><td>PDF</td><td class="mono small">2.1 MB</td><td><span class="badge ok"><svg class="ico"><use href="#i-check"/></svg>Indexed</span></td><td><button class="btn sm" data-toast="Re-indexing queued (sample)">Re-index</button></td></tr>
+          <tr><td><svg class="ico"><use href="#i-video"/></svg> lecture-03-transcript.vtt</td><td>VTT</td><td class="mono small">86 KB</td><td><span class="badge ok"><svg class="ico"><use href="#i-check"/></svg>Indexed</span></td><td><button class="btn sm" data-toast="Re-indexing queued (sample)">Re-index</button></td></tr>
+          <tr><td><svg class="ico"><use href="#i-file"/></svg> lab-manual.docx</td><td>Word</td><td class="mono small">640 KB</td><td><span class="badge warn"><svg class="ico"><use href="#i-spin"/></svg>Parsing</span></td><td></td></tr>
+          <tr><td><svg class="ico"><use href="#i-note"/></svg> notes-week-4.md</td><td>Markdown</td><td class="mono small">12 KB</td><td><span class="badge"><svg class="ico"><use href="#i-clock"/></svg>Queued</span></td><td></td></tr>
+          <tr><td><svg class="ico"><use href="#i-file"/></svg> scan-appendix.pdf</td><td>PDF</td><td class="mono small">9.8 MB</td><td><span class="badge bad"><svg class="ico"><use href="#i-x"/></svg>Failed</span><div class="small err" style="margin-top:6px">No text layer found. Upload a text version or run OCR first.</div></td><td><button class="btn sm" data-toast="Retry queued (sample)">Retry</button></td></tr>
+        </tbody></table></div></div>
+      </template>
+
+      <!-- MCP server body -->
+      <template id="t-mcp-server">
+        <div class="tech" style="display:grid;gap:20px">
+          <div style="display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;align-items:center"><span class="cap">MCP server</span><span class="badge" style="color:var(--color-tech-success);border-color:var(--color-tech-success)"><span class="live-dot" style="margin:0"></span>Running · last call 4 minutes ago</span></div>
+          <div><div class="small muted" style="margin-bottom:6px">Server URL</div><div class="copyrow"><pre class="code">https://sapiduct.olaheavy.dev/mcp/k7f2q9xw3m</pre><button class="tbtn" data-copy="https://sapiduct.olaheavy.dev/mcp/k7f2q9xw3m"><svg class="ico"><use href="#i-copy"/></svg>Copy</button></div></div>
+          <div><div class="small muted" style="margin-bottom:6px">Access token · created 3 days ago · last used 4 minutes ago</div><div class="copyrow"><pre class="code">sap_••••••••••••••••••••••••3f9a</pre><button class="tbtn" data-toast="Rotate opens a dialog naming this collection (sample)">Rotate</button><button class="tbtn" data-toast="Revoke asks you to confirm, then ends access at once (sample)">Revoke</button></div><p class="xs muted" style="margin-top:6px">A token is shown once, when it is created. Rotating keeps the old one valid for a short overlap that the dialog states.</p></div>
+          <div><div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:8px"><span class="small muted">Connect an assistant</span><div class="seg" role="group" aria-label="Client"><button aria-pressed="true" data-cfg="claude">Claude Desktop</button><button aria-pressed="false" data-cfg="cursor">Cursor</button></div></div>
+            <pre class="code" id="cfg">{ "mcpServers": { "physics-notes": {
+    "url": "https://sapiduct.olaheavy.dev/mcp/k7f2q9xw3m",
+    "headers": { "Authorization": "Bearer &lt;your token&gt;" } } } }</pre>
+            <p class="xs muted" style="margin-top:8px">Illustrative. The exact config for each client is verified and dated when the page is built (issue #12).</p><div style="margin-top:8px"><button class="tbtn" data-copy-pre="cfg"><svg class="ico"><use href="#i-copy"/></svg>Copy snippet</button></div></div>
+          <div><div class="small muted" style="margin-bottom:8px">Tools on this server</div>
+            <div class="scroll"><table><tbody>
+              <tr><td class="mono">search</td><td class="small muted">Find passages that match a question</td><td><span class="badge" style="color:var(--color-tech-muted);border-color:var(--color-tech-border)">read-only</span></td></tr>
+              <tr><td class="mono">get_document</td><td class="small muted">Read one document by id</td><td><span class="badge" style="color:var(--color-tech-muted);border-color:var(--color-tech-border)">read-only</span></td></tr>
+              <tr><td class="mono">list_sources</td><td class="small muted">List the documents in this collection</td><td><span class="badge" style="color:var(--color-tech-muted);border-color:var(--color-tech-border)">read-only</span></td></tr></tbody></table></div></div>
+        </div>
+      </template>
+
+      <!-- Playground body -->
+      <template id="t-playground">
+        <div class="grid2">
+          <div class="tech"><div class="cap" style="margin-bottom:12px">Tools</div>
+            <button class="tool" aria-pressed="true" data-tool="search"><b>search</b><div class="small muted">Find passages that match a question</div></button>
+            <button class="tool" aria-pressed="false" data-tool="get_document"><b>get_document</b><div class="small muted">Read one document by id</div></button>
+            <button class="tool" aria-pressed="false" data-tool="list_sources"><b>list_sources</b><div class="small muted">List the documents in this collection</div></button>
+            <div class="cap" style="margin:20px 0 12px">Input</div><form id="pgform"></form>
+            <div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap"><button class="tbtn pri" id="run"><svg class="ico"><use href="#i-play"/></svg>Run tool</button><a class="tbtn" href="#playground" data-toast="Opens MCPJam in a new tab. Whether it can be prefilled is still unconfirmed, so a copy box sits beside it.">Test in MCPJam</a></div>
+          </div>
+          <div class="tech" style="display:grid;gap:14px;align-content:start"><div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px"><span class="cap">Request and result</span><div class="seg" role="group" aria-label="View"><button aria-pressed="true" data-view="result">Result</button><button aria-pressed="false" data-view="raw">Raw</button></div></div>
+            <div id="pgout"></div></div>
+        </div>
+      </template>
+
+      <!-- Activity body -->
+      <template id="t-activity">
+        <div class="tech">
+          <div style="display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:center;margin-bottom:12px">
+            <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap"><label class="small muted" for="fst">Status</label><select id="fst" style="min-height:40px;background:var(--color-tech-code);color:var(--color-tech-text);border:1px solid var(--color-tech-border);border-radius:var(--radius-sm);padding:0 10px"><option value="all">All</option><option value="ok">Success</option><option value="err">Error</option></select><span class="xs muted">Showing calls kept for a retention period the build will state here.</span></div>
+            <button class="tbtn" id="sim"><svg class="ico"><use href="#i-play"/></svg>Simulate an incoming call</button></div>
+          <svg class="flow" id="actflow" viewBox="0 0 560 40" aria-hidden="true" style="max-height:34px;margin-bottom:8px"><path class="line" d="M6 20 H250"/><rect class="duct" x="250" y="6" width="60" height="28" rx="12"/><path class="line" d="M310 20 H554"/></svg>
+          <div class="scroll"><table id="acttbl"><thead><tr><th>Time</th><th>Tool</th><th>Arguments</th><th>Status</th><th>Latency</th></tr></thead><tbody></tbody></table></div>
+        </div>
+      </template>
+
+      <!-- Course -->
+      <div data-screen="course" data-app>
+        <div class="pagehead"><div><span class="badge" style="margin-bottom:8px">Course mode</span><h2>Intro to Python</h2><p class="muted small">Generated from 31 documents. Every item cites a passage.</p></div></div>
+        <div class="tabs" aria-label="Collection sections" style="margin-bottom:20px"><a href="#documents">Documents</a><a href="#mcp-server">MCP server</a><a href="#playground">Playground</a><a href="#activity">Activity</a><a href="#course" aria-current="page">Course</a><a href="#documents">Settings</a></div>
+        <div class="course">
+          <nav class="units" aria-label="Units"><a href="#course" aria-current="true">Unit 1 · Variables</a><a href="#course">Unit 2 · Conditionals</a><a href="#course">Unit 3 · Loops</a><a href="#course">Unit 4 · Functions</a></nav>
+          <div style="min-width:0;display:grid;gap:20px">
+            <div class="card" style="display:grid;gap:10px"><div style="display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap"><b>Due today</b><span class="small muted">6 reviews</span></div><div class="progress" role="progressbar" aria-valuenow="40" aria-valuemin="0" aria-valuemax="100" aria-label="Unit 1 progress"><i style="width:40%"></i></div><div class="actions"><button class="btn primary" data-toast="Practice opens here (sample)">Start practice</button><span class="small muted" style="align-self:center">Unit 1 is 40% complete</span></div></div>
+            <div><h3 style="margin-bottom:10px">What you'll learn</h3><ul class="checks"><li><svg class="ico" style="color:var(--color-status-success)"><use href="#i-check"/></svg>Store and name values with variables</li><li><svg class="ico" style="color:var(--color-status-success)"><use href="#i-check"/></svg>Tell numbers from text and convert between them</li><li><svg class="ico" style="color:var(--color-status-success)"><use href="#i-check"/></svg>Read an error message and find the line it points to</li></ul></div>
+            <div><h3 style="margin-bottom:6px">Sessions</h3><ul class="outline">
+              <li><svg class="ico"><use href="#i-video"/></svg><div style="flex:1;min-width:0"><b>Session 1 · What a variable is</b><div class="xs muted">Digest ready · cites lecture-01-transcript.vtt</div></div><span class="badge ok"><svg class="ico"><use href="#i-check"/></svg>Done</span></li>
+              <li><svg class="ico"><use href="#i-note"/></svg><div style="flex:1;min-width:0"><b>Session 2 · Numbers and text</b><div class="xs muted">Digest ready · cites notes-02.md</div></div><span class="badge warn">In progress</span></li>
+              <li><svg class="ico"><use href="#i-pen"/></svg><div style="flex:1;min-width:0"><b>Assignment 1 · Temperature converter</b><div class="xs muted">Hints available. Hints guide you; they never give the full solution.</div></div><button class="btn sm" data-toast="Hint panel opens here (sample)">Get a hint</button></li>
+            </ul></div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+(function(){
+var $=function(s,r){return (r||document).querySelector(s)},$$=function(s,r){return Array.prototype.slice.call((r||document).querySelectorAll(s))};
+// theme
+var root=document.documentElement;try{var t=localStorage.getItem('sapiduct-theme');if(t)root.setAttribute('data-theme',t)}catch(e){}
+$$('[data-theme-toggle]').forEach(function(b){b.addEventListener('click',function(){var dark=root.getAttribute('data-theme')==='dark'||(!root.getAttribute('data-theme')&&matchMedia('(prefers-color-scheme: dark)').matches);var n=dark?'light':'dark';root.setAttribute('data-theme',n);try{localStorage.setItem('sapiduct-theme',n)}catch(e){}})});
+// toast
+var tt;function toast(m){var el=$('#toast');el.textContent=m;el.classList.add('on');clearTimeout(tt);tt=setTimeout(function(){el.classList.remove('on')},2600)}
+document.addEventListener('click',function(e){var b=e.target.closest('[data-toast]');if(b){e.preventDefault();toast(b.getAttribute('data-toast'))}
+ var c=e.target.closest('[data-copy]');if(c){copy(c.getAttribute('data-copy'),c)}
+ var p=e.target.closest('[data-copy-pre]');if(p){copy($('#'+p.getAttribute('data-copy-pre')).textContent,p)}
+ var g=e.target.closest('[data-go-btn]');if(g){location.hash=g.getAttribute('data-go-btn')}});
+function copy(text,btn){var done=function(){var o=btn.innerHTML;btn.innerHTML='<svg class="ico"><use href="#i-check"/></svg>Copied';setTimeout(function(){btn.innerHTML=o},1600)};
+ try{navigator.clipboard.writeText(text).then(done,function(){toast('Select the text and copy it')})}catch(e){toast('Select the text and copy it')}}
+$$('form[data-go]').forEach(function(f){f.addEventListener('submit',function(e){e.preventDefault();location.hash=f.getAttribute('data-go')})});
+// collection pages
+var TABS=[['documents','Documents'],['mcp-server','MCP server'],['playground','Playground'],['activity','Activity'],['course','Course'],['documents','Settings']];
+function head(cur){return '<div class="pagehead"><div><span class="badge" style="margin-bottom:8px">Knowledge</span><h2>Physics notes</h2><p class="muted small">14 documents · one MCP server</p></div></div><div class="tabs" aria-label="Collection sections" style="margin-bottom:20px">'+TABS.filter(function(x,i){return x[0]!=='course'}).map(function(x){return '<a href="#'+x[0]+'"'+(x[0]===cur&&x[1]!=='Settings'?' aria-current="page"':'')+'>'+x[1]+'</a>'}).join('')+'</div>'}
+$$('[data-coll]').forEach(function(el){var n=el.getAttribute('data-screen');el.innerHTML=head(n)+'<div class="body"></div>';$('.body',el).appendChild($('#t-'+n).content.cloneNode(true))});
+// client switch
+$$('[data-cfg]').forEach(function(b){b.addEventListener('click',function(){$$('[data-cfg]').forEach(function(x){x.setAttribute('aria-pressed',x===b?'true':'false')});
+ $('#cfg').textContent=b.getAttribute('data-cfg')==='claude'?'{ "mcpServers": { "physics-notes": {\n    "url": "https://sapiduct.olaheavy.dev/mcp/k7f2q9xw3m",\n    "headers": { "Authorization": "Bearer <your token>" } } } }':'{ "mcpServers": { "physics-notes": {\n    "url": "https://sapiduct.olaheavy.dev/mcp/k7f2q9xw3m",\n    "headers": { "Authorization": "Bearer <your token>" } } } }\n// Cursor: put this in .cursor/mcp.json (illustrative)'})});
+// playground
+var SCHEMAS={search:[['query','text','What is the difference between speed and velocity?'],['limit','number','2']],get_document:[['document_id','text','doc_kinematics_01']],list_sources:[]};
+var tool='search',view='result',last=null;
+function form(){var f=$('#pgform');f.innerHTML=SCHEMAS[tool].length?SCHEMAS[tool].map(function(x){return '<div class="tfield"><label for="f-'+x[0]+'">'+x[0]+' <span class="xs muted">'+(x[1]==='number'?'integer':'string')+', required</span></label><input id="f-'+x[0]+'" name="'+x[0]+'" type="'+(x[1]==='number'?'number':'text')+'" value="'+x[2]+'"></div>'}).join(''):'<p class="small muted">This tool takes no input.</p>'}
+function args(){var o={};SCHEMAS[tool].forEach(function(x){var v=$('#f-'+x[0]).value;o[x[0]]=x[1]==='number'?Number(v):v});return o}
+function render(){var out=$('#pgout');if(!last){out.innerHTML='<p class="muted small">Run a tool to see the request, the result and the passages it came from.</p>';return}
+ var req='{ "method": "tools/call", "params": { "name": "'+last.tool+'", "arguments": '+JSON.stringify(last.args)+' } }';
+ if(view==='raw'){out.innerHTML='<div class="cap" style="margin-bottom:6px">Request</div><pre class="code">'+esc(req)+'</pre><div class="cap" style="margin:14px 0 6px">Response</div><pre class="code">'+esc(JSON.stringify(last.raw,null,2))+'</pre>';return}
+ var h='<div class="small muted">Called <span class="mono">'+last.tool+'</span> · 142 ms (sample)</div>';
+ if(last.tool==='search'){h+=last.raw.results.map(function(r,i){return '<div class="passage"><div class="xs mono muted">Result '+(i+1)+' of '+last.raw.results.length+'</div><p class="small">'+esc(r.text)+'</p><div><button class="chip" data-toast="Opens the passage in a side sheet (sample)"><svg class="ico"><use href="#i-file"/></svg>'+esc(r.source)+'</button></div></div>'}).join('')}
+ else if(last.tool==='get_document'){h+='<div class="passage"><b class="small">kinematics-chapter.pdf</b><p class="small muted">'+esc(last.raw.text)+'</p></div>'}
+ else{h+='<div class="scroll"><table><tbody>'+last.raw.sources.map(function(s){return '<tr><td class="mono small">'+esc(s.id)+'</td><td class="small">'+esc(s.name)+'</td></tr>'}).join('')+'</tbody></table></div>'}
+ out.innerHTML=h}
+function esc(s){return String(s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+function run(e){if(e)e.preventDefault();var a=args(),raw;
+ if(tool==='search')raw={results:[{text:'Speed has magnitude only. Velocity has magnitude and direction, so an object moving in a circle at constant speed is still changing its velocity.',source:'kinematics-chapter.pdf · p. 4'},{text:'Average velocity is displacement divided by elapsed time; average speed is distance divided by elapsed time.',source:'lecture-03-transcript.vtt · 12:40'}].slice(0,a.limit||2)};
+ else if(tool==='get_document')raw={id:a.document_id,text:'Chapter 2 introduces position, displacement, speed and velocity, with worked examples. (Sample text.)'};
+ else raw={sources:[{id:'doc_kinematics_01',name:'kinematics-chapter.pdf'},{id:'doc_lecture_03',name:'lecture-03-transcript.vtt'},{id:'doc_lab_01',name:'lab-manual.docx'}]};
+ last={tool:tool,args:a,raw:raw};render()}
+if($('#pgform')){form();render();$('#run').addEventListener('click',run);
+ $$('[data-tool]').forEach(function(b){b.addEventListener('click',function(){tool=b.getAttribute('data-tool');$$('[data-tool]').forEach(function(x){x.setAttribute('aria-pressed',x===b?'true':'false')});form();last=null;render()})});
+ $$('[data-view]').forEach(function(b){b.addEventListener('click',function(){view=b.getAttribute('data-view');$$('[data-view]').forEach(function(x){x.setAttribute('aria-pressed',x===b?'true':'false')});render()})})}
+// activity
+var rows=[['14:02:11','search','{"query":"projectile range"}','ok','118 ms'],['13:58:40','get_document','{"document_id":"doc_lecture_03"}','ok','64 ms'],['13:41:05','search','{"query":"free fall"}','ok','131 ms'],['12:15:52','search','{"query":""}','err','9 ms · empty query']];
+function acts(){var f=$('#fst').value,tb=$('#acttbl tbody');tb.innerHTML=rows.filter(function(r){return f==='all'||r[3]===f}).map(function(r){return '<tr><td class="mono small">'+r[0]+'</td><td class="mono small">'+r[1]+'</td><td class="mono xs muted">'+esc(r[2])+'</td><td>'+(r[3]==='ok'?'<span class="badge" style="color:var(--color-tech-success);border-color:var(--color-tech-success)"><svg class="ico"><use href="#i-check"/></svg>Success</span>':'<span class="badge" style="color:var(--color-tech-danger);border-color:var(--color-tech-danger)"><svg class="ico"><use href="#i-x"/></svg>Error</span>')+'</td><td class="mono small">'+r[4]+'</td></tr>'}).join('')}
+if($('#fst')){acts();$('#fst').addEventListener('change',acts);$('#sim').addEventListener('click',function(){var d=new Date(),p=function(n){return String(n).padStart(2,'0')};rows.unshift([p(d.getHours())+':'+p(d.getMinutes())+':'+p(d.getSeconds()),'search','{"query":"sample incoming call"}','ok','122 ms']);acts();var fl=$('#actflow');fl.classList.add('live');setTimeout(function(){fl.classList.remove('live')},2400);toast('New call received (simulated)')})}
+// router
+var AUTH=['sign-in','sign-up','forgot-password','check-email'],APP=['collections','documents','mcp-server','playground','activity','course'];
+function route(){var h=(location.hash||'#landing').slice(1);if(h!=='landing'&&AUTH.indexOf(h)<0&&APP.indexOf(h)<0)h='landing';
+ var isApp=APP.indexOf(h)>=0;$$('[data-screen]').forEach(function(s){var n=s.getAttribute('data-screen');var on=isApp?(s.hasAttribute('data-app')&&n===h):n===h;s.classList.toggle('on',on)});
+ $('#app').style.display=isApp?'block':'none';
+ $$('.rail a[aria-current]').forEach(function(a){a.setAttribute('aria-current',(h==='course'&&a.textContent.indexOf('Python')>=0)||(h!=='course'&&h!=='collections'&&a.textContent.indexOf('Physics')>=0)?'true':'false')});
+ window.scrollTo(0,0)}
+addEventListener('hashchange',route);route();
+})();
+</script>
