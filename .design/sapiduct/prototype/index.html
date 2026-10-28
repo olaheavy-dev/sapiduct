@@ -177,12 +177,56 @@ button,input,select{font:inherit;color:inherit}
 /* documents */
 .drop{border:1.5px dashed var(--color-border-secondary);border-radius:var(--radius-lg);padding:18px 20px;display:flex;gap:16px;align-items:center;flex-wrap:wrap;background:var(--color-bg-secondary)}
 .docs{border:1px solid var(--color-border-primary);border-radius:var(--radius-lg);overflow:hidden;background:var(--color-bg-primary)}
-.doc{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:4px 12px;padding:14px 16px;border-bottom:1px solid var(--color-border-primary);cursor:pointer;text-align:left;width:100%;background:transparent;border-inline:0;border-top:0}
-.doc:last-child{border-bottom:0}.doc:hover{background:var(--color-bg-secondary)}
-.doc[aria-pressed="true"]{background:var(--color-bg-tertiary)}
-.doc .nm{display:flex;gap:10px;align-items:center;min-width:0;font-weight:500}.doc .nm span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.doc .st{justify-self:end}.doc .tr{grid-column:1/-1;margin-top:6px}
-.doc .mt{font-size:.875rem;color:var(--color-text-tertiary);grid-column:1/-1;padding-left:28px}
+.dhead{display:none}
+.doc{display:grid;grid-template-columns:28px minmax(0,1fr) auto;gap:2px 12px;align-items:center;padding:8px 16px;border-bottom:1px solid var(--color-border-primary);cursor:pointer}
+.doc:last-child{border-bottom:0}.doc:hover{background:var(--color-bg-secondary)}.doc[aria-selected="true"]{background:var(--color-bg-tertiary)}
+.chk{width:18px;height:18px;accent-color:var(--color-accent-primary);margin:0;cursor:pointer}
+.doc .nm{background:transparent;border:0;text-align:left;font-weight:500;display:flex;gap:10px;align-items:center;min-width:0;cursor:pointer;padding:6px 0;min-height:44px;color:inherit}
+.doc .nm span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.doc .c{display:none;color:var(--color-text-secondary);font-size:.9375rem;font-variant-numeric:tabular-nums}
+.doc .mt{grid-column:2/-1;font-size:.875rem;color:var(--color-text-tertiary);margin-top:-4px;padding-bottom:4px}
+.doc .tr{grid-column:2/-1;margin:2px 0 6px}
+.bulk{display:none;align-items:center;gap:10px;flex-wrap:wrap;padding:10px 14px;margin-bottom:10px;border-radius:var(--radius-md);background:var(--color-bg-inverse);color:var(--color-text-inverse)}
+.bulk.on{display:flex}.bulk .btn{color:var(--color-text-inverse);border-color:var(--color-text-inverse)}.bulk .btn:hover{background:var(--color-text-inverse);color:var(--color-bg-inverse)}
+@media(min-width:1100px){.dhead,.doc{grid-template-columns:28px minmax(0,1fr) 92px 84px 122px}
+ .dhead{display:grid;gap:12px;padding:10px 16px;border-bottom:1px solid var(--color-border-primary);font:500 .8125rem/1.2 var(--font-sans);letter-spacing:.06em;text-transform:uppercase;color:var(--color-text-tertiary);align-items:center;background:var(--color-bg-secondary)}
+ .doc .c{display:block}.doc .mt{display:none}.doc{padding:4px 16px}}
+.protoctl-r{display:flex;justify-content:flex-end;gap:8px;align-items:center;margin:-8px 0 12px;font-size:.8125rem;color:var(--color-text-tertiary)}
+.protoctl-r .seg{border-color:var(--color-border-secondary)}.protoctl-r .seg button{color:var(--color-text-secondary);min-height:30px;padding:2px 12px}.protoctl-r .seg button[aria-pressed="true"]{background:var(--color-bg-tertiary);color:var(--color-text-primary)}
+.rej{padding:10px 14px;margin-top:12px;border-color:var(--color-status-danger)}.rej summary{cursor:pointer}
+.batch{padding:12px 16px;margin-top:12px}
+.idetail{grid-column:1/-1;padding:12px 4px 16px 40px}
+@media(max-width:1099px){#docside{display:none}.doc .nm span{white-space:normal;overflow-wrap:anywhere}}
+.skip{position:absolute;left:-999px;top:8px;background:var(--color-bg-inverse);color:var(--color-text-inverse);padding:8px 14px;border-radius:var(--radius-md);z-index:40}.skip:focus{left:16px}
+.dlg{border:1px solid var(--color-border-primary);border-radius:var(--radius-lg);background:var(--color-bg-primary);color:var(--color-text-primary);padding:24px;width:min(520px,calc(100vw - 32px));max-height:calc(100vh - 32px);overflow:auto}
+.dlg::backdrop{background:rgb(20 17 15/.6)}
+.dlg.sheet{margin:0 0 0 auto;height:100%;max-height:100%;width:min(460px,100%);border-radius:var(--radius-lg) 0 0 var(--radius-lg)}
+.dlg h3{margin-bottom:8px}.dlg .actions{margin-top:20px;justify-content:flex-end}
+.avatar{display:inline-grid;place-items:center;width:36px;height:36px;border-radius:50%;background:var(--color-bg-tertiary);color:var(--color-text-primary);font:600 .8125rem var(--font-sans);text-decoration:none;border:1px solid var(--color-border-secondary)}
+.avatar.lg{width:64px;height:64px;font-size:1.3rem}
+.if-empty{display:none}#app[data-cs="empty"] .if-empty{display:block}#app[data-cs="empty"] .if-docs{display:none}
+.tabs a.if-course{display:none}#app[data-cm="Course"] .tabs a.if-course{display:inline-flex}
+.emptycard{padding:28px;display:grid;gap:12px;justify-items:start}
+.if-first{display:none}#app[data-first="1"] .if-first{display:grid}#app[data-first="1"] .if-has{display:none}
+#app[data-mode="demo"] .rail,#app[data-mode="demo"] .railsel,#app[data-mode="demo"] .tabs,#app[data-mode="demo"] .crumb,#app[data-mode="demo"] [data-signedin]{display:none}
+.demo-banner,.demo-only{display:none}#app[data-mode="demo"] .demo-banner{display:block}#app[data-mode="demo"] .demo-only{display:inline-flex}
+.radios{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(240px,1fr))}
+.radio{display:flex;gap:12px;align-items:flex-start;padding:16px;border:1px solid var(--color-border-secondary);border-radius:var(--radius-md);cursor:pointer}
+.radio input{margin-top:.35em;accent-color:var(--color-accent-primary)}
+.radio:has(input:checked){border-color:var(--color-accent-primary);background:color-mix(in srgb,var(--color-accent-primary) 8%,transparent)}
+.danger-zone{border-color:var(--color-status-danger)}
+.qtext{font-family:var(--font-display);font-size:1.4rem;line-height:1.35;margin:0}
+.opts{display:grid;gap:10px;margin:16px 0;border:0;padding:0}
+.fb{padding:12px 14px;border-radius:var(--radius-md);border:1px solid var(--color-border-secondary);margin-top:12px}.fb.ok{border-color:var(--color-status-success)}.fb.bad{border-color:var(--color-status-danger)}
+.hintbox{border-left:3px solid var(--color-accent-primary);padding:6px 0 6px 14px;margin:12px 0}
+textarea.input{padding:10px 12px;min-height:150px;font-family:var(--font-mono);font-size:.9375rem;line-height:1.5;resize:vertical}
+.methods{list-style:none;margin:0;padding:0}.methods li{display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap;padding:12px 0;border-bottom:1px solid var(--color-border-primary)}.methods li:last-child{border-bottom:0}
+.steps-l{list-style:none;padding:0;margin:0;display:grid;gap:18px}.steps-l li{display:flex;gap:14px;align-items:flex-start}
+.lede2{font-size:1.15rem;color:var(--color-text-secondary);max-width:52ch;margin-top:12px}
+.seg.onpaper{border-color:var(--color-border-secondary)}.seg.onpaper button{color:var(--color-text-secondary)}.seg.onpaper button[aria-pressed="true"]{background:var(--color-bg-tertiary);color:var(--color-text-primary)}
+.tbtn:disabled{opacity:.5;cursor:not-allowed}
+.pg[data-mode="chat"] #pinset,.pg[data-mode="chat"] #pmanual{display:none}.pg:not([data-mode="chat"]) #pchat,.pg:not([data-mode="chat"]) #pchatside{display:none}
+.bubble{background:var(--color-bg-tertiary);border-radius:var(--radius-md);padding:10px 14px;max-width:92%}
 /* playground */
 .pg{display:grid;gap:20px;grid-template-columns:minmax(0,1fr)}
 @media(min-width:1000px){.pg{grid-template-columns:330px minmax(0,1fr)}}
@@ -199,9 +243,14 @@ button,input,select{font:inherit;color:inherit}
 .sources .src{font:500 .8125rem/1.4 var(--font-mono);overflow-wrap:anywhere}
 .live-dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--color-tech-success);margin-right:6px}
 /* activity */
+.tsel{min-height:40px;background:var(--tech-inset);color:var(--color-tech-text);border:1px solid var(--color-tech-border);border-radius:var(--radius-sm);padding:0 10px}
+.inset .chip{color:var(--color-tech-muted);border-color:var(--color-tech-border)}.inset .chip:hover{background:var(--color-tech-hairline)}.inset .chip[aria-pressed="true"]{background:var(--color-tech-text);color:var(--color-tech-bg);border-color:var(--color-tech-text)}
 .logs{width:100%;border-collapse:collapse}.logs th{font:500 .8125rem/1.2 var(--font-mono);letter-spacing:.06em;text-transform:uppercase;text-align:left;color:var(--color-tech-muted);padding:8px 10px;border-bottom:1px solid var(--color-tech-hairline)}
 .logs td{padding:10px;border-bottom:1px solid var(--color-tech-hairline)}.logs tr[data-i]{cursor:pointer}.logs tr[data-i]:hover td{background:var(--color-tech-hairline)}.logs tr[aria-selected="true"] td{background:var(--color-tech-hairline)}
 .scroll{overflow-x:auto}
+.chips{display:flex;gap:8px;flex-wrap:wrap}.chip{display:inline-flex;gap:8px;align-items:center;min-height:36px;padding:0 12px;border-radius:9999px;border:1px solid var(--color-border-secondary);background:transparent;cursor:pointer;font-size:.9375rem;color:var(--color-text-secondary)}.chip:hover{background:var(--color-bg-tertiary)}.chip[aria-pressed="true"]{background:var(--color-bg-inverse);color:var(--color-text-inverse);border-color:var(--color-bg-inverse)}.chip b{font-weight:600;font-variant-numeric:tabular-nums}
+.protoctl{display:flex;gap:10px;align-items:center;flex-wrap:wrap;padding:8px 12px;border:1px dashed var(--color-border-secondary);border-radius:var(--radius-md)}
+.protoctl .seg button{color:var(--color-text-secondary)}.protoctl .seg button[aria-pressed="true"]{background:var(--color-bg-tertiary);color:var(--color-text-primary)}
 .split{display:grid;gap:20px;grid-template-columns:minmax(0,1fr)}
 @media(min-width:1100px){.split{grid-template-columns:minmax(0,1fr) 300px}}
 /* course */
@@ -236,21 +285,22 @@ button,input,select{font:inherit;color:inherit}
   <symbol id="i-logo" viewBox="0 0 32 32"><rect x="1.5" y="1.5" width="29" height="29" rx="9" fill="currentColor" stroke="none"/><path d="M7 12h9M7 20h9M16 12c4 0 4 4 9 4M16 20c4 0 4-4 9-4" stroke="var(--color-bg-primary)" stroke-width="1.9" fill="none" stroke-linecap="round"/><circle cx="25" cy="16" r="2.2" fill="var(--color-bg-primary)" stroke="none"/></symbol>
 </svg>
 
-<div class="banner"><span>Prototype v2 with sample data. Names, figures and passages are made up to show the layout.</span><nav aria-label="Prototype screens"><a href="#landing">Landing</a><a href="#sign-in">Sign in</a><a href="#collections">Collections</a><a href="#documents">Documents</a><a href="#mcp-server">MCP server</a><a href="#playground">Playground</a><a href="#activity">Activity</a><a href="#course">Course</a><a href="#states">States</a></nav></div>
+<a href="#" class="skip" data-skip>Skip to content</a>
+<div class="banner"><span>Prototype v5 with sample data. Names, figures and passages are made up to show the layout.</span><nav aria-label="Prototype screens"><a href="#landing">Landing</a><a href="#guides">Guides</a><a href="#demo">Demo</a><a href="#sign-in">Sign in</a><a href="#collections">Collections</a><a href="#new-collection">New</a><a href="#documents">Documents</a><a href="#mcp-server">MCP server</a><a href="#playground">Playground</a><a href="#activity">Activity</a><a href="#collection-settings">Settings</a><a href="#course">Course</a><a href="#practice">Practice</a><a href="#digest">Digest</a><a href="#hints">Hints</a><a href="#account">Account</a><a href="#states">States</a><a href="#not-found">404</a></nav></div>
 
 <!-- LANDING -->
 <div data-screen="landing">
   <header class="topbar">
     <a class="brand" href="#landing"><svg class="ico"><use href="#i-logo"/></svg>Sapiduct</a>
-    <nav class="nav" aria-label="Main"><a href="#playground">Demo</a><a href="#mcp-server">Connect guides</a><a href="https://github.com/olaheavy-dev/sapiduct">Source</a></nav>
+    <nav class="nav" aria-label="Main"><a href="#demo">Demo</a><a href="#guides">Connect guides</a><a href="https://github.com/olaheavy-dev/sapiduct">Source</a></nav>
     <span class="spacer"></span>
     <button class="icon-btn" data-theme-toggle aria-label="Switch colour theme"><svg class="ico"><use href="#i-sun"/></svg></button>
-    <a class="btn" href="#sign-in">Sign in</a><a class="btn primary" href="#sign-up">Get started</a>
+    <a class="btn" href="#sign-in">Sign in</a><a class="btn primary" href="#sign-in">Get started</a>
   </header>
   <section class="hero">
     <h1 style="max-width:21ch">Answers from your documents, with their <span class="hl">sources</span>.</h1>
     <p class="lede">Add your PDFs, transcripts and notes to a collection. Sapiduct turns it into one MCP server your assistant can call, and every result comes back with where it came from.</p>
-    <div class="actions"><a class="btn primary" href="#sign-up">Create a collection</a><a class="btn" href="#playground">Try the demo</a></div>
+    <div class="actions"><a class="btn primary" href="#sign-in">Create a collection</a><a class="btn" href="#demo">Try the demo</a></div>
   </section>
   <section class="paper answer" aria-label="Example of an answer with sources">
     <div class="row wide" style="margin-bottom:6px"><div>
@@ -286,49 +336,47 @@ button,input,select{font:inherit;color:inherit}
   <footer class="foot"><span>Sapiduct prototype. Sample data only.</span><span><a href="https://github.com/olaheavy-dev/sapiduct">Source on GitHub</a> · <a href="#states">Interface states</a></span></footer>
 </div>
 
-<!-- AUTH -->
+<!-- GUIDES -->
+<div data-screen="guides">
+  <header class="topbar"><a class="brand" href="#landing"><svg class="ico"><use href="#i-logo"/></svg>Sapiduct</a>
+    <nav class="nav" aria-label="Main"><a href="#demo">Demo</a><a href="#guides" aria-current="page">Connect guides</a><a href="https://github.com/olaheavy-dev/sapiduct">Source</a></nav><span class="spacer"></span>
+    <button class="icon-btn" data-theme-toggle aria-label="Switch colour theme"><svg class="ico"><use href="#i-sun"/></svg></button><a class="btn" href="#sign-in">Sign in</a></header>
+  <section style="padding-block:40px 12px"><div class="eyebrow" style="margin-bottom:10px">Connect guides</div><h1 style="font-size:clamp(2rem,1.4rem + 2.4vw,3.2rem);max-width:20ch">Connect an assistant to your collection</h1>
+    <p class="lede2">Five steps, the same for any assistant that supports MCP servers. Pick yours to see its snippet.</p></section>
+  <div class="row wide"><div>
+    <div class="stack" style="margin-bottom:20px"><div class="seg onpaper" role="group" aria-label="Assistant"><button aria-pressed="true" data-gclient="claude">Claude Desktop</button><button aria-pressed="false" data-gclient="cursor">Cursor</button></div><span class="badge warn" id="gtested"><svg class="ico"><use href="#i-clock"/></svg>Last tested: not yet tested</span></div>
+    <ol class="steps-l">
+      <li><button class="fn" style="vertical-align:0" tabindex="-1" aria-hidden="true">1</button><div><b>Copy your server URL</b><div class="muted small">Open the collection's MCP server tab and copy the URL.</div></div></li>
+      <li><button class="fn" style="vertical-align:0" tabindex="-1" aria-hidden="true">2</button><div><b>Copy your access token</b><div class="muted small">It is shown once, when you create it. Create a new one if you lost it.</div></div></li>
+      <li><button class="fn" style="vertical-align:0" tabindex="-1" aria-hidden="true">3</button><div><b>Add the server to <span id="gname">Claude Desktop</span></b><div class="muted small" style="margin-bottom:10px">Open the MCP settings for your assistant and add this entry.</div>
+        <div class="inset" style="padding:12px"><pre class="code" id="gcfg"></pre><div style="margin-top:10px"><button class="tbtn" data-copy-pre="gcfg"><svg class="ico"><use href="#i-copy"/></svg>Copy snippet</button></div></div></div></li>
+      <li><button class="fn" style="vertical-align:0" tabindex="-1" aria-hidden="true">4</button><div><b>Restart and look for the tools</b><div class="muted small">You should see <span class="mono">search</span>, <span class="mono">get_document</span> and <span class="mono">list_sources</span>.</div></div></li>
+      <li><button class="fn" style="vertical-align:0" tabindex="-1" aria-hidden="true">5</button><div><b>Ask a question and check the sources</b><div class="muted small">Every answer should list the passages it used. Try the playground first if nothing appears.</div></div></li></ol></div>
+    <aside class="note" id="g1"><b class="n">&#9679;</b><span class="src">About this guide</span>The snippet is illustrative. Each client's exact config is checked and dated when it is tested end to end, and this page says "not yet tested" until then.</aside></div>
+  <footer class="foot"><span>Sapiduct prototype. Sample data only.</span><span><a href="#landing">Back to the start</a></span></footer>
+</div>
+
+<!-- NOT FOUND -->
+<div data-screen="not-found">
+  <header class="topbar"><a class="brand" href="#landing"><svg class="ico"><use href="#i-logo"/></svg>Sapiduct</a><span class="spacer"></span><button class="icon-btn" data-theme-toggle aria-label="Switch colour theme"><svg class="ico"><use href="#i-sun"/></svg></button></header>
+  <div style="padding-block:72px;display:grid;gap:14px;justify-items:start"><div class="eyebrow">404</div><h1 style="font-size:clamp(2.2rem,1.4rem + 3vw,3.6rem)">That page doesn't exist</h1><p class="lede2">The link may be old or mistyped. Your collections are one click away.</p><div class="actions" style="margin-top:8px"><a class="btn primary" href="#collections">Go to collections</a><a class="btn" href="#landing">Back to the start</a></div></div>
+</div>
+
+<!-- AUTH: one page, GitHub or Google only -->
 <div data-screen="sign-in"><div class="auth">
   <div class="formside"><a class="brand" href="#landing" style="margin-bottom:28px"><svg class="ico"><use href="#i-logo"/></svg>Sapiduct</a>
-    <h2 style="margin-bottom:6px">Welcome back</h2><p class="muted" style="margin-bottom:24px">Sign in to your collections.</p>
-    <form data-go="collections" novalidate>
-      <div class="field"><label for="si-email">Email</label><input class="input" id="si-email" type="email" autocomplete="email" placeholder="you@example.com" required></div>
-      <div class="field"><div style="display:flex;justify-content:space-between;gap:8px"><label for="si-pw">Password</label><a class="small" href="#forgot-password">Forgot password?</a></div><input class="input" id="si-pw" type="password" autocomplete="current-password" required></div>
-      <button class="btn primary block" type="submit">Sign in</button>
-    </form>
-    <div class="divider">or</div>
-    <button class="btn block" type="button" data-go-btn="collections" style="margin-bottom:10px">Continue with GitHub</button>
+    <h2 style="margin-bottom:8px">Sign in to Sapiduct</h2><p class="muted" style="margin-bottom:24px">No passwords to manage. Use the GitHub or Google account you already have. If you are new, signing in creates your account.</p>
+    <div class="paper" id="si-err" role="alert" hidden style="padding:12px 14px;margin-bottom:16px;border-color:var(--color-status-danger)"><b class="err">We couldn't sign you in with GitHub.</b><div class="small muted">The request was cancelled before it finished. Try again, or use Google.</div></div>
+    <button class="btn primary block" type="button" data-go-btn="collections" style="margin-bottom:10px">Continue with GitHub</button>
     <button class="btn block" type="button" data-go-btn="collections">Continue with Google</button>
-    <p class="xs muted" style="margin-top:12px">Which providers to offer is decided at the auth build.</p>
-    <p class="small" style="margin-top:24px">New here? <a href="#sign-up">Create an account</a></p>
-    <p class="xs muted" style="margin-top:28px">By signing in you agree to the terms and privacy policy.</p></div>
+    <p class="xs muted" style="margin-top:20px">By continuing you agree to the terms and privacy policy.</p>
+    <p class="xs" style="margin-top:20px"><button class="btn sm ghost" type="button" id="si-preview" style="padding:0 8px">Prototype: preview the cancelled sign-in state</button></p></div>
   <aside class="brandside paper" aria-hidden="true"><div class="eyebrow">Every answer, with its source</div>
     <p style="font-family:var(--font-display);font-size:1.6rem;line-height:1.35;letter-spacing:-.015em">Velocity has a direction, and speed does not.<button class="fn" tabindex="-1">1</button></p>
     <div class="note on" style="max-width:34ch"><b class="n">1</b><span class="src">kinematics-chapter.pdf · p. 4</span>"Speed has magnitude only. Velocity has magnitude and direction."</div>
+    <div style="display:grid;gap:12px;margin-top:8px"><div><b class="n" style="display:inline-grid;place-items:center;min-width:1.4em;height:1.4em;border-radius:50%;background:var(--color-accent-primary);color:var(--color-text-inverse);font:650 .75rem/1 var(--font-sans);margin-right:8px">1</b>Add your documents</div><div><b style="display:inline-grid;place-items:center;min-width:1.4em;height:1.4em;border-radius:50%;background:var(--color-accent-primary);color:var(--color-text-inverse);font:650 .75rem/1 var(--font-sans);margin-right:8px">2</b>Connect an assistant</div><div><b style="display:inline-grid;place-items:center;min-width:1.4em;height:1.4em;border-radius:50%;background:var(--color-accent-primary);color:var(--color-text-inverse);font:650 .75rem/1 var(--font-sans);margin-right:8px">3</b>Ask, and check the source</div></div>
     <p class="muted small">Sample content.</p></aside>
 </div></div>
-
-<div data-screen="sign-up"><div class="auth">
-  <div class="formside"><a class="brand" href="#landing" style="margin-bottom:28px"><svg class="ico"><use href="#i-logo"/></svg>Sapiduct</a>
-    <h2 style="margin-bottom:6px">Create your account</h2><p class="muted" style="margin-bottom:24px">Then make a collection and connect it.</p>
-    <form data-go="check-email" novalidate>
-      <div class="field"><label for="su-email">Email</label><input class="input" id="su-email" type="email" autocomplete="email" required></div>
-      <div class="field"><label for="su-pw">Password</label><input class="input" id="su-pw" type="password" autocomplete="new-password" aria-describedby="su-hint" required><span class="xs muted" id="su-hint">Use at least 12 characters. The final rule comes from the auth provider's settings.</span></div>
-      <button class="btn primary block" type="submit">Create account</button></form>
-    <div class="divider">or</div><button class="btn block" type="button" data-go-btn="collections">Continue with GitHub</button>
-    <p class="small" style="margin-top:24px">Already have an account? <a href="#sign-in">Sign in</a></p></div>
-  <aside class="brandside paper" aria-hidden="true"><div class="eyebrow">What you get</div><p style="font-family:var(--font-display);font-size:1.6rem;line-height:1.35">A server URL, an access token you control, and a playground to try every tool before you connect.</p><p class="muted small">Prototype copy. No plan or price is decided.</p></aside>
-</div></div>
-
-<div data-screen="forgot-password"><div class="auth"><div class="formside"><a class="brand" href="#landing" style="margin-bottom:28px"><svg class="ico"><use href="#i-logo"/></svg>Sapiduct</a>
-  <h2 style="margin-bottom:6px">Reset your password</h2><p class="muted" style="margin-bottom:24px">Enter your email and we'll send a link if an account exists.</p>
-  <form data-go="check-email" novalidate><div class="field"><label for="fp-email">Email</label><input class="input" id="fp-email" type="email" autocomplete="email" required></div><button class="btn primary block" type="submit">Send reset link</button></form>
-  <p class="small" style="margin-top:24px"><a href="#sign-in">Back to sign in</a></p></div>
-  <aside class="brandside paper" aria-hidden="true"><div class="eyebrow">Reset</div><p class="muted">The message is the same whether or not the address has an account.</p></aside></div></div>
-
-<div data-screen="check-email"><div class="auth"><div class="formside"><a class="brand" href="#landing" style="margin-bottom:28px"><svg class="ico"><use href="#i-logo"/></svg>Sapiduct</a>
-  <h2 style="margin-bottom:6px">Check your email</h2><p class="muted" style="margin-bottom:24px">If that address can receive a message from us, a link is on its way. It may take a minute.</p>
-  <button class="btn block" type="button" data-toast="Link sent again (sample)">Send it again</button><p class="small" style="margin-top:24px"><a href="#sign-in">Back to sign in</a></p></div>
-  <aside class="brandside paper" aria-hidden="true"><div class="eyebrow">Next</div><p class="muted">The link signs you in and, for a reset, takes you to the new password form.</p></aside></div></div>
 
 <!-- STATES -->
 <div data-screen="states">
@@ -349,32 +397,38 @@ button,input,select{font:inherit;color:inherit}
     <div class="card"><h4 style="margin-bottom:12px">Loading</h4><div style="display:grid;gap:10px"><span class="skel" style="width:70%"></span><span class="skel"></span><span class="skel" style="width:85%"></span><span class="skel" style="width:55%"></span></div></div>
     <div class="card"><h4 style="margin-bottom:12px">Error</h4><div style="display:grid;gap:10px;justify-items:start"><p class="err"><b>The server could not read scan-appendix.pdf</b></p><p class="muted small">No text layer found. Upload a text version or run OCR first, then retry.</p><div class="stack"><button class="btn sm">Retry</button><button class="btn sm ghost">Remove</button></div></div></div>
     <div class="card"><h4 style="margin-bottom:12px">Marks and notes</h4><p style="font-family:var(--font-display);font-size:1.2rem;margin-bottom:12px">A claim with a source.<button class="fn" data-ref="s-n1">1</button> A second one.<button class="fn on" data-ref="s-n2">2</button></p><div class="note" id="s-n1" style="margin-bottom:10px"><b class="n">1</b><span class="src">notes-week-4.md</span>Default note.</div><div class="note on" id="s-n2"><b class="n">2</b><span class="src">notes-week-4.md</span>Active note, highlighted.</div></div>
+    <div class="card"><h4 style="margin-bottom:12px">Dialog</h4><button class="btn" data-dlg="revoke">Open a dialog</button><p class="xs muted" style="margin-top:8px">Focus moves in, Escape closes, and focus returns here.</p></div>
     <div class="card"><h4 style="margin-bottom:12px">Toast</h4><button class="btn" data-toast="Copied the server URL">Show a toast</button></div>
   </div>
 </div>
 
 <!-- APP -->
-<div id="app" class="app-wrap" style="display:none">
+<div id="app" class="app-wrap" style="display:none" data-cs="docs" data-cm="Knowledge" data-mode="app" data-first="0">
   <header class="topbar">
     <a class="brand" href="#collections"><svg class="ico"><use href="#i-logo"/></svg>Sapiduct</a>
     <span class="spacer"></span>
     <button class="icon-btn" data-theme-toggle aria-label="Switch colour theme"><svg class="ico"><use href="#i-sun"/></svg></button>
-    <a class="btn sm" href="#landing">Sign out</a>
+    <a class="avatar" href="#account" aria-label="Account" data-signedin>AS</a><a class="btn sm" href="#landing" data-signedin>Sign out</a><a class="btn sm primary demo-only" href="#sign-in">Sign in</a>
   </header>
   <div class="app">
     <nav class="rail" aria-label="Collections"><div class="eyebrow">Collections</div>
       <a href="#documents" data-rail="physics"><span>Physics notes</span><span class="xs muted">Knowledge</span></a>
       <a href="#documents" data-rail="fastapi"><span>FastAPI reading</span><span class="xs muted">Knowledge</span></a>
       <a href="#course" data-rail="python"><span>Intro to Python</span><span class="xs muted">Course</span></a>
+      <a href="#documents" data-rail="newc" id="railnew" hidden><span id="railnewn"></span><span class="xs muted" id="railnewm"></span></a>
       <a href="#collections" style="margin-top:6px" data-rail="all">All collections</a>
-      <a href="#collections" class="btn sm primary" style="margin-top:12px;justify-content:center;align-items:center;color:var(--color-text-inverse)">New collection</a></nav>
+      <a href="#new-collection" class="btn sm primary" style="margin-top:12px;justify-content:center;align-items:center;color:var(--color-text-inverse)">New collection</a></nav>
     <div class="railsel"><label class="sr" for="cs">Collection</label><select class="input" id="cs"><option value="physics">Physics notes</option><option value="fastapi">FastAPI reading</option><option value="python">Intro to Python</option></select></div>
-    <main style="min-width:0">
+    <main style="min-width:0" tabindex="-1">
+      <div class="paper demo-banner" style="padding:14px 16px;margin-bottom:16px"><b>Demo collection.</b> Openly licensed sample documents. It is read-only: you can try every tool and nothing here can be changed. <a href="#sign-in">Sign in</a> to make your own.</div>
 
       <div data-screen="collections" data-app>
         <div class="pagehead"><div><h1 style="font-size:clamp(2rem,1.4rem + 2vw,2.8rem)">Your collections</h1><p class="muted" style="margin-top:8px">Each collection is a set of documents with one server of its own.</p></div></div>
+        <div class="protoctl-r"><span>Prototype: collections</span><div class="seg" role="group" aria-label="Collections"><button aria-pressed="true" data-first="0">3</button><button aria-pressed="false" data-first="1">None</button></div></div>
+        <div class="if-first paper emptycard"><h3>Create your first collection</h3><p class="muted" style="max-width:52ch">A collection is a set of documents with one server of its own. Add a few documents and connect your assistant in a few minutes.</p><div class="actions"><a class="btn primary" href="#new-collection">Create a collection</a><a class="btn" href="#demo">Look at the sample collection first</a></div></div>
+        <div class="if-has">
         <ul class="toc">
-          <li class="row"><a class="item-wrap" href="#documents" style="text-decoration:none;color:inherit;display:block"><div class="item" style="display:flex;align-items:baseline;gap:8px"><h3 style="font-size:1.6rem">Physics notes</h3><span class="dots"></span><span class="count">14 documents</span></div>
+          <li class="row"><a class="item-wrap" href="#documents" style="text-decoration:none;color:inherit;display:block"><div class="item" style="display:flex;align-items:baseline;gap:8px"><h3 style="font-size:1.6rem">Physics notes</h3><span class="dots"></span><span class="count">1,284 documents</span></div>
             <div class="sub"><span class="badge ok"><span class="dot"></span>Server running</span><span>Indexed 2 hours ago</span><span>212 calls this week</span></div></a>
             <aside class="note"><b class="n">&#9679;</b>Last call 4 minutes ago, from a connected assistant.</aside></li>
           <li class="row"><a class="item-wrap" href="#documents" style="text-decoration:none;color:inherit;display:block"><div class="item" style="display:flex;align-items:baseline;gap:8px"><h3 style="font-size:1.6rem">FastAPI reading</h3><span class="dots"></span><span class="count">6 documents</span></div>
@@ -388,37 +442,50 @@ button,input,select{font:inherit;color:inherit}
         <ul class="recent" style="margin-bottom:32px"><li><span class="t">14:02</span><b>Physics notes</b><span class="mono xs">search("projectile range")</span><span class="badge ok"><svg class="ico"><use href="#i-check"/></svg>Success</span></li>
           <li><span class="t">13:58</span><b>Physics notes</b><span class="mono xs">get_document("doc_lecture_03")</span><span class="badge ok"><svg class="ico"><use href="#i-check"/></svg>Success</span></li>
           <li><span class="t">12:15</span><b>Physics notes</b><span class="mono xs">search("")</span><span class="badge bad"><svg class="ico"><use href="#i-x"/></svg>Error</span></li></ul>
-        <div class="newrow"><div><b>Start another collection</b><div class="muted small">A name and your first documents. The server starts once one is indexed.</div></div><button class="btn primary" data-toast="Create flow is the next prototype step">New collection</button></div>
+        <div class="newrow"><div><b>Start another collection</b><div class="muted small">A name and your first documents. The server starts once one is indexed.</div></div><a class="btn primary" href="#new-collection">New collection</a></div></div>
       </div>
 
       <div data-screen="documents" data-app data-coll></div>
       <div data-screen="mcp-server" data-app data-coll></div>
       <div data-screen="playground" data-app data-coll></div>
       <div data-screen="activity" data-app data-coll></div>
+      <div data-screen="collection-settings" data-app data-coll></div>
 
+<template id="t-collection-settings">
+        <div class="row"><div class="paper" style="padding:20px"><h3 style="margin-bottom:12px">Name</h3><form id="setname" novalidate style="display:flex;gap:10px;flex-wrap:wrap;align-items:flex-start"><div class="field" style="margin:0;flex:1 1 260px"><label class="sr" for="set-name">Collection name</label><input class="input" id="set-name"></div><button class="btn primary" type="submit">Save name</button></form></div>
+          <aside class="note"><b class="n">&#9679;</b>Renaming never changes the server URL or breaks a link to this collection.</aside></div>
+        <div class="row"><div class="paper" style="padding:20px"><h3 style="margin-bottom:12px">Mode</h3><fieldset style="border:0;padding:0;margin:0"><legend class="sr">Mode</legend><div class="radios"><label class="radio"><input type="radio" name="set-mode" value="Knowledge"><span><b>Knowledge</b><div class="small muted">Your documents as a searchable server.</div></span></label><label class="radio"><input type="radio" name="set-mode" value="Course"><span><b>Course</b><div class="small muted">Also builds a syllabus, digests, practice and hints.</div></span></label></div></fieldset></div>
+          <aside class="note"><b class="n">&#9679;</b>Switching to Course mode adds a Course tab. The server keeps working next to it. Switching back hides the tab and keeps your progress.</aside></div>
+        <div class="row"><div class="paper" style="padding:20px;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:center"><div><h3 style="margin-bottom:4px">Access token</h3><p class="small muted">Rotate or revoke it on the MCP server tab.</p></div><a class="btn" href="#mcp-server">Open MCP server</a></div><div></div></div>
+        <div class="row"><div class="paper danger-zone" style="padding:20px"><h3 style="margin-bottom:6px">Delete this collection</h3><p class="small muted" style="margin-bottom:14px">Removes its documents, the index, the access token and the activity. The server stops answering at once. This cannot be undone.</p><button class="btn danger" data-dlg="delete-coll">Delete collection</button></div><div></div></div>
+      </template>
       <template id="t-documents">
-        <div class="split">
+        <div class="if-empty paper emptycard"><h3>No documents yet</h3><p class="muted" style="max-width:52ch">Add a PDF, Word file, Markdown or transcript. Your server starts as soon as one document is indexed.</p><div class="drop" style="width:100%"><svg class="ico" style="width:24px;height:24px"><use href="#i-up"/></svg><div style="flex:1;min-width:200px"><b>Drop files here</b><div class="xs muted">PDF, Word, Markdown and VTT, up to 25 MB each (sample limit).</div></div><button class="btn primary" data-dlg="add-docs">Choose files</button></div></div>
+        <div class="if-docs"><div class="split">
           <div style="min-width:0">
-            <div class="drop"><svg class="ico" style="width:24px;height:24px"><use href="#i-up"/></svg><div style="flex:1;min-width:200px"><b>Drop files here</b><div class="xs muted">PDF, Word, Markdown and VTT, up to 25 MB each (sample limit).</div></div><button class="btn sm" data-toast="File picker opens here (sample)">Choose files</button></div>
-            <p class="small muted" style="margin:18px 0 10px">14 documents · 12 indexed · 1 processing · 1 failed</p>
-            <div class="docs" id="doclist">
-              <button class="doc" aria-pressed="true" data-d="0"><span class="nm"><svg class="ico"><use href="#i-file"/></svg><span>kinematics-chapter.pdf</span></span><span class="st badge ok"><svg class="ico"><use href="#i-check"/></svg>Indexed</span><span class="mt">PDF · 2.1 MB · 38 passages</span></button>
-              <button class="doc" aria-pressed="false" data-d="1"><span class="nm"><svg class="ico"><use href="#i-video"/></svg><span>lecture-03-transcript.vtt</span></span><span class="st badge ok"><svg class="ico"><use href="#i-check"/></svg>Indexed</span><span class="mt">Transcript · 86 KB · 52 passages</span></button>
-              <button class="doc" aria-pressed="false" data-d="2"><span class="nm"><svg class="ico"><use href="#i-file"/></svg><span>lab-manual.docx</span></span><span class="st badge warn"><svg class="ico"><use href="#i-spin"/></svg>Parsing</span><span class="mt">Word · 640 KB</span><span class="tr trace run"><i></i></span></button>
-              <button class="doc" aria-pressed="false" data-d="3"><span class="nm"><svg class="ico"><use href="#i-note"/></svg><span>notes-week-4.md</span></span><span class="st badge"><svg class="ico"><use href="#i-clock"/></svg>Queued</span><span class="mt">Markdown · 12 KB</span></button>
-              <button class="doc" aria-pressed="false" data-d="4"><span class="nm"><svg class="ico"><use href="#i-file"/></svg><span>scan-appendix.pdf</span></span><span class="st badge bad"><svg class="ico"><use href="#i-x"/></svg>Failed</span><span class="mt">PDF · 9.8 MB</span><span class="tr trace fail"><i></i></span></button>
-            </div>
+            <div class="protoctl-r"><span>Prototype: sample size</span><div class="seg" role="group" aria-label="Sample size"><button aria-pressed="true" data-size="small">14</button><button aria-pressed="false" data-size="large">1,284</button></div></div>
+            <div class="drop" id="dropbig"><svg class="ico" style="width:24px;height:24px"><use href="#i-up"/></svg><div style="flex:1;min-width:200px"><b>Drop files here</b><div class="xs muted">PDF, Word, Markdown and VTT, up to 25 MB each (sample limit).</div></div><button class="btn sm" data-dlg="add-docs">Choose files</button></div>
+            <div id="dtools" style="display:none;gap:12px">
+              <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center"><label class="sr" for="dq">Search documents</label><input class="input" id="dq" placeholder="Search by name" style="flex:1 1 200px;min-width:0"><label class="sr" for="dsort">Sort</label><select class="input" id="dsort" style="width:auto"><option value="new">Newest first</option><option value="name">Name A to Z</option><option value="failed">Failed first</option></select><button class="btn primary" id="addbtn" data-dlg="add-docs">Add documents</button></div>
+              <div id="dchips" class="chips" role="group" aria-label="Filter by status"></div></div>
+            <details class="paper rej" id="rejected"><summary><b class="err">2 files were not added</b> <span class="small muted">· show why</span></summary><ul class="small" style="margin:8px 0 8px;padding-left:18px"><li><span class="mono">complete-textbook-scan.pdf</span> is 148 MB and the limit is 25 MB (sample). Split it into chapters and add those.</li><li><span class="mono">lecture-recording.mp4</span>: video is not supported. Add its transcript (.vtt) instead.</li></ul><button class="btn sm ghost" type="button" data-dismiss="rejected">Dismiss</button></details>
+            <div class="paper batch" id="batch" hidden><div style="display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;margin-bottom:8px"><b>Indexing a batch from 14:20</b><span class="small muted">18 of 240 left, 6 of them queued</span></div><div class="trace run"><i></i></div></div>
+            <div class="bulk" id="bulk" role="region" aria-label="Selected documents"><b id="bulkn"></b><button class="btn sm" type="button" data-bulk="reindex">Re-index</button><button class="btn sm" type="button" data-bulk="remove">Remove</button><button class="btn sm" type="button" data-bulk="clear" style="border-color:transparent">Clear</button></div>
+            <p class="small muted" id="dsummary" style="margin:14px 0 10px"></p>
+            <div class="docs" id="doclist"></div>
+            <div id="dpager" style="display:none;margin-top:12px;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap"><span class="small muted" id="drange"></span><div class="stack"><button class="btn sm" id="dprev">Previous</button><button class="btn sm" id="dnext">Next</button></div></div>
+            <p class="xs muted" id="dnote" style="margin-top:8px" hidden>Newest first, 25 at a time. The list uses a cursor rather than page numbers, so it stays stable while new documents arrive and does not jump while documents finish.</p>
           </div>
           <aside class="paper" id="docside" style="padding:20px;align-self:start" aria-live="polite"></aside>
-        </div>
+        </div></div>
       </template>
 
-      <template id="t-mcp-server">
+      <template id="t-mcp-server"><div class="if-docs">
         <div class="row"><div><div class="eyebrow" style="margin-bottom:8px">Status</div><div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap"><span class="badge ok"><span class="dot"></span>Server running</span><span class="muted small">Last call 4 minutes ago</span></div></div>
           <aside class="note" id="m1"><b class="n">1</b>This collection has one server. Its URL reaches Physics notes only; another collection has its own.</aside></div>
         <div class="row"><div class="inset"><div class="cap" style="margin-bottom:8px">Server URL</div><div class="copyrow"><pre class="code">https://sapiduct.olaheavy.dev/mcp/k7f2q9xw3m</pre><button class="tbtn" data-copy="https://sapiduct.olaheavy.dev/mcp/k7f2q9xw3m"><svg class="ico"><use href="#i-copy"/></svg>Copy</button></div></div>
           <aside class="note" id="m2"><b class="n">2</b>The address is not a secret on its own: calls also need the access token below.</aside></div>
-        <div class="row"><div class="inset"><div class="cap" style="margin-bottom:8px">Access token · created 3 days ago · last used 4 minutes ago</div><div class="copyrow"><pre class="code">sap_••••••••••••••••••••••••3f9a</pre><button class="tbtn" data-toast="Rotate opens a dialog naming this collection (sample)">Rotate</button><button class="tbtn danger" data-toast="Revoke asks you to confirm, then ends access at once (sample)">Revoke</button></div></div>
+        <div class="row"><div class="inset"><div class="cap" style="margin-bottom:8px">Access token · created 3 days ago · last used 4 minutes ago</div><div class="copyrow"><pre class="code" id="tokv">sap_••••••••••••••••••••••••3f9a</pre><button class="tbtn" id="tokrot" data-dlg="rotate">Rotate</button><button class="tbtn danger" id="tokrev" data-dlg="revoke">Revoke</button></div></div>
           <aside class="note" id="m3"><b class="n">3</b>A token is shown once, when it is created. Rotating keeps the old one valid for a short overlap the dialog states. Revoking ends access immediately.</aside></div>
         <div class="row"><div class="inset"><div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:10px"><span class="cap" style="align-self:center">Connect an assistant</span><div class="seg" role="group" aria-label="Client"><button aria-pressed="true" data-cfg="claude">Claude Desktop</button><button aria-pressed="false" data-cfg="cursor">Cursor</button></div></div>
             <pre class="code" id="cfg"></pre><div style="margin-top:10px"><button class="tbtn" data-copy-pre="cfg"><svg class="ico"><use href="#i-copy"/></svg>Copy snippet</button></div></div>
@@ -426,58 +493,118 @@ button,input,select{font:inherit;color:inherit}
         <div class="row"><div class="inset"><div class="cap" style="margin-bottom:10px">Tools on this server</div>
             <div style="display:grid;gap:10px"><div style="display:flex;gap:12px;align-items:baseline;flex-wrap:wrap"><span class="mono" style="min-width:12ch">search</span><span class="muted small" style="flex:1;min-width:180px">Find passages that match a question</span><span class="badge">read-only</span></div>
             <div style="display:flex;gap:12px;align-items:baseline;flex-wrap:wrap"><span class="mono" style="min-width:12ch">get_document</span><span class="muted small" style="flex:1;min-width:180px">Read one document by id</span><span class="badge">read-only</span></div>
-            <div style="display:flex;gap:12px;align-items:baseline;flex-wrap:wrap"><span class="mono" style="min-width:12ch">list_sources</span><span class="muted small" style="flex:1;min-width:180px">List the documents in this collection</span><span class="badge">read-only</span></div></div></div>
+            <div style="display:flex;gap:12px;align-items:baseline;flex-wrap:wrap"><span class="mono" style="min-width:12ch">list_sources</span><span class="muted small" style="flex:1;min-width:180px">List documents, a page at a time (up to 25, with a cursor)</span><span class="badge">read-only</span></div></div></div>
           <aside class="note" id="m5"><b class="n">5</b>All three tools only read. An assistant can search and open your documents but cannot change or delete them.</aside></div>
-      </template>
+      </div><div class="if-empty paper emptycard"><h3>Your server starts with your first document</h3><p class="muted" style="max-width:52ch">When one document is indexed, this page shows the server URL, your access token and the config for your assistant.</p><a class="btn primary" href="#documents">Add documents</a></div></template>
 
-      <template id="t-playground">
-        <div class="pg">
-          <div class="inset" style="align-self:start"><div class="cap" style="margin-bottom:12px">Tools</div>
+      <template id="t-playground"><div class="if-docs">
+        <div class="protoctl-r" style="justify-content:flex-start;margin:0 0 14px"><div class="seg" role="group" aria-label="Playground mode"><button aria-pressed="true" data-pmode="manual">Call a tool by hand</button><button aria-pressed="false" data-pmode="chat">Chat with a model</button></div></div>
+        <div class="pg" id="pg" data-mode="manual">
+          <div class="inset" id="pinset" style="align-self:start"><div class="cap" style="margin-bottom:12px">Tools</div>
             <button class="toolbtn" aria-pressed="true" data-tool="search"><b>search</b><div class="small muted">Find passages that match a question</div></button>
             <button class="toolbtn" aria-pressed="false" data-tool="get_document"><b>get_document</b><div class="small muted">Read one document by id</div></button>
             <button class="toolbtn" aria-pressed="false" data-tool="list_sources"><b>list_sources</b><div class="small muted">List the documents in this collection</div></button>
             <div class="cap" style="margin:20px 0 12px">Input</div><form id="pgform"></form>
-            <div style="margin-top:14px;display:flex;gap:8px;flex-wrap:wrap"><button class="tbtn pri" id="run"><svg class="ico"><use href="#i-play"/></svg>Run tool</button><a class="tbtn" href="#playground" data-toast="Opens MCPJam in a new tab. A prefilled link is unconfirmed, so a copy box sits beside it.">Test in MCPJam</a></div></div>
-          <div class="paper result" style="padding:24px;min-width:0"><div style="display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:center;margin-bottom:16px"><span class="eyebrow">Result</span><div class="seg" role="group" aria-label="View"><button aria-pressed="true" data-view="result">Result</button><button aria-pressed="false" data-view="raw">Raw</button></div></div>
+            <div style="margin-top:14px;display:flex;gap:8px;flex-wrap:wrap"><button class="tbtn pri" id="run"><svg class="ico"><use href="#i-play"/></svg>Run tool</button><a class="tbtn" href="https://app.mcpjam.com" target="_blank" rel="noopener">Test in MCPJam</a><button class="tbtn" data-copy="https://sapiduct.olaheavy.dev/mcp/k7f2q9xw3m"><svg class="ico"><use href="#i-copy"/></svg>Copy server URL</button></div></div>
+          <div id="pchatside" class="inset" style="align-self:start"><div class="cap" style="margin-bottom:12px">Tools the model can use</div><div style="display:grid;gap:10px"><label class="radio" style="border-color:var(--color-tech-border)"><input type="checkbox" checked disabled><span><b class="mono">search</b><div class="small muted">Find passages that match a question</div></span></label><label class="radio" style="border-color:var(--color-tech-border)"><input type="checkbox" checked disabled><span><b class="mono">get_document</b><div class="small muted">Read one document by id</div></span></label><label class="radio" style="border-color:var(--color-tech-border)"><input type="checkbox" checked disabled><span><b class="mono">list_sources</b><div class="small muted">List documents, a page at a time</div></span></label></div>
+            <div class="cap" style="margin:20px 0 8px">Budget</div><p class="small muted" id="pbud2">8 of 20 messages left today (sample). The cap is decided in the limits record (issue #5).</p><button class="tbtn" style="margin-top:8px" data-toast="Bringing your own key is an option for heavier use (sample)">Use my own API key</button></div>
+          <div class="paper result" id="pmanual" style="padding:24px;min-width:0"><div style="display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:center;margin-bottom:16px"><span class="eyebrow">Result</span><div class="seg" role="group" aria-label="View"><button aria-pressed="true" data-view="result">Result</button><button aria-pressed="false" data-view="raw">Raw</button></div></div>
             <div id="pgout" aria-live="polite"></div></div>
+          <div class="paper" id="pchat" style="padding:24px;min-width:0"><div style="display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:center;margin-bottom:10px"><span class="eyebrow">Chat with a model</span><span class="badge" id="pbudget">8 of 20 messages left today</span></div>
+            <p class="xs muted" style="margin-bottom:14px">A sample model picks tools and every call shows inline. No real model runs in this prototype, and the answers are canned.</p>
+            <div id="plog" style="display:grid;gap:16px;margin-bottom:16px" aria-live="polite"></div><div class="chips" id="psugg"></div>
+            <form id="pchatform" style="display:flex;gap:10px;margin-top:12px;flex-wrap:wrap" novalidate><label class="sr" for="pmsg">Message</label><input class="input" id="pmsg" placeholder="Ask about your documents" autocomplete="off" style="flex:1 1 240px"><button class="btn primary" type="submit" id="psend">Send</button></form><div id="pnote" class="small" style="margin-top:10px" role="status"></div></div>
         </div>
-      </template>
+      </div><div class="if-empty paper emptycard"><h3>No tools to try yet</h3><p class="muted" style="max-width:52ch">The playground works once a document is indexed. Add one first.</p><a class="btn primary" href="#documents">Add documents</a></div></template>
 
-      <template id="t-activity">
+      <template id="t-activity"><div class="if-docs">
         <div class="split">
           <div class="inset"><div style="display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:center;margin-bottom:14px">
-            <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap"><label class="small muted" for="fst">Status</label><select id="fst" style="min-height:40px;background:var(--tech-inset);color:var(--color-tech-text);border:1px solid var(--color-tech-border);border-radius:var(--radius-sm);padding:0 10px"><option value="all">All</option><option value="ok">Success</option><option value="err">Error</option></select></div>
+            <div class="chips" id="arange" role="group" aria-label="Time range"></div>
             <button class="tbtn" id="sim"><svg class="ico"><use href="#i-play"/></svg>Simulate an incoming call</button></div>
+            <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:12px"><label class="small muted" for="fst">Status</label><select id="fst" class="tsel"><option value="all">All</option><option value="ok">Success</option><option value="err">Error</option></select><label class="small muted" for="ftool">Tool</label><select id="ftool" class="tsel"><option value="all">All</option><option value="search">search</option><option value="get_document">get_document</option><option value="list_sources">list_sources</option></select></div>
             <div class="trace" id="acttrace" style="margin-bottom:12px;background:var(--color-tech-hairline)"><i style="width:0"></i></div>
-            <div class="scroll"><table class="logs" id="acttbl"><thead><tr><th>Time</th><th>Tool</th><th>Status</th><th>Latency</th></tr></thead><tbody></tbody></table></div>
-            <p class="xs muted" style="margin-top:12px">Calls are kept for a retention period the build will state here.</p></div>
+            <div class="scroll"><table class="logs" id="acttbl"><thead><tr><th>When</th><th>Tool</th><th>Status</th><th>Latency</th></tr></thead><tbody></tbody></table></div>
+            <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-top:12px"><span class="small muted" id="arangetxt"></span><div class="stack"><button class="tbtn" id="aprev">Previous</button><button class="tbtn" id="anext">Next</button></div></div>
+            <p class="xs muted" style="margin-top:12px">Calls are kept for 30 days in this sample. The real period is decided in the limits record (issue #5).</p></div>
           <aside class="paper" id="actside" style="padding:20px;align-self:start" aria-live="polite"></aside>
-        </div>
-      </template>
+        </div></div>
+        <div class="if-empty paper emptycard"><h3>No calls yet</h3><p class="muted" style="max-width:52ch">When an assistant calls this server, each call appears here with its arguments and the passages it returned.</p><a class="btn primary" href="#documents">Add documents</a></div></template>
 
       <div data-screen="course" data-app>
         <div class="crumb"><a href="#collections">Collections</a> / Intro to Python</div>
         <div class="pagehead"><div><h1 style="font-size:clamp(2rem,1.4rem + 2vw,2.8rem)">Intro to Python</h1><div class="meta"><span class="badge">Course mode</span><span>31 documents</span><span>Generated from your documents; every item cites a passage</span></div></div></div>
-        <div class="tabs" aria-label="Collection sections"><a href="#documents">Documents</a><a href="#mcp-server">MCP server</a><a href="#playground">Playground</a><a href="#activity">Activity</a><a href="#course" aria-current="page">Course</a><a href="#documents">Settings</a></div>
+        <div class="tabs" aria-label="Collection sections"><a href="#documents">Documents</a><a href="#mcp-server">MCP server</a><a href="#playground">Playground</a><a href="#activity">Activity</a><a href="#course" aria-current="page">Course</a><a href="#collection-settings">Settings</a></div>
         <div class="course">
           <nav class="units" aria-label="Units"><a href="#course" aria-current="true">Unit 1 · Variables</a><a href="#course">Unit 2 · Conditionals</a><a href="#course">Unit 3 · Loops</a><a href="#course">Unit 4 · Functions</a></nav>
           <div style="min-width:0">
-            <div class="row"><div class="paper" style="padding:20px;display:grid;gap:12px"><div style="display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;align-items:baseline"><h3>Due today: 6 reviews</h3><span class="small muted">Unit 1 is 40% complete</span></div><div class="progress" role="progressbar" aria-valuenow="40" aria-valuemin="0" aria-valuemax="100" aria-label="Unit 1 progress"><i style="width:40%"></i></div><div><button class="btn primary" data-toast="Practice opens here (sample)">Start practice</button></div></div>
+            <div class="row"><div class="paper" style="padding:20px;display:grid;gap:12px"><div style="display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;align-items:baseline"><h3>Due today: 6 reviews</h3><span class="small muted">Unit 1 is 40% complete</span></div><div class="progress" role="progressbar" aria-valuenow="40" aria-valuemin="0" aria-valuemax="100" aria-label="Unit 1 progress"><i style="width:40%"></i></div><div><a class="btn primary" href="#practice">Start practice</a></div></div>
               <aside class="note"><b class="n">&#9679;</b>Reviews are scheduled from your answers: items you miss come back sooner.</aside></div>
             <div class="row"><div><h3 style="margin-bottom:12px">What you'll learn</h3><ul class="checks"><li><svg class="ico" style="color:var(--color-status-success);margin-top:.3em"><use href="#i-check"/></svg><span>Store and name values with variables<button class="fn" data-ref="c1" aria-label="Source 1">1</button></span></li><li><svg class="ico" style="color:var(--color-status-success);margin-top:.3em"><use href="#i-check"/></svg><span>Tell numbers from text and convert between them<button class="fn" data-ref="c2" aria-label="Source 2">2</button></span></li><li><svg class="ico" style="color:var(--color-status-success);margin-top:.3em"><use href="#i-check"/></svg>Read an error message and find the line it points to</li></ul></div>
               <aside><div class="note" id="c1" style="margin-bottom:12px"><b class="n">1</b><span class="src">lecture-01-transcript.vtt · 04:12</span>Where "a variable is a name for a value" is introduced.</div><div class="note" id="c2"><b class="n">2</b><span class="src">notes-02.md</span>The section on converting with int() and str().</div></aside></div>
             <h3 style="margin-bottom:4px">Sessions</h3>
             <ul class="sess">
-              <li><span class="num">1</span><div><b>What a variable is</b><div class="xs muted">Digest ready · cites lecture-01-transcript.vtt</div></div><span class="badge ok"><svg class="ico"><use href="#i-check"/></svg>Done</span></li>
-              <li><span class="num">2</span><div><b>Numbers and text</b><div class="xs muted">Digest ready · cites notes-02.md</div></div><span class="badge warn">In progress</span></li>
-              <li><span class="num">A</span><div><b>Assignment: temperature converter</b><div class="xs muted">Hints guide you and never give the full solution.</div></div><button class="btn sm" data-toast="Hint panel opens here (sample)">Get a hint</button></li>
+              <li><span class="num">1</span><div><a href="#digest" style="color:inherit"><b>What a variable is</b></a><div class="xs muted">Digest ready · cites lecture-01-transcript.vtt</div></div><span class="badge ok"><svg class="ico"><use href="#i-check"/></svg>Done</span></li>
+              <li><span class="num">2</span><div><a href="#digest" style="color:inherit"><b>Numbers and text</b></a><div class="xs muted">Digest ready · cites notes-02.md</div></div><span class="badge warn">In progress</span></li>
+              <li><span class="num">A</span><div><b>Assignment: temperature converter</b><div class="xs muted">Hints guide you and never give the full solution.</div></div><a class="btn sm" href="#hints">Get a hint</a></li>
             </ul>
           </div>
+        </div>
+      </div>
+
+      <div data-screen="new-collection" data-app>
+        <div class="crumb"><a href="#collections">Collections</a> / New</div>
+        <h1 style="font-size:clamp(2rem,1.4rem + 2vw,2.8rem)">New collection</h1><p class="muted" style="margin:8px 0 24px;max-width:56ch">A collection is a set of documents with one server of its own. You add the documents next.</p>
+        <form id="ncform" novalidate style="max-width:560px">
+          <div class="field"><label for="nc-name">Name</label><input class="input" id="nc-name" placeholder="For example, Physics notes" autocomplete="off" aria-describedby="nc-err"><span class="err" id="nc-err" hidden>Use at least 3 characters.</span></div>
+          <fieldset style="border:0;padding:0;margin:0 0 20px"><legend style="font-weight:500;font-size:.9375rem;margin-bottom:8px">Mode</legend><div class="radios">
+            <label class="radio"><input type="radio" name="nc-mode" value="Knowledge" checked><span><b>Knowledge</b><div class="small muted">Your documents as a searchable server. The default.</div></span></label>
+            <label class="radio"><input type="radio" name="nc-mode" value="Course"><span><b>Course</b><div class="small muted">Also builds a syllabus, digests, practice and hints from the documents.</div></span></label></div></fieldset>
+          <div class="actions"><button class="btn primary" type="submit">Create collection</button><a class="btn" href="#collections">Cancel</a></div></form>
+      </div>
+
+      <div data-screen="account" data-app>
+        <div class="crumb"><a href="#collections">Collections</a> / Account</div>
+        <h1 style="font-size:clamp(2rem,1.4rem + 2vw,2.8rem);margin-bottom:24px">Account</h1>
+        <div class="row"><div class="paper" style="padding:20px;display:flex;gap:16px;align-items:center;flex-wrap:wrap"><span class="avatar lg" aria-hidden="true">AS</span><div><b>Alex Sample</b><div class="small muted">alex@example.com · signed in with GitHub</div></div></div>
+          <aside class="note"><b class="n">&#9679;</b>Your name and avatar come from the account you sign in with. Change them there.</aside></div>
+        <div class="row"><div class="paper" style="padding:20px"><h3 style="margin-bottom:6px">Sign-in methods</h3><ul class="methods"><li><span><b>GitHub</b><div class="small muted">alex@example.com</div></span><span class="badge ok"><svg class="ico"><use href="#i-check"/></svg>Connected</span></li><li><span><b>Google</b><div class="small muted">Not linked</div></span><button class="btn sm" data-toast="Linking opens the provider's sign-in (sample)">Link Google</button></li></ul></div>
+          <aside class="note"><b class="n">&#9679;</b>Signing in with another provider that shares your verified email links to this account automatically. An unverified email is never linked.</aside></div>
+        <div class="row"><div class="paper" style="padding:20px;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:center"><div><h3 style="margin-bottom:4px">Sessions</h3><p class="small muted">Sign out of every browser and device.</p></div><button class="btn" data-toast="Signed out everywhere (sample)">Sign out everywhere</button></div><div></div></div>
+        <div class="row"><div class="paper danger-zone" style="padding:20px"><h3 style="margin-bottom:6px">Delete account</h3><p class="small muted" style="margin-bottom:14px">Removes your account and all your collections, documents, tokens and activity. This cannot be undone.</p><button class="btn danger" data-dlg="delete-account">Delete account</button></div><div></div></div>
+      </div>
+
+      <div data-screen="practice" data-app>
+        <div class="crumb"><a href="#collections">Collections</a> / <a href="#course">Intro to Python</a> / Practice</div>
+        <h1 style="font-size:clamp(2rem,1.4rem + 2vw,2.8rem);margin-bottom:20px">Practice</h1>
+        <div style="max-width:720px"><div class="progress" role="progressbar" id="pprog" aria-valuemin="0" aria-valuemax="6" aria-valuenow="0" aria-label="Review progress"><i style="width:0"></i></div><p class="small muted" id="pcount" style="margin:8px 0 16px"></p><div class="paper" style="padding:24px" id="pcard" aria-live="polite"></div></div>
+      </div>
+
+      <div data-screen="digest" data-app>
+        <div class="crumb"><a href="#collections">Collections</a> / <a href="#course">Intro to Python</a> / Session 2</div>
+        <h1 style="font-size:clamp(2rem,1.4rem + 2vw,2.8rem)">Numbers and text</h1><p class="muted" style="margin:8px 0 28px">Session 2 digest · built from notes-02.md and lecture-02-transcript.vtt · sample</p>
+        <div class="row"><p class="stmt qtext">Python treats 3 and "3" as different things: one is a number, the other is text.<button class="fn" data-ref="d1" aria-label="Source 1">1</button></p><aside class="note" id="d1"><b class="n">1</b><span class="src">notes-02.md · section 1</span>Where numbers and text are introduced as different types. (Sample.)</aside></div>
+        <div class="row"><p class="stmt qtext">Adding two numbers adds them; adding two pieces of text joins them, so "3" + "4" gives "34".<button class="fn" data-ref="d2" aria-label="Source 2">2</button></p><aside class="note" id="d2"><b class="n">2</b><span class="src">lecture-02-transcript.vtt · 06:30</span>The worked example of joining text with +. (Sample.)</aside></div>
+        <div class="row"><p class="stmt qtext">int() turns text that looks like a whole number into a number, and str() turns a value into text.<button class="fn" data-ref="d3" aria-label="Source 3">3</button></p><aside class="note" id="d3"><b class="n">3</b><span class="src">notes-02.md · section 3</span>The conversion functions and their limits. (Sample.)</aside></div>
+        <div class="row"><p class="stmt qtext">Mixing a number and text in one + raises a TypeError, and the message names the line to fix.<button class="fn" data-ref="d4" aria-label="Source 4">4</button></p><aside class="note" id="d4"><b class="n">4</b><span class="src">lecture-02-transcript.vtt · 18:05</span>Reading the error message. (Sample.)</aside></div>
+        <div class="actions" style="margin-top:8px"><a class="btn primary" href="#practice">Practise this session</a><a class="btn" href="#course">Back to the course</a></div>
+      </div>
+
+      <div data-screen="hints" data-app>
+        <div class="crumb"><a href="#collections">Collections</a> / <a href="#course">Intro to Python</a> / Assignment</div>
+        <h1 style="font-size:clamp(2rem,1.4rem + 2vw,2.8rem)">Temperature converter</h1><p class="muted" style="margin:8px 0 24px;max-width:60ch">Write a function <span class="mono">celsius_to_fahrenheit(c)</span> that returns the temperature in Fahrenheit. Hints nudge you toward it and never give the full solution.</p>
+        <div class="split">
+          <div><label class="small" for="attempt" style="display:block;font-weight:500;margin-bottom:6px">Your attempt</label><textarea class="input" id="attempt" spellcheck="false">def celsius_to_fahrenheit(c):
+    return c * 9 / 5
+</textarea>
+            <div class="actions" style="margin-top:12px;align-items:center"><button class="btn primary" id="gethint">Get a hint</button><span class="small muted" id="hintct">0 of 3 hints used</span></div></div>
+          <aside class="paper" style="padding:20px;align-self:start" aria-live="polite"><div class="eyebrow" style="margin-bottom:8px">Hints</div><div id="hintlist"><p class="small muted">Ask for a hint when you are stuck. Each one is a little more specific than the last.</p></div></aside>
         </div>
       </div>
     </main>
   </div>
 </div>
+<dialog id="dlg" class="dlg" aria-labelledby="dlgt"></dialog>
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
 <script>
@@ -497,24 +624,65 @@ document.addEventListener('click',function(e){var b=e.target.closest('[data-toas
  var f=e.target.closest('.fn[data-ref]');if(f){var n=document.getElementById(f.getAttribute('data-ref'));if(n){var on=!n.classList.contains('on');$$('.note.on').forEach(function(x){x.classList.remove('on')});$$('.fn.on').forEach(function(x){x.classList.remove('on')});if(on){n.classList.add('on');f.classList.add('on');if(n.scrollIntoView&&innerWidth<900)n.scrollIntoView({block:'nearest',behavior:'smooth'})}}}});
 document.addEventListener('mouseover',function(e){var f=e.target.closest('.fn[data-ref]');if(f){var n=document.getElementById(f.getAttribute('data-ref'));if(n)n.classList.add('hot')}});
 document.addEventListener('mouseout',function(e){var f=e.target.closest('.fn[data-ref]');if(f){var n=document.getElementById(f.getAttribute('data-ref'));if(n)n.classList.remove('hot')}});
-$$('form[data-go]').forEach(function(f){f.addEventListener('submit',function(e){e.preventDefault();location.hash=f.getAttribute('data-go')})});
+var sp=$('#si-preview');if(sp)sp.addEventListener('click',function(){var e=$('#si-err');e.hidden=!e.hidden});
 // collection pages
-var TABS=[['documents','Documents'],['mcp-server','MCP server'],['playground','Playground'],['activity','Activity'],['settings-x','Settings']];
-function head(cur){return '<div class="crumb"><a href="#collections">Collections</a> / Physics notes</div><div class="pagehead"><div><h1 style="font-size:clamp(2rem,1.4rem + 2vw,2.8rem)">Physics notes</h1><div class="meta"><span class="badge">Knowledge</span><span>14 documents</span><span>one MCP server</span></div></div></div><div class="tabs" aria-label="Collection sections">'+TABS.map(function(x){return '<a href="#'+(x[0]==='settings-x'?'documents':x[0])+'"'+(x[0]===cur?' aria-current="page"':'')+'>'+x[1]+'</a>'}).join('')+'</div>'}
+var COLL={name:'Physics notes',mode:'Knowledge',state:'docs'},TOK='active',NEWDOCS=[];
+var TABS=[['documents','Documents'],['mcp-server','MCP server'],['playground','Playground'],['activity','Activity'],['collection-settings','Settings']];
+function tabLink(x,cur){return '<a href="#'+x[0]+'"'+(x[0]===cur?' aria-current="page"':'')+'>'+x[1]+'</a>'}
+function head(cur){return '<div class="crumb"><a href="#collections">Collections</a> / <span class="ctitle">Physics notes</span></div><div class="pagehead"><div><h1 class="ctitle" style="font-size:clamp(2rem,1.4rem + 2vw,2.8rem)">Physics notes</h1><div class="meta"><span class="badge cmode">Knowledge</span><span class="hcount">1,284 documents</span><span>one MCP server</span></div></div></div><div class="tabs" aria-label="Collection sections">'+TABS.slice(0,4).map(function(x){return tabLink(x,cur)}).join('')+'<a class="if-course" href="#course">Course</a>'+tabLink(TABS[4],cur)+'</div>'}
 $$('[data-coll]').forEach(function(el){var n=el.getAttribute('data-screen');el.innerHTML=head(n)+'<div class="body"></div>';$('.body',el).appendChild($('#t-'+n).content.cloneNode(true))});
+function applyColl(){var app=$('#app'),demo=app.getAttribute('data-mode')==='demo';$$('.ctitle').forEach(function(x){x.textContent=demo?'Demo collection':COLL.name});$$('.cmode').forEach(function(x){x.textContent=demo?'Read-only sample':COLL.mode});app.setAttribute('data-cs',demo?'docs':COLL.state);app.setAttribute('data-cm',COLL.mode);if(COLL.state==='empty'&&!demo)$$('.hcount').forEach(function(x){x.textContent='0 documents'});
+ var sn=$('#set-name');if(sn&&document.activeElement!==sn)sn.value=COLL.name;$$('[name="set-mode"]').forEach(function(r){r.checked=r.value===COLL.mode});var rn=$('#railnew');if(rn)rn.hidden=!(COLL.isNew||(typeof SAVED!=='undefined'&&SAVED.newc))}
+function tokUI(){var v=$('#tokv'),r=$('#tokrot'),x=$('#tokrev');if(!v)return;if(TOK==='revoked'){v.textContent='No active token. Create one to reconnect.';r.textContent='Create token';r.setAttribute('data-dlg','create-token');x.hidden=true}else{v.textContent='sap_••••••••••••••••••••••••7c1e';r.textContent='Rotate';r.setAttribute('data-dlg','rotate');x.hidden=false}}
 // client config
 var CFG={claude:'{ "mcpServers": { "physics-notes": {\n    "url": "https://sapiduct.olaheavy.dev/mcp/k7f2q9xw3m",\n    "headers": { "Authorization": "Bearer <your token>" } } } }',cursor:'{ "mcpServers": { "physics-notes": {\n    "url": "https://sapiduct.olaheavy.dev/mcp/k7f2q9xw3m",\n    "headers": { "Authorization": "Bearer <your token>" } } } }'};
 if($('#cfg')){$('#cfg').textContent=CFG.claude;$$('[data-cfg]').forEach(function(b){b.addEventListener('click',function(){$$('[data-cfg]').forEach(function(x){x.setAttribute('aria-pressed',x===b?'true':'false')});$('#cfg').textContent=CFG[b.getAttribute('data-cfg')]})})}
 // documents
-var DOCS=[{n:'kinematics-chapter.pdf',h:'Read as 38 passages across 14 pages.',p:[['p. 4','Speed has magnitude only. Velocity has magnitude and direction.'],['p. 6','Average velocity is displacement divided by elapsed time.']]},{n:'lecture-03-transcript.vtt',h:'Read as 52 passages with timestamps.',p:[['12:40','Average velocity is displacement divided by elapsed time.'],['14:05','Speed is the magnitude of the velocity.']]},{n:'lab-manual.docx',h:'Parsing. Reading page 12 of 31.',p:[]},{n:'notes-week-4.md',h:'Queued. Waiting for a worker.',p:[]},{n:'scan-appendix.pdf',h:'Failed: no text layer found. Upload a text version or run OCR first, then retry.',p:[],f:1}];
-function docside(i){var d=DOCS[i],h='<div class="eyebrow" style="margin-bottom:8px">Selected document</div><h4 style="margin-bottom:6px;overflow-wrap:anywhere">'+esc(d.n)+'</h4><p class="small muted" style="margin-bottom:14px">'+esc(d.h)+'</p>';
- if(d.p.length){h+=d.p.map(function(x,k){return '<div class="note" style="margin-bottom:12px"><b class="n">'+(k+1)+'</b><span class="src">'+esc(x[0])+'</span>'+esc(x[1])+'</div>'}).join('')+'<p class="xs muted">Sample passages.</p>'}
- else if(d.f){h+='<div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn sm" data-toast="Retry queued (sample)">Retry</button><button class="btn sm ghost" data-toast="Remove asks you to confirm (sample)">Remove</button></div>'}
- else{h+='<div class="trace run"><i></i></div>'}
- $('#docside').innerHTML=h}
-if($('#doclist')){docside(0);$$('.doc').forEach(function(b){b.addEventListener('click',function(){$$('.doc').forEach(function(x){x.setAttribute('aria-pressed',x===b?'true':'false')});docside(+b.getAttribute('data-d'))})})}
+var DOCS=[{n:'kinematics-chapter.pdf',s:'ok',t:'PDF',z:'2.1 MB',pc:38,p:[['p. 4','Speed has magnitude only. Velocity has magnitude and direction.'],['p. 6','Average velocity is displacement divided by elapsed time.']]},{n:'lecture-03-transcript.vtt',s:'ok',t:'Transcript',z:'86 KB',pc:52,p:[['12:40','Average velocity is displacement divided by elapsed time.'],['14:05','Speed is the magnitude of the velocity.']]},{n:'lab-manual.docx',s:'parse',t:'Word',z:'640 KB'},{n:'notes-week-4.md',s:'queue',t:'Markdown',z:'12 KB'},{n:'scan-appendix.pdf',s:'fail',t:'PDF',z:'9.8 MB'},{n:'lecture-01-transcript.vtt',s:'ok',t:'Transcript',z:'91 KB',pc:49},{n:'lecture-02-transcript.vtt',s:'ok',t:'Transcript',z:'88 KB',pc:47},{n:'lecture-04-transcript.vtt',s:'ok',t:'Transcript',z:'94 KB',pc:55},{n:'chapter-02-worked-examples.pdf',s:'ok',t:'PDF',z:'1.8 MB',pc:31},{n:'chapter-03-forces.pdf',s:'ok',t:'PDF',z:'2.4 MB',pc:42},{n:'formula-sheet.pdf',s:'ok',t:'PDF',z:'210 KB',pc:6},{n:'lab-1-notes.md',s:'ok',t:'Markdown',z:'9 KB',pc:5},{n:'lab-2-notes.md',s:'ok',t:'Markdown',z:'11 KB',pc:6},{n:'practice-problems.docx',s:'ok',t:'Word',z:'320 KB',pc:18}];
+var TOPICS=['kinematics','dynamics','energy','momentum','waves','optics','thermo','electricity'],EXT=['pdf','vtt','docx','md'],TYPE=['PDF','Transcript','Word','Markdown'];
+var BIG=[];(function(){for(var i=0;i<1284;i++){var st='ok';if(i%117===5)st='fail';else if(i%107===2)st='parse';else if(i%214===9)st='queue';var k=i%4;var d={n:TOPICS[i%8]+'-'+String(1284-i).padStart(4,'0')+'.'+EXT[k],s:st,t:TYPE[k],z:((i*37)%900+20)+' KB',pc:(i%60)+3};if(i===3){d={n:'physics-textbook-complete.pdf',s:'parse',t:'PDF',z:'21.4 MB',big:1,pages:842,at:312}}BIG.push(d)}})();
+var BADGE={ok:'<span class="st badge ok"><svg class="ico"><use href="#i-check"/></svg>Indexed</span>',parse:'<span class="st badge warn"><svg class="ico"><use href="#i-spin"/></svg>Parsing</span>',queue:'<span class="st badge"><svg class="ico"><use href="#i-clock"/></svg>Queued</span>',fail:'<span class="st badge bad"><svg class="ico"><use href="#i-x"/></svg>Failed</span>'};
+var ST={size:/[?&]size=small/.test(location.search)?'small':'large',filter:'all',q:'',sort:'new',start:0,sel:0,chk:{}},PS=25,PAGE=[];
+function counts(list){var c={all:list.length,ok:0,parse:0,queue:0,fail:0};list.forEach(function(d){c[d.s]++});return c}
+function docView(){var list=ST.size==='large'?BIG:(ST.size==='new'?NEWDOCS:DOCS);var out=list.filter(function(d){return (ST.filter==='all'||d.s===ST.filter)&&(!ST.q||d.n.toLowerCase().indexOf(ST.q.toLowerCase())>=0)});
+ if(ST.sort==='name')out=out.slice().sort(function(a,b){return a.n<b.n?-1:1});else if(ST.sort==='failed')out=out.slice().sort(function(a,b){return (b.s==='fail')-(a.s==='fail')});return out}
+function meta(d){if(d.big)return d.t+' · '+d.z+' · '+d.pages+' pages · reading page '+d.at;return d.t+' · '+d.z+(d.pc?' · '+d.pc+' passages':'')}
+function rowHtml(d,idx){var tr=d.big?'<span class="tr trace"><i style="width:'+Math.round(d.at/d.pages*100)+'%"></i></span>':d.s==='parse'?'<span class="tr trace run"><i></i></span>':d.s==='fail'?'<span class="tr trace fail"><i></i></span>':'';var icon=d.t==='Transcript'?'i-video':d.t==='Markdown'?'i-note':'i-file';
+ return '<div class="doc" role="row" aria-selected="'+(idx===ST.sel)+'" data-d="'+idx+'"><input class="chk" type="checkbox" data-k="'+esc(d.n)+'" aria-label="Select '+esc(d.n)+'"'+(ST.chk[d.n]?' checked':'')+'><button class="nm" type="button" title="'+esc(d.n)+'"><svg class="ico"><use href="#'+icon+'"/></svg><span>'+esc(d.n)+'</span></button><span class="c">'+esc(d.t)+'</span><span class="c">'+esc(d.z)+'</span>'+BADGE[d.s]+'<span class="mt">'+esc(meta(d))+'</span>'+tr+'</div>'}
+function sideHtml(d){if(!d)return '<p class="muted small">No documents match.</p>';
+ var h='<div class="eyebrow" style="margin-bottom:8px">Selected document</div><h4 style="margin-bottom:6px;overflow-wrap:anywhere">'+esc(d.n)+'</h4><p class="xs muted" style="margin-bottom:12px">'+esc(d.t+' · '+d.z)+'</p>';
+ if(d.big){var pct=Math.round(d.at/d.pages*100);h+='<div class="progress" role="progressbar" aria-valuenow="'+pct+'" aria-valuemin="0" aria-valuemax="100" aria-label="Reading progress" style="margin-bottom:10px"><i style="width:'+pct+'%"></i></div><p class="small" style="margin-bottom:10px"><b>Reading page '+d.at+' of '+d.pages+'</b> ('+pct+'%)</p><div class="note"><b class="n">1</b>Pages 1 to '+(d.at-1)+' are already searchable. The rest become searchable as they finish, so you do not wait for the whole file. A time estimate appears once the first pages finish. (Sample.)</div>'}
+ else if(d.s==='ok'){var P=d.p||DOCS[0].p;h+='<p class="small muted" style="margin-bottom:14px">Read as '+d.pc+' passages.</p>'+P.map(function(x,k){return '<div class="note" style="margin-bottom:12px"><b class="n">'+(k+1)+'</b><span class="src">'+esc(x[0])+'</span>'+esc(x[1])+'</div>'}).join('')+'<p class="xs muted">Sample passages.</p>'}
+ else if(d.s==='fail'){h+='<p class="small err" style="margin-bottom:6px"><b>Could not read this file</b></p><p class="small muted" style="margin-bottom:12px">No text layer found. Upload a text version or run OCR first, then retry.</p><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn sm" data-toast="Retry queued (sample)">Retry</button><button class="btn sm ghost" data-toast="Remove asks you to confirm (sample)">Remove</button></div>'}
+ else if(d.s==='parse'){h+='<p class="small muted" style="margin-bottom:10px">Parsing.</p><div class="trace run"><i></i></div>'}
+ else{h+='<p class="small muted">Queued. Waiting for a worker.</p>'}
+ return h}
+function docside(d){$('#docside').innerHTML=sideHtml(d);$$('.idetail').forEach(function(x){x.remove()});
+ if(innerWidth<1100&&d){var r=$$('.doc')[ST.sel];if(r){var div=document.createElement('div');div.className='idetail';div.innerHTML=sideHtml(d);r.insertAdjacentElement('afterend',div)}}}
+function bulk(){var n=Object.keys(ST.chk).length;$('#bulk').classList.toggle('on',n>0);$('#bulkn').textContent=n+' selected'}
+function renderDocs(){var big=ST.size==='large',all=big?BIG:(ST.size==='new'?NEWDOCS:DOCS),c=counts(all),vs=docView();
+ $$('.hcount').forEach(function(x){x.textContent=(big?'1,284':all.length)+' documents'});
+ $('#batch').hidden=!big;$('#dropbig').style.display=big?'none':'flex';$('#rejected').hidden=!big;$('#dtools').style.display=big?'grid':'none';$('#dpager').style.display=big?'flex':'none';$('#dnote').hidden=!big;
+ var base=[['all','All',c.all],['ok','Indexed',c.ok],['parse','Processing',c.parse],['queue','Queued',c.queue],['fail','Failed',c.fail]];
+ if(big)$('#dchips').innerHTML=base.map(function(x){return '<button class="chip" aria-pressed="'+(ST.filter===x[0])+'" data-f="'+x[0]+'">'+x[1]+' <b>'+x[2].toLocaleString()+'</b></button>'}).join('')+(ST.filter==='fail'&&c.fail?'<button class="btn sm" data-toast="Retry queued for '+c.fail+' failed documents (sample)">Retry all '+c.fail+' failed</button>':'');
+ PAGE=big?vs.slice(ST.start,ST.start+PS):vs;
+ $('#dsummary').textContent=big?(vs.length.toLocaleString()+(ST.filter==='all'&&!ST.q?' documents':' matching documents')+' · '+c.ok.toLocaleString()+' indexed · '+(c.parse+c.queue)+' processing · '+c.fail+' failed'):(c.all+' documents · '+c.ok+' indexed · '+(c.parse+c.queue)+' processing · '+c.fail+' failed');
+ var head='<div class="dhead" role="row"><input class="chk" id="selall" type="checkbox" aria-label="Select all on this page"><span>Name</span><span>Type</span><span>Size</span><span>Status</span></div>';
+ $('#doclist').innerHTML=PAGE.length?head+PAGE.map(function(d,i){return rowHtml(d,i)}).join(''):'<div style="padding:20px"><b>No documents match</b><p class="small muted">Clear the search or choose another status.</p></div>';
+ if(ST.sel>=PAGE.length)ST.sel=0;docside(PAGE[ST.sel]);bulk();
+ if(big){var a1=vs.length?ST.start+1:0,b1=Math.min(ST.start+PS,vs.length);$('#drange').textContent='Showing '+a1+' to '+b1+' of '+vs.length.toLocaleString();$('#dprev').disabled=ST.start===0;$('#dnext').disabled=b1>=vs.length}
+ var sa=$('#selall');if(sa){sa.checked=PAGE.length&&PAGE.every(function(d){return ST.chk[d.n]});sa.addEventListener('change',function(){PAGE.forEach(function(d){if(sa.checked)ST.chk[d.n]=1;else delete ST.chk[d.n]});renderDocs()})}
+ $$('.doc').forEach(function(r){r.addEventListener('click',function(e){if(e.target.classList.contains('chk'))return;ST.sel=+r.getAttribute('data-d');$$('.doc').forEach(function(x){x.setAttribute('aria-selected',x===r?'true':'false')});docside(PAGE[ST.sel])})});
+ $$('.doc .chk').forEach(function(k){k.addEventListener('change',function(){var n=k.getAttribute('data-k');if(k.checked)ST.chk[n]=1;else delete ST.chk[n];bulk();var sa2=$('#selall');if(sa2)sa2.checked=PAGE.every(function(d){return ST.chk[d.n]})})});
+ $$('[data-f]').forEach(function(b){b.addEventListener('click',function(){ST.filter=b.getAttribute('data-f');ST.start=0;ST.sel=0;renderDocs()})})}
+if($('#doclist')){$$('[data-size]').forEach(function(x){x.setAttribute('aria-pressed',x.getAttribute('data-size')===ST.size?'true':'false')});renderDocs();
+ $$('[data-size]').forEach(function(b){b.addEventListener('click',function(){ST={size:b.getAttribute('data-size'),filter:'all',q:'',sort:'new',start:0,sel:0,chk:{}};$('#dq').value='';$('#dsort').value='new';$$('[data-size]').forEach(function(x){x.setAttribute('aria-pressed',x===b?'true':'false')});renderDocs()})});
+ $('#dq').addEventListener('input',function(){ST.q=this.value;ST.start=0;ST.sel=0;renderDocs()});$('#dsort').addEventListener('change',function(){ST.sort=this.value;ST.start=0;ST.sel=0;renderDocs()});
+ $('#dnext').addEventListener('click',function(){ST.start+=PS;ST.sel=0;renderDocs()});$('#dprev').addEventListener('click',function(){ST.start=Math.max(0,ST.start-PS);ST.sel=0;renderDocs()});
+ $$('[data-bulk]').forEach(function(b){b.addEventListener('click',function(){var a=b.getAttribute('data-bulk');if(a==='clear'){ST.chk={};renderDocs();return}toast((a==='reindex'?'Re-indexing ':'Remove asks you to confirm for ')+Object.keys(ST.chk).length+' documents (sample)')})});
+ $$('[data-dismiss]').forEach(function(b){b.addEventListener('click',function(){var t=document.getElementById(b.getAttribute('data-dismiss'));if(t)t.hidden=true})})}
 // playground
-var SCHEMAS={search:[['query','text','What is the difference between speed and velocity?'],['limit','number','2']],get_document:[['document_id','text','doc_kinematics_01']],list_sources:[]};
+var SCHEMAS={search:[['query','text','What is the difference between speed and velocity?'],['limit','number','2']],get_document:[['document_id','text','doc_kinematics_01']],list_sources:[['limit','number','3'],['cursor','text','']]};
 var tool='search',view='result',last=null;
 function form(){var f=$('#pgform');f.innerHTML=SCHEMAS[tool].length?SCHEMAS[tool].map(function(x){return '<div class="tfield"><label for="f-'+x[0]+'">'+x[0]+' <span class="xs muted">'+(x[1]==='number'?'integer':'string')+', required</span></label><input id="f-'+x[0]+'" name="'+x[0]+'" type="'+(x[1]==='number'?'number':'text')+'" value="'+x[2]+'"></div>'}).join(''):'<p class="small muted">This tool takes no input.</p>'}
 function args(){var o={};SCHEMAS[tool].forEach(function(x){var v=$('#f-'+x[0]).value;o[x[0]]=x[1]==='number'?Number(v):v});return o}
@@ -523,34 +691,121 @@ function render(){var out=$('#pgout');if(!last){out.innerHTML='<p class="muted">
  var req='{ "method": "tools/call", "params": { "name": "'+last.tool+'", "arguments": '+JSON.stringify(last.args)+' } }';
  if(view==='raw'){out.innerHTML='<div class="inset" style="padding:14px"><div class="cap" style="margin-bottom:6px">Request</div><pre class="code" style="white-space:pre-wrap">'+esc(req)+'</pre><div class="cap" style="margin:14px 0 6px">Response</div><pre class="code">'+esc(JSON.stringify(last.raw,null,2))+'</pre></div>';return}
  var h='<div class="small muted" style="margin-bottom:16px">Called <span class="mono">'+last.tool+'</span> · 142 ms · sample</div>';
- if(last.tool==='search'){h+='<div class="result">'+last.raw.results.map(function(r,i){return '<p class="stmt" style="margin-bottom:14px">'+esc(r.text)+'<button class="fn" data-ref="p'+i+'" aria-label="Source '+(i+1)+'">'+(i+1)+'</button></p>'}).join('')+'</div><ol class="sources" style="list-style:none">'+last.raw.results.map(function(r,i){return '<li class="note" id="p'+i+'" style="padding-left:12px"><b class="n">'+(i+1)+'</b><span class="src">'+esc(r.source)+'</span><button class="btn sm" style="margin-top:6px" data-toast="Opens the passage in a side sheet (sample)">Open passage</button></li>'}).join('')+'</ol>'}
+ if(last.tool==='search'){h+='<div class="result">'+last.raw.results.map(function(r,i){return '<p class="stmt" style="margin-bottom:14px">'+esc(r.text)+'<button class="fn" data-ref="p'+i+'" aria-label="Source '+(i+1)+'">'+(i+1)+'</button></p>'}).join('')+'</div><ol class="sources" style="list-style:none">'+last.raw.results.map(function(r,i){return '<li class="note" id="p'+i+'" style="padding-left:12px"><b class="n">'+(i+1)+'</b><span class="src">'+esc(r.source)+'</span><button class="btn sm" style="margin-top:6px" data-dlg="passage" data-p="'+i+'">Open passage</button></li>'}).join('')+'</ol>'}
  else if(last.tool==='get_document'){h+='<p class="stmt">Chapter 2 introduces position, displacement, speed and velocity, with worked examples. <span class="muted">(Sample text.)</span></p><ol class="sources"><li class="note"><b class="n">1</b><span class="src">kinematics-chapter.pdf · whole document</span></li></ol>'}
- else{h+='<ol class="sources">'+last.raw.sources.map(function(s,i){return '<li class="note"><b class="n">'+(i+1)+'</b><span class="src">'+esc(s.name)+'</span><span class="xs muted">'+esc(s.id)+'</span></li>'}).join('')+'</ol>'}
+ else{h+='<p class="small muted" style="margin-bottom:6px">Showing '+last.raw.from+' to '+(last.raw.from+last.raw.sources.length-1)+' of '+last.raw.total.toLocaleString()+(last.raw.next_cursor?' · next cursor <span class="mono">'+last.raw.next_cursor+'</span>':' · no more results')+'</p><ol class="sources">'+last.raw.sources.map(function(s,i){return '<li class="note"><b class="n">'+(i+1)+'</b><span class="src">'+esc(s.name)+'</span><span class="xs muted">'+esc(s.id)+'</span></li>'}).join('')+'</ol>'}
  out.innerHTML=h}
 function run(e){if(e)e.preventDefault();var a=args(),raw;
  if(tool==='search')raw={results:PASS.slice(0,a.limit||2).map(function(p){return {text:p.t,source:p.s+' · '+p.l}})};
  else if(tool==='get_document')raw={id:a.document_id,text:'Chapter 2 introduces position, displacement, speed and velocity, with worked examples. (Sample text.)'};
- else raw={sources:[{id:'doc_kinematics_01',name:'kinematics-chapter.pdf'},{id:'doc_lecture_03',name:'lecture-03-transcript.vtt'},{id:'doc_lab_01',name:'lab-manual.docx'}]};
+ else{var SRC=ST.size==='large'?BIG:(ST.size==='new'?NEWDOCS:DOCS),lim=Math.max(1,Math.min(25,a.limit||3)),off=parseInt(String(a.cursor||'').replace('c_',''),10)||0,end=Math.min(off+lim,SRC.length);raw={total:SRC.length,from:off+1,sources:SRC.slice(off,end).map(function(d,i){return {id:'doc_'+(off+i+1),name:d.n}}),next_cursor:end<SRC.length?'c_'+end:null}}
  last={tool:tool,args:a,raw:raw};render()}
 if($('#pgform')){form();run();$('#run').addEventListener('click',run);
  $$('[data-tool]').forEach(function(b){b.addEventListener('click',function(){tool=b.getAttribute('data-tool');$$('[data-tool]').forEach(function(x){x.setAttribute('aria-pressed',x===b?'true':'false')});form();run()})});
  $$('[data-view]').forEach(function(b){b.addEventListener('click',function(){view=b.getAttribute('data-view');$$('[data-view]').forEach(function(x){x.setAttribute('aria-pressed',x===b?'true':'false')});render()})})}
 // activity
-var rows=[['14:02:11','search','{"query":"projectile range"}','ok','118 ms','2 passages · kinematics-chapter.pdf p. 9'],['13:58:40','get_document','{"document_id":"doc_lecture_03"}','ok','64 ms','1 document'],['13:41:05','search','{"query":"free fall"}','ok','131 ms','2 passages · lecture-03-transcript.vtt 21:10'],['12:15:52','search','{"query":""}','err','9 ms','Rejected: the query is empty']];
-var sel=0;
-function acts(){var f=$('#fst').value,tb=$('#acttbl tbody');var list=rows.map(function(r,i){return [r,i]}).filter(function(x){return f==='all'||x[0][3]===f});tb.innerHTML=list.map(function(x){var r=x[0],i=x[1];return '<tr data-i="'+i+'" aria-selected="'+(i===sel)+'" tabindex="0"><td class="mono small">'+r[0]+'</td><td class="mono small">'+r[1]+'</td><td>'+(r[3]==='ok'?'<span class="badge ok"><svg class="ico"><use href="#i-check"/></svg>Success</span>':'<span class="badge bad"><svg class="ico"><use href="#i-x"/></svg>Error</span>')+'</td><td class="mono small">'+r[4]+'</td></tr>'}).join('');
- $$('#acttbl tr[data-i]').forEach(function(tr){var go=function(){sel=+tr.getAttribute('data-i');acts()};tr.addEventListener('click',go);tr.addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();go()}})});
- var r=rows[sel];$('#actside').innerHTML='<div class="eyebrow" style="margin-bottom:8px">Selected call</div><h4 style="margin-bottom:8px" class="mono">'+esc(r[1])+'</h4><p class="xs muted" style="margin-bottom:6px">Arguments</p><pre class="code" style="white-space:pre-wrap;margin-bottom:14px;background:var(--color-bg-tertiary);color:var(--color-text-primary);border-color:var(--color-border-primary)">'+esc(r[2])+'</pre><div class="note"><b class="n">1</b><span class="src">Result</span>'+esc(r[5])+'</div>'}
-if($('#fst')){acts();$('#fst').addEventListener('change',acts);$('#sim').addEventListener('click',function(){var d=new Date(),p=function(n){return String(n).padStart(2,'0')};rows.unshift([p(d.getHours())+':'+p(d.getMinutes())+':'+p(d.getSeconds()),'search','{"query":"sample incoming call"}','ok','122 ms','2 passages · kinematics-chapter.pdf p. 4']);sel=0;acts();var tr=$('#acttrace');tr.classList.add('run');tr.querySelector('i').style.width='100%';setTimeout(function(){tr.classList.remove('run');tr.querySelector('i').style.width='0'},2400);toast('New call received (simulated)')})}
+var ACT=[],QRY=['projectile range','free fall','speed versus velocity','third law of motion','centripetal force','work and energy','conservation of momentum','wave speed'];
+(function(){var per=[38,31,29,30,28,27,29],seed=11;function rnd(){seed=(seed*1103515245+12345)&2147483647;return seed/2147483647}
+ for(var d=0;d<30;d++){var n=d<7?per[d]:(d-7<15?28:27),start=d===0?50520:85200,step=Math.floor(start/n);for(var k=0;k<n;k++){var r=rnd(),tool=r<.7?'search':r<.9?'get_document':'list_sources',err=tool==='search'&&rnd()<.05,sec=start-k*step-Math.floor(rnd()*step*.6),a,res,ms=40+Math.floor(rnd()*160);
+  if(tool==='search'){a=err?'{"query":""}':'{"query":"'+QRY[Math.floor(rnd()*QRY.length)]+'"}';res=err?'Rejected: the query is empty':'2 passages · '+DOCS[Math.floor(rnd()*3)].n+' p. '+(2+Math.floor(rnd()*30));if(err)ms=9}
+  else if(tool==='get_document'){a='{"document_id":"doc_'+(100+Math.floor(rnd()*1100))+'"}';res='1 document'}else{a='{"limit":25}';res='25 of 1,284 sources'}
+  ACT.push({d:d,s:Math.max(sec,30),tool:tool,a:a,err:err,ms:ms,res:res})}}})();
+function tl(r){var s=r.s,h=Math.floor(s/3600),m=Math.floor(s%3600/60),sc=s%60,p=function(n){return String(n).padStart(2,'0')};var day=r.d===0?'Today':r.d===1?'Yesterday':(r.d<=27?(28-r.d)+' Oct':(58-r.d)+' Sep');return day+' '+p(h)+':'+p(m)+':'+p(sc)}
+var AS={status:'all',tool:'all',range:7,start:0,sel:0},AP=25,simN=0;
+function aview(){return ACT.filter(function(r){return r.d<AS.range&&(AS.status==='all'||(AS.status==='err')===r.err)&&(AS.tool==='all'||r.tool===AS.tool)})}
+function acts(){var v=aview(),pg=v.slice(AS.start,AS.start+AP),cnt=function(n){return ACT.filter(function(r){return r.d<n}).length};
+ $('#arange').innerHTML=[[1,'Today'],[7,'7 days'],[30,'30 days']].map(function(x){return '<button class="chip" aria-pressed="'+(AS.range===x[0])+'" data-ar="'+x[0]+'">'+x[1]+' <b>'+cnt(x[0])+'</b></button>'}).join('');
+ $('#acttbl tbody').innerHTML=pg.length?pg.map(function(r,i){return '<tr data-i="'+i+'" aria-selected="'+(i===AS.sel)+'" tabindex="0"><td class="mono small">'+tl(r)+'</td><td class="mono small">'+r.tool+'</td><td>'+(r.err?'<span class="badge bad"><svg class="ico"><use href="#i-x"/></svg>Error</span>':'<span class="badge ok"><svg class="ico"><use href="#i-check"/></svg>Success</span>')+'</td><td class="mono small">'+r.ms+' ms</td></tr>'}).join(''):'<tr><td colspan="4" class="muted" style="padding:16px">No calls match.</td></tr>';
+ var a1=v.length?AS.start+1:0,b1=Math.min(AS.start+AP,v.length);$('#arangetxt').textContent='Showing '+a1+' to '+b1+' of '+v.length.toLocaleString();$('#aprev').disabled=AS.start===0;$('#anext').disabled=b1>=v.length;
+ var r=pg[AS.sel];$('#actside').innerHTML=r?'<div class="eyebrow" style="margin-bottom:8px">Selected call</div><h4 style="margin-bottom:4px" class="mono">'+r.tool+'</h4><p class="xs muted">'+tl(r)+'</p><p class="xs muted" style="margin:10px 0 6px">Arguments</p><pre class="code" style="white-space:pre-wrap;margin-bottom:14px;background:var(--color-bg-tertiary);color:var(--color-text-primary);border-color:var(--color-border-primary)">'+esc(r.a)+'</pre><div class="note"><b class="n">1</b><span class="src">Result</span>'+esc(r.res)+'</div>':'<p class="muted small">No call selected.</p>';
+ $$('#acttbl tr[data-i]').forEach(function(tr){var go=function(){AS.sel=+tr.getAttribute('data-i');acts()};tr.addEventListener('click',go);tr.addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();go()}})});
+ $$('[data-ar]').forEach(function(b){b.addEventListener('click',function(){AS.range=+b.getAttribute('data-ar');AS.start=0;AS.sel=0;acts()})})}
+if($('#fst')){acts();$('#fst').addEventListener('change',function(){AS.status=this.value;AS.start=0;AS.sel=0;acts()});$('#ftool').addEventListener('change',function(){AS.tool=this.value;AS.start=0;AS.sel=0;acts()});
+ $('#anext').addEventListener('click',function(){AS.start+=AP;AS.sel=0;acts()});$('#aprev').addEventListener('click',function(){AS.start=Math.max(0,AS.start-AP);AS.sel=0;acts()});
+ $('#sim').addEventListener('click',function(){ACT.unshift({d:0,s:52200+(++simN),tool:'search',a:'{"query":"sample incoming call"}',err:false,ms:122,res:'2 passages · kinematics-chapter.pdf p. 4'});AS.start=0;AS.sel=0;acts();var tr=$('#acttrace');tr.classList.add('run');tr.querySelector('i').style.width='100%';setTimeout(function(){tr.classList.remove('run');tr.querySelector('i').style.width='0'},2400);toast('New call received (simulated)')})}
+// dialogs
+var dlg=$('#dlg'),lastF=null;
+function openDlg(h,sheet){lastF=document.activeElement;dlg.className='dlg'+(sheet?' sheet':'');dlg.innerHTML=h;if(!dlg.open)dlg.showModal();var f=dlg.querySelector('input,textarea,.btn.primary,button');if(f)f.focus()}
+dlg.addEventListener('close',function(){if(lastF&&lastF.focus&&document.contains(lastF))lastF.focus()});
+dlg.addEventListener('click',function(e){if(e.target===dlg){dlg.close();return}if(e.target.closest('[data-close]'))dlg.close()});
+var CHECK='<svg class="ico"><use href="#i-check"/></svg>',XI='<svg class="ico"><use href="#i-x"/></svg>';
+function addSample(){if(COLL.state==='empty'){COLL.state='docs';ST.size='new'}
+ if(ST.size==='new'){NEWDOCS.push({n:'kinematics-chapter-2.pdf',s:'parse',t:'PDF',z:'3.2 MB'},{n:'lab-notes.md',s:'queue',t:'Markdown',z:'14 KB'});applyColl();renderDocs();toast('2 files added, 1 not added (too large). Indexing starts now (sample)');setTimeout(function(){NEWDOCS.forEach(function(d,i){d.s='ok';d.pc=i?4:21});renderDocs();toast('First document indexed. Your server is running (sample)')},3000)}
+ else toast('2 files added, 1 not added (too large) (sample)')}
+function openKind(k,src){var NAME=esc(COLL.name);
+ if(k==='rotate'||k==='create-token'){var fresh=TOK==='revoked';openDlg('<h3 id="dlgt">'+(fresh?'Create a new token':'Rotate the access token')+' for '+NAME+'?</h3><p class="muted">A new token is created and shown once.'+(fresh?'':' The current token keeps working for a short overlap that is stated here when this is built (sample).')+'</p><div class="actions"><button class="btn" data-close>Cancel</button><button class="btn primary" id="rot-go">'+(fresh?'Create token':'Rotate token')+'</button></div>');
+  $('#rot-go').addEventListener('click',function(){TOK='active';tokUI();dlg.innerHTML='<h3 id="dlgt">Copy your new token</h3><p class="muted" style="margin-bottom:12px">This is the only time it is shown.</p><div class="inset" style="padding:12px"><div class="copyrow"><pre class="code">sap_sample_7c1e9b4d2a5f8e60</pre><button class="tbtn" data-copy="sap_sample_7c1e9b4d2a5f8e60"><svg class="ico"><use href="#i-copy"/></svg>Copy</button></div></div><div class="actions"><button class="btn primary" data-close>I have saved it</button></div>';var f=dlg.querySelector('.tbtn');if(f)f.focus()})}
+ else if(k==='revoke'){openDlg('<h3 id="dlgt">Revoke the token for '+NAME+'?</h3><p class="muted">Assistants using it lose access immediately. You can create a new token afterwards.</p><div class="actions"><button class="btn" data-close>Cancel</button><button class="btn danger" id="rev-go">Revoke token</button></div>');$('#rev-go').addEventListener('click',function(){TOK='revoked';tokUI();dlg.close();toast('Token revoked. Assistants using it lose access (sample)')})}
+ else if(k==='delete-coll'){openDlg('<h3 id="dlgt">Delete '+NAME+'?</h3><p class="muted">This removes its documents, the index, its access token and its activity. The server stops answering at once. This cannot be undone.</p><div class="field" style="margin-top:14px"><label for="dc-name">Type the collection name to confirm</label><input class="input" id="dc-name" autocomplete="off" placeholder="'+NAME+'"></div><div class="actions"><button class="btn" data-close>Cancel</button><button class="btn danger" id="dc-go" disabled>Delete collection</button></div>');var i=$('#dc-name'),g=$('#dc-go');i.addEventListener('input',function(){g.disabled=i.value!==COLL.name});g.addEventListener('click',function(){dlg.close();toast('Collection deleted (sample)');location.hash='collections'})}
+ else if(k==='delete-account'){openDlg('<h3 id="dlgt">Delete your account?</h3><p class="muted">This removes your account and all your collections, documents, tokens and activity. This cannot be undone.</p><div class="field" style="margin-top:14px"><label for="da-t">Type delete to confirm</label><input class="input" id="da-t" autocomplete="off"></div><div class="actions"><button class="btn" data-close>Cancel</button><button class="btn danger" id="da-go" disabled>Delete account</button></div>');var i2=$('#da-t'),g2=$('#da-go');i2.addEventListener('input',function(){g2.disabled=i2.value.toLowerCase()!=='delete'});g2.addEventListener('click',function(){dlg.close();toast('Account deleted (sample)');location.hash='landing'})}
+ else if(k==='add-docs'){openDlg('<h3 id="dlgt">Add documents</h3><p class="small muted">Three sample files are selected so you can see how each is checked.</p><ul class="methods" style="margin-top:8px"><li><span><b class="mono small">kinematics-chapter-2.pdf</b><div class="xs muted">3.2 MB</div></span><span class="badge ok">'+CHECK+'Ready</span></li><li><span><b class="mono small">lab-notes.md</b><div class="xs muted">14 KB</div></span><span class="badge ok">'+CHECK+'Ready</span></li><li><span><b class="mono small">complete-textbook-scan.pdf</b><div class="xs muted">148 MB</div></span><span class="badge bad">'+XI+'Too large</span></li></ul><p class="xs muted" style="margin-top:8px">The limit is 25 MB (sample). Split larger files into chapters.</p><div class="actions"><button class="btn" data-close>Cancel</button><button class="btn primary" id="ad-go">Add 2 files</button></div>');$('#ad-go').addEventListener('click',function(){dlg.close();addSample()})}
+ else if(k==='passage'){var pi=+src.getAttribute('data-p'),pp=PASS[pi]||PASS[0];openDlg('<div class="eyebrow" style="margin-bottom:8px">Passage</div><h3 id="dlgt" class="mono" style="font-size:1rem;overflow-wrap:anywhere">'+esc(pp.s)+' · '+esc(pp.l)+'</h3><p class="small muted" style="margin:12px 0">The sentence before it, shown for context (sample).</p><p class="qtext" style="padding:12px 14px;background:color-mix(in srgb,var(--color-accent-primary) 12%,transparent);border-left:3px solid var(--color-accent-primary)">'+esc(pp.t)+'</p><p class="small muted" style="margin:12px 0">The sentence after it (sample).</p><div class="actions"><button class="btn" data-copy="'+esc(pp.s+', '+pp.l)+'">Copy citation</button><button class="btn primary" data-close>Close</button></div>',true)}}
+document.addEventListener('click',function(e){var d=e.target.closest('[data-dlg]');if(d){e.preventDefault();openKind(d.getAttribute('data-dlg'),d)}
+ var sk=e.target.closest('[data-skip]');if(sk){e.preventDefault();var m=$('#app').style.display!=='none'?$('#app main'):$('[data-screen].on h1,[data-screen].on h2');if(m){m.setAttribute('tabindex','-1');m.focus()}}});
+// new collection, settings
+var nc=$('#ncform');if(nc)nc.addEventListener('submit',function(e){e.preventDefault();var inp=$('#nc-name'),v=inp.value.trim(),err=$('#nc-err');if(v.length<3){err.hidden=false;inp.classList.add('bad');inp.setAttribute('aria-invalid','true');inp.focus();return}err.hidden=true;inp.classList.remove('bad');inp.removeAttribute('aria-invalid');
+ COLL={name:v,mode:(nc.querySelector('[name="nc-mode"]:checked')||{}).value||'Knowledge',state:'empty',isNew:true};NEWDOCS=[];ST.size='new';ST.filter='all';ST.q='';ST.start=0;ST.chk={};TOK='active';$('#railnewn').textContent=v;$('#railnewm').textContent=COLL.mode;var o=document.createElement('option');o.value='newc';o.textContent=v;$('#cs').appendChild(o);inp.value='';applyColl();renderDocs();location.hash='documents';toast('Collection created. Add documents to start its server.')});
+var sn=$('#setname');if(sn)sn.addEventListener('submit',function(e){e.preventDefault();var v=$('#set-name').value.trim();if(v.length<3){toast('Use at least 3 characters');return}COLL.name=v;applyColl();toast('Name saved')});
+$$('[name="set-mode"]').forEach(function(r){r.addEventListener('change',function(){COLL.mode=r.value;applyColl();toast(r.value==='Course'?'Course mode on. A Course tab was added (sample).':'Knowledge mode. The Course tab is hidden and your progress is kept (sample).')})});
+var SAVED={};
+function switchTo(k){if(k==='newc'){if(!COLL.isNew&&SAVED.newc){COLL=SAVED.newc.coll;NEWDOCS=SAVED.newc.docs;ST.size='new'}}else if(COLL.isNew){SAVED.newc={coll:COLL,docs:NEWDOCS};COLL={name:'Physics notes',mode:'Knowledge',state:'docs'};ST.size='large'}
+ ST.filter='all';ST.q='';ST.start=0;ST.sel=0;ST.chk={};applyColl();renderDocs()}
+$$('.rail a[data-rail]').forEach(function(a){a.addEventListener('click',function(){var k=a.getAttribute('data-rail');if(k==='physics'||k==='fastapi')switchTo('physics');else if(k==='newc')switchTo('newc')})});
+$$('[data-first]').forEach(function(b){b.addEventListener('click',function(){$('#app').setAttribute('data-first',b.getAttribute('data-first'));$$('[data-first]').forEach(function(x){x.setAttribute('aria-pressed',x===b?'true':'false')})})});
+// guides
+function gset(k){$$('[data-gclient]').forEach(function(x){x.setAttribute('aria-pressed',x.getAttribute('data-gclient')===k?'true':'false')});$('#gname').textContent=k==='claude'?'Claude Desktop':'Cursor';$('#gcfg').textContent=CFG[k]}
+if($('#gcfg')){gset('claude');$$('[data-gclient]').forEach(function(b){b.addEventListener('click',function(){gset(b.getAttribute('data-gclient'))})})}
+// practice
+var QZ=[{q:'What does this print?',code:'x = 3\nx = x + 2\nprint(x)',o:['3','5','x + 2'],a:1,e:'The second line adds 2 to the current value of x, so x becomes 5.',s:'lecture-01-transcript.vtt · 04:12'},{q:'What does this print?',code:'print("3" + "4")',o:['7','34','An error'],a:1,e:'Adding two pieces of text joins them, so "3" + "4" is "34".',s:'lecture-02-transcript.vtt · 06:30'},{q:'Which is a valid variable name?',o:['2x','total_price','my-var'],a:1,e:'Names cannot start with a digit or contain a hyphen; underscores are fine.',s:'lecture-01-transcript.vtt · 11:20'},{q:'What does this print?',code:'print(int("12") + 1)',o:['13','121','An error'],a:0,e:'int("12") is the number 12, and 12 + 1 is 13.',s:'notes-02.md · section 3'},{q:'What kind of error does this raise?',code:'print(y)',o:['TypeError','NameError','SyntaxError'],a:1,e:'y was never given a value, so Python reports a NameError that names it.',s:'lecture-02-transcript.vtt · 18:05'},{q:'What does str(7) return?',o:['7, a number','"7", text','An error'],a:1,e:'str() turns a value into text, so 7 becomes "7".',s:'notes-02.md · section 3'}];
+var PQ=0,PSC=0;
+function pUpd(){var d=Math.min(PQ,QZ.length);$('#pcount').textContent=PQ>=QZ.length?'Finished':'Review '+(PQ+1)+' of '+QZ.length;$('#pprog i').style.width=(d/QZ.length*100)+'%';$('#pprog').setAttribute('aria-valuenow',d)}
+function pRender(){var c=$('#pcard');if(!c)return;
+ if(PQ>=QZ.length){c.innerHTML='<h3>Done for today</h3><p class="muted" style="margin:8px 0 16px">'+PSC+' of '+QZ.length+' correct. Items you missed come back sooner: the next review is tomorrow (sample schedule).</p><div class="actions" style="justify-content:flex-start"><a class="btn primary" href="#course">Back to the course</a><button class="btn" id="pagain">Practise again</button></div>';$('#pagain').addEventListener('click',function(){PQ=0;PSC=0;pRender()});pUpd();return}
+ var q=QZ[PQ];c.innerHTML='<form id="pform" novalidate><p class="qtext">'+esc(q.q)+'</p>'+(q.code?'<pre class="code" style="margin-top:12px;background:var(--color-bg-tertiary);color:var(--color-text-primary);border-color:var(--color-border-primary)">'+esc(q.code)+'</pre>':'')+'<fieldset class="opts"><legend class="sr">Choose an answer</legend>'+q.o.map(function(o,i){return '<label class="radio"><input type="radio" name="pq" value="'+i+'"><span class="mono">'+esc(o)+'</span></label>'}).join('')+'</fieldset><div class="actions" style="justify-content:flex-start;margin-top:0"><button class="btn primary" type="submit">Check answer</button></div><div id="pfb" role="status"></div></form>';
+ $('#pform').addEventListener('submit',function(e){e.preventDefault();if($('#pnext'))return;var ch=$('#pform [name="pq"]:checked');if(!ch){$('#pfb').innerHTML='<div class="fb bad">Choose an answer first.</div>';return}var ok=+ch.value===q.a;if(ok)PSC++;
+  $('#pfb').innerHTML='<div class="fb '+(ok?'ok':'bad')+'"><b>'+(ok?'Correct.':'Not quite.')+'</b> '+esc(q.e)+'<button class="fn" data-ref="pfn" aria-label="Source">1</button><div class="note" id="pfn" style="margin-top:10px"><b class="n">1</b><span class="src">'+esc(q.s)+'</span>Where this is taught. (Sample.)</div></div><div class="actions" style="justify-content:flex-start"><button class="btn primary" type="button" id="pnext">'+(PQ+1<QZ.length?'Next question':'Finish')+'</button></div>';
+  $$('#pform [name="pq"]').forEach(function(x){x.disabled=true});$('#pform [type="submit"]').disabled=true;$('#pnext').focus();$('#pnext').addEventListener('click',function(){PQ++;pRender()})});pUpd()}
+if($('#pcard'))pRender();
+// hints
+var HN=0,HINTS=[{t:'Compare your result for 0 °C with what you expect. What is the freezing point of water in Fahrenheit?',s:'notes-02.md · section 4'},{t:'The conversion has two parts: a scale factor and an offset. Your code has one of them.',s:'notes-02.md · section 4'},{t:'Write the formula in words first, then turn each part into one line of Python. Test it with two known values: 0 and 100.',s:'lecture-02-transcript.vtt · 22:15'}];
+var gh=$('#gethint');if(gh)gh.addEventListener('click',function(){if(HN>=HINTS.length)return;HN++;var l=$('#hintlist');l.innerHTML=HINTS.slice(0,HN).map(function(h,i){return '<div class="hintbox"><div class="xs muted">Hint '+(i+1)+' of 3</div><p>'+esc(h.t)+'<button class="fn" data-ref="hn'+i+'" aria-label="Source">'+(i+1)+'</button></p><div class="note" id="hn'+i+'" style="margin-top:8px"><b class="n">'+(i+1)+'</b><span class="src">'+esc(h.s)+'</span>Where this is covered. (Sample.)</div></div>'}).join('')+(HN>=HINTS.length?'<p class="small muted">Out of hints for now. Run your code, read the output or the error, then try again.</p>':'');$('#hintct').textContent=HN+' of 3 hints used';if(HN>=HINTS.length){gh.disabled=true}});
+// chat
+var BUD=8,lastSend=0,CN=0,PGMODE='manual';
+function setMode(m){PGMODE=m;var pg=$('#pg');if(pg)pg.setAttribute('data-mode',m);$$('[data-pmode]').forEach(function(x){x.setAttribute('aria-pressed',x.getAttribute('data-pmode')===m?'true':'false')})}
+$$('[data-pmode]').forEach(function(b){b.addEventListener('click',function(){setMode(b.getAttribute('data-pmode'))})});
+function budUI(){var t=BUD+' of 20 messages left today';if($('#pbudget')){$('#pbudget').textContent=t;$('#pbud2').textContent=t+' (sample). The cap is decided in the limits record (issue #5).';$('#pbudget').className='badge'+(BUD<=2?' warn':'')}}
+function trace(tool,args,ok,summary,ms){return '<div class="inset" style="padding:12px 14px;margin:6px 0"><div style="display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;align-items:center"><span class="cap">Tool call</span><span class="badge '+(ok?'ok':'bad')+'">'+(ok?CHECK+'Success':XI+'Error')+'</span></div><div class="mono small" style="margin-top:6px;overflow-wrap:anywhere">'+esc(tool)+'('+esc(args)+')</div><div class="small muted" style="margin-top:4px">'+esc(summary)+' · '+ms+' ms (sample)</div></div>'}
+function note(id,n,src,txt){return '<div class="note" id="'+id+'" style="margin-top:8px"><b class="n">'+n+'</b><span class="src">'+esc(src)+'</span>'+esc(txt)+'</div>'}
+function reply(msg){var id='c'+(++CN),m=msg.toLowerCase();
+ if(/error|fail/.test(m))return trace('search','{"query":""}',false,'Rejected: the query is empty',9)+'<p>That call failed, so I have no passages to cite. I can try again with a real question.</p>';
+ if(/open|read|chapter/.test(m))return trace('get_document','{"document_id":"doc_kinematics_01"}',true,'1 document',64)+'<p class="qtext" style="font-size:1.1rem">Chapter 2 introduces position, displacement, speed and velocity, with worked examples.<button class="fn" data-ref="'+id+'a" aria-label="Source 1">1</button></p>'+note(id+'a',1,'kinematics-chapter.pdf · whole document','Opened in full. (Sample.)');
+ if(/which|list|documents|mention/.test(m))return trace('list_sources','{"limit":3}',true,'Showing 1 to 3 of 1,284 · next cursor c_3',58)+'<p class="qtext" style="font-size:1.1rem">The newest three are kinematics-1284.pdf, dynamics-1283.vtt and energy-1282.docx, out of 1,284 in total. I can page through the rest.<button class="fn" data-ref="'+id+'a" aria-label="Source 1">1</button></p>'+note(id+'a',1,'list_sources · page 1','The list is paged, so only three names came back. (Sample.)');
+ return trace('search','{"query":"'+msg.replace(/"/g,'')+'","limit":2}',true,'2 passages',142)+'<p class="qtext" style="font-size:1.1rem">Speed has magnitude only, while velocity has magnitude and direction.<button class="fn" data-ref="'+id+'a" aria-label="Source 1">1</button> Average velocity divides displacement by time.<button class="fn" data-ref="'+id+'b" aria-label="Source 2">2</button></p>'+note(id+'a',1,'kinematics-chapter.pdf · p. 4','Speed has magnitude only. Velocity has magnitude and direction.')+note(id+'b',2,'lecture-03-transcript.vtt · 12:40','Average velocity is displacement divided by elapsed time.')+'<p class="xs muted" style="margin-top:8px">Sample answer: the prototype always returns the same two passages.</p>'}
+function chatSend(msg){var log=$('#plog'),note_=$('#pnote');if(BUD<=0)return;note_.textContent='';
+ if(!msg.trim()){note_.innerHTML='<span class="err">Type a question first.</span>';return}
+ var now=Date.now();if(now-lastSend<1500){note_.innerHTML='<span class="err">Slow down: wait 2 seconds before sending another message (sample rate limit).</span>';return}lastSend=now;
+ BUD--;budUI();log.insertAdjacentHTML('beforeend','<div style="display:flex;justify-content:flex-end"><div class="bubble">'+esc(msg)+'</div></div>');
+ var wrap=document.createElement('div');wrap.innerHTML='<span class="skel" style="width:60%;margin-bottom:8px"></span><span class="skel" style="width:40%"></span>';log.appendChild(wrap);$('#pmsg').value='';
+ setTimeout(function(){wrap.innerHTML=reply(msg);if(BUD<=0){$('#pmsg').disabled=true;$('#psend').disabled=true;$('#pnote').innerHTML='<div class="fb bad"><b>Daily chat limit reached (sample).</b> It resets at midnight UTC (sample). You can still call the tools by hand, or bring your own API key. <div class="actions" style="justify-content:flex-start;margin-top:10px"><button class="btn sm" type="button" id="tohand">Call a tool by hand</button><button class="btn sm" type="button" data-toast="Bringing your own key is an option for heavier use (sample)">Use my own key</button></div></div>';$('#tohand').addEventListener('click',function(){setMode('manual')})}},700)}
+var pcf=$('#pchatform');if(pcf){pcf.addEventListener('submit',function(e){e.preventDefault();chatSend($('#pmsg').value)});
+ $('#psugg').innerHTML=['What is the difference between speed and velocity?','Which documents mention momentum?','Open the kinematics chapter','Make a tool call fail'].map(function(t){return '<button class="chip" type="button" data-prompt="'+esc(t)+'" style="border-color:var(--color-border-secondary)">'+esc(t)+'</button>'}).join('');
+ $$('[data-prompt]').forEach(function(b){b.addEventListener('click',function(){$('#pmsg').value=b.getAttribute('data-prompt');chatSend(b.getAttribute('data-prompt'))})});budUI()}
 // router
-var AUTH=['sign-in','sign-up','forgot-password','check-email'],APP=['collections','documents','mcp-server','playground','activity','course'],PUB=['landing','states'];
-function route(){var h=(location.hash||'#landing').slice(1);if(PUB.indexOf(h)<0&&AUTH.indexOf(h)<0&&APP.indexOf(h)<0)h='landing';
- var isApp=APP.indexOf(h)>=0;$$('[data-screen]').forEach(function(s){var n=s.getAttribute('data-screen');var on=isApp?(s.hasAttribute('data-app')&&n===h):n===h;s.classList.toggle('on',on)});
+var AUTH=['sign-in'],APP=['collections','new-collection','documents','mcp-server','playground','activity','collection-settings','course','practice','digest','hints','account'],PUB=['landing','states','guides','not-found'],COURSE_S=['course','practice','digest','hints'],COLL_S=['documents','mcp-server','playground','activity','collection-settings'];
+function route(){var h=(location.hash||'#landing').slice(1),demo=false;if(h==='sign-up'||h==='forgot-password'||h==='check-email')h='sign-in';if(h==='demo'){h='playground';demo=true}
+ if(PUB.indexOf(h)<0&&AUTH.indexOf(h)<0&&APP.indexOf(h)<0)h='not-found';
+ var isApp=APP.indexOf(h)>=0;$('#app').setAttribute('data-mode',demo?'demo':'app');
+ $$('[data-screen]').forEach(function(s){var n=s.getAttribute('data-screen');var on=isApp?(s.hasAttribute('data-app')&&n===h):n===h;s.classList.toggle('on',on)});
  $('#app').style.display=isApp?'block':'none';
- $$('.rail a[data-rail]').forEach(function(a){var k=a.getAttribute('data-rail');var cur=(h==='course'&&k==='python')||(h!=='course'&&h!=='collections'&&k==='physics')||(h==='collections'&&k==='all');a.setAttribute('aria-current',cur?'true':'false')});
- var cs=$('#cs');if(cs){if(h==='course')cs.value='python';else if(cs.value==='python')cs.value='physics'}
- window.scrollTo(0,0)}
-var csel=$('#cs');if(csel)csel.addEventListener('change',function(){location.hash=csel.value==='python'?'course':'documents'});
+ var cur=COURSE_S.indexOf(h)>=0?'python':COLL_S.indexOf(h)>=0?(COLL.isNew?'newc':'physics'):h==='collections'?'all':'';
+ $$('.rail a[data-rail]').forEach(function(a){a.setAttribute('aria-current',a.getAttribute('data-rail')===cur?'true':'false')});
+ var cs=$('#cs');if(cs){cs.value=cur==='all'||!cur?cs.value:cur}
+ applyColl();window.scrollTo(0,0)}
+var csel=$('#cs');if(csel)csel.addEventListener('change',function(){var v=csel.value;if(v!=='physics'&&v!=='fastapi'&&v!=='python'&&v!=='newc')return;if(v==='python')location.hash='course';else{switchTo(v==='newc'?'newc':'physics');location.hash='documents'}});
+if(/[?&]coll=empty/.test(location.search)){COLL={name:'Chemistry',mode:'Course',state:'empty',isNew:true};NEWDOCS=[];ST.size='new';$('#railnewn').textContent='Chemistry';$('#railnewm').textContent='Course';renderDocs()}
+if(/[?&]first=1/.test(location.search))$('#app').setAttribute('data-first','1');
 addEventListener('hashchange',route);route();
+if(/[?&]chat=1/.test(location.search)){setMode('chat');chatSend('What is the difference between speed and velocity?')}
+var qd=/[?&]dlg=([a-z-]+)/.exec(location.search);if(qd)setTimeout(function(){openKind(qd[1],document.body)},300);
 })();
 </script>

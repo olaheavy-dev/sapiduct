@@ -133,3 +133,55 @@ Saved in `.design/sapiduct/screenshots/`, captured with headless Chrome. Desktop
 - **Margin notes as help.** Explanations sit beside the field they explain, and fall back under it on narrow screens.
 - **Inset only for machine strings.** The URL, token, snippet and logs are the only dark surfaces on the light shell, so the technical half is easy to find.
 - **One control family** with its states on a single page.
+
+---
+
+# Round 3: sign-in and large collections
+
+Two owner requests after v2: sign-in by GitHub or Google only, and what happens to a collection with many documents. The owner then reported that the Documents tab looked the same for a large collection, which was right: the large view sat behind a prototype switch and defaulted off.
+
+- **Sign-in:** the password pages are gone. One page, `/sign-in`, offers Continue with GitHub and Continue with Google, says plainly that signing in creates an account, and has a designed cancelled or failed state (`v3-signin-light-1280.png`). The brand panel carries the three steps.
+- **Large collection is now the default** for Physics notes (1,284 documents); the 14-document view is one click away. The Documents tab was redesigned for it (`v4-documents-light-1280.png`, `v4-documents-dark-375.png`):
+  - Search, sort and an Add documents button in one toolbar, with status chips and counts that add up (1,254 + 13 + 6 + 11 = 1,284).
+  - A column layout on desktop (name, type, size, status) with a select-all box, and a two-line layout on phones where names wrap instead of truncating.
+  - Row selection with a bulk bar (Re-index, Remove, Clear), and Retry all failed when the Failed chip is chosen.
+  - A cursor pager, 25 at a time, and a note that the list does not jump while documents finish.
+  - A batch strip for a large upload, one line instead of hundreds of moving rows.
+  - Rejected files are summarised in one collapsed line with the reasons inside (a 148 MB file over the limit, an unsupported video).
+  - A very large single document (842 pages, 21.4 MB) shows determinate progress, "reading page 312 of 842", and says that pages 1 to 311 are already searchable.
+  - On phones and tablets the selected document's detail opens inline under its row instead of in a panel far below the list.
+- **Tested:** a scripted run in headless Chrome clicked the status chips (25 rows to 11), the search box, Next (rows 26 to 50), the checkboxes (bulk bar shows 2 selected) and the size switch (5 rows in the small view). It found a real bug, a variable named `view` that shadowed a function, which broke every interaction after the first render; fixed.
+- **Limits not decided:** the maximum documents per collection, the maximum upload size and the page-size maximums are for the limits record (issue #5). The 25 MB figure in the prototype is a sample.
+- **Not covered:** the Activity list at scale, drag-and-drop anywhere on the page (the Add documents button toasts), keyboard use of the bulk bar, and a virtualized list (25 rows per page makes it unnecessary for now).
+
+---
+
+# Round 4: the finished prototype (v5)
+
+The owner asked to finish the prototype and asked whether there was a chat playground to test the tools. There was not (it was specified last, issue #24), so it was added.
+
+## What was added
+
+- **Chat playground with trace:** a second playground mode, "Chat with a model" (`v5-playground-chat-light-1280.png`, `v5-playground-chat-dark-375.png`). The model's tool calls show inline with the tool, its arguments, a success or error badge, a summary and the latency, and the answer carries numbered source marks. It also has suggested prompts, a message budget (8 of 20, sample), a rate limit message, an error call, and a daily-limit state that points back to calling tools by hand or bringing an API key. No real model runs; replies are canned and labelled so.
+- **Create collection** with validation and a mode choice (`v5-new-collection-light-1280.png`), and the **empty collection** state across Documents, MCP server, Playground and Activity (`v5-documents-empty-light-1280.png`). Adding documents shows each file's check (ready, too large), then indexing, then "your server is running".
+- **Collection settings** (`v5-settings-light-1280.png`): rename, switch Knowledge or Course (the Course tab appears and disappears), and delete with a typed confirmation.
+- **Dialogs** built on the native dialog element (focus moves in, Escape closes, focus returns): rotate token (shows the new token once), revoke token (the token row changes to "No active token"), delete collection, delete account, add documents, and a **passage side sheet** opened from "Open passage" (`v5-dialog-revoke-light-1280.png`).
+- **Account** (`v5-account-light-1280.png`): name and avatar from the provider, sign-in methods, sign out everywhere, delete account.
+- **Activity at scale** (`v5-activity-dark-1280.png`): 848 sample calls over 30 days, range chips with counts (Today 38, 7 days 212, 30 days 848), status and tool filters, a cursor pager (25 at a time) and a selected-call panel. The 7-day count matches the "212 calls this week" shown on the collections page.
+- **Course:** a **practice** flow with six questions, answer checking, a cited explanation and a summary with the next review (`v5-practice-light-1280.png`); a session **digest** with cited statements; and an assignment **hints** page with three levels that never give the full solution.
+- **Public pages:** a **connect guide** page (`v5-guides-light-1280.png`) that says "last tested: not yet tested" until a client is tested, a read-only **demo** route, a **first-run** empty collections state (`v5-collections-first-run-light-1280.png`), and a **404** page (`v5-404-light-1280.png`).
+- A skip-to-content link, and the whole screen list in the prototype banner.
+
+## How it was checked
+
+- A scripted run in headless Chrome drove every flow and reported no page errors: first-run toggle, create-collection validation and creation, adding documents and watching them index, renaming, switching mode, the typed-confirmation delete dialogs, rotate and revoke, chat (reply with tool call, rate limit, budget running out and the limit message), activity ranges, filters, paging and a simulated call (7 days 212 to 213), practice to its summary, three hints and the disabled button, account deletion, the demo route, the guide client switch, unknown routes going to the 404 page, and the `sign-up` alias going to sign-in. The passage sheet opens as a side sheet.
+- Screens were captured at 1280 and, for the chat and documents, at an exact 375px frame, in light and dark.
+
+## Not covered
+
+- Real pointer and keyboard use: the script used programmatic clicks and events. Tab order, focus rings on every new control, and dialog focus trapping were not tested with a keyboard.
+- Screen-reader output of the live regions (the chat log, the practice feedback, the hint list).
+- Reduced motion on the new screens.
+- Tablet width (768) for the new screens, and phone width for practice, hints, settings and account.
+- The playground chat is canned: it cannot show how a real model behaves with these tools, how long answers read, or how errors look when a model misuses a tool.
+- The hash-based demo and not-found routes are prototype devices; the real build uses real URLs (see the IA).
