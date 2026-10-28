@@ -317,3 +317,56 @@ async def test_an_unknown_collection_id_is_a_404_not_a_500(client: httpx.AsyncCl
 
 async def test_requests_without_a_user_are_refused(client: httpx.AsyncClient) -> None:
     assert (await client.get("/v1/collections")).status_code == 401
+
+
+async def test_names_are_trimmed_before_their_length_is_checked(client: httpx.AsyncClient) -> None:
+    for name in ("   ", " a ", "ab", "x" * 81):
+        response = await client.post(
+            "/v1/collections", json={"name": name}, headers=as_user("alice")
+        )
+        assert response.status_code == 422, name
+    made = await client.post(
+        "/v1/collections", json={"name": "  Notes  "}, headers=as_user("alice")
+    )
+    assert made.status_code == 201
+    assert made.json()["name"] == "Notes"
+    renamed = await client.patch(
+        f"/v1/collections/{made.json()['id']}", json={"name": "  "}, headers=as_user("alice")
+    )
+    assert renamed.status_code == 422
+
+
+async def test_the_database_refuses_a_blank_name_even_without_the_api(
+    owner_engine: AsyncEngine,
+) -> None:
+    async with AsyncSession(owner_engine) as session:
+        session.add(Collection(owner_id="alice", name="  "))
+        with pytest.raises(IntegrityError, match="ck_collection_name"):
+            await session.commit()
+
+
+async def test_the_application_role_can_use_every_runtime_table(
+    owner_engine: AsyncEngine,
+) -> None:
+    """The model budget and agent checkpoints are not tenant tables, but the API reads and writes
+    them with the same login; a restricted role that lacked them would fail on the first model
+    call. Alembic's own version table stays out of reach."""
+    async with owner_engine.connect() as connection:
+        rows = (
+            await connection.execute(
+                text(
+                    "SELECT tablename, "
+                    "has_table_privilege(:login, format('public.%I', tablename), "
+                    "'SELECT,INSERT,UPDATE,DELETE') "
+                    "FROM pg_tables WHERE schemaname = 'public'"
+                ),
+                {"login": LOGIN},
+            )
+        ).all()
+    allowed = {str(name): bool(granted) for name, granted in rows}
+    assert allowed.pop("alembic_version") is False
+    missing = sorted(name for name, granted in allowed.items() if not granted)
+    assert missing == []
+    assert {"llm_call", "llm_spend_day", "llm_spend_user_day", "collection", "document"} <= set(
+        allowed
+    )

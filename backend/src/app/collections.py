@@ -53,6 +53,7 @@ class Collection(Base):
         # with its owner.
         UniqueConstraint("id", "owner_id", name="uq_collection_id_owner"),
         CheckConstraint("mode IN ('knowledge', 'course')", name="mode"),
+        CheckConstraint("length(btrim(name)) >= 3", name="name"),
         Index("uq_collection_owner_name", "owner_id", func.lower(name), unique=True),
     )
 

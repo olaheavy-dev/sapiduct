@@ -9,10 +9,10 @@ from __future__ import annotations
 
 import uuid
 from datetime import datetime
-from typing import Literal
+from typing import Annotated, Literal
 
 from fastapi import APIRouter, Response
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, StringConstraints
 from sqlalchemy import select, tuple_
 from sqlalchemy.exc import IntegrityError
 
@@ -24,16 +24,17 @@ from app.tenancy import OwnerSessionDep
 
 router = APIRouter(prefix="/collections", tags=["collections"])
 
-Name = Field(min_length=3, max_length=80)
+# Whitespace is stripped before the length is checked, so "   " and " a " are rejected.
+Name = Annotated[str, StringConstraints(strip_whitespace=True, min_length=3, max_length=80)]
 
 
 class CollectionIn(BaseModel):
-    name: str = Name
+    name: Name
     mode: Literal["knowledge", "course"] = "knowledge"
 
 
 class CollectionRename(BaseModel):
-    name: str = Name
+    name: Name
 
 
 class CollectionOut(BaseModel):
@@ -73,7 +74,7 @@ async def _owned(
 async def create_collection(
     body: CollectionIn, user: CurrentUser, session: OwnerSessionDep
 ) -> CollectionOut:
-    row = Collection(owner_id=user.id, name=body.name.strip(), mode=body.mode)
+    row = Collection(owner_id=user.id, name=body.name, mode=body.mode)
     session.add(row)
     try:
         await session.commit()
@@ -114,7 +115,7 @@ async def rename_collection(
     collection_id: uuid.UUID, body: CollectionRename, user: CurrentUser, session: OwnerSessionDep
 ) -> CollectionOut:
     row = await _owned(session, user, collection_id)
-    row.name = body.name.strip()
+    row.name = body.name
     try:
         await session.commit()
     except IntegrityError:

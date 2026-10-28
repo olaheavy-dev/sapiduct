@@ -28,7 +28,10 @@ from alembic import op
 revision: str = "5c1e7a90d2b4"
 down_revision: str | Sequence[str] | None = "app_root"
 branch_labels: str | Sequence[str] | None = None
-depends_on: str | Sequence[str] | None = None
+# The template tables the application role is granted access to below must exist first: the model
+# budget and the agent checkpoints. 0005 is the template's latest revision and descends from the
+# earlier ones; naming an ancestor as well as 0005 makes Alembic's head bookkeeping fail.
+depends_on: str | Sequence[str] | None = "0005"
 
 API_ROLE = "sapiduct_api"
 TENANT_TABLES = ("collection", "document")
@@ -66,6 +69,7 @@ def upgrade() -> None:
             nullable=False,
         ),
         sa.CheckConstraint("mode IN ('knowledge', 'course')", name=op.f("ck_collection_mode")),
+        sa.CheckConstraint("length(btrim(name)) >= 3", name=op.f("ck_collection_name")),
         sa.PrimaryKeyConstraint("id", name=op.f("pk_collection")),
         sa.UniqueConstraint("id", "owner_id", name="uq_collection_id_owner"),
         sa.UniqueConstraint("public_id", name=op.f("uq_collection_public_id")),
@@ -115,11 +119,32 @@ def upgrade() -> None:
                 WITH CHECK (owner_id = current_setting('app.owner_id', true))
             """
         )
-        op.execute(f"GRANT SELECT, INSERT, UPDATE, DELETE ON {table} TO {API_ROLE}")
+    # The application role runs everything the API does, not only these tables: the model budget
+    # and the agent checkpoints are the template's, and a later template update may add more. So it
+    # gets data privileges (never DDL) on every table in the schema, now and by default for tables
+    # the owner creates later, except Alembic's own version table.
     op.execute(f"GRANT USAGE ON SCHEMA public TO {API_ROLE}")
+    op.execute(f"GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO {API_ROLE}")
+    op.execute(f"GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA public TO {API_ROLE}")
+    op.execute(
+        "ALTER DEFAULT PRIVILEGES IN SCHEMA public "
+        f"GRANT SELECT, INSERT, UPDATE, DELETE ON TABLES TO {API_ROLE}"
+    )
+    op.execute(
+        f"ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT USAGE, SELECT ON SEQUENCES TO {API_ROLE}"
+    )
+    op.execute(f"REVOKE ALL ON alembic_version FROM {API_ROLE}")
 
 
 def downgrade() -> None:
     op.drop_table("document")
     op.drop_table("collection")
+    op.execute(
+        "ALTER DEFAULT PRIVILEGES IN SCHEMA public "
+        f"REVOKE SELECT, INSERT, UPDATE, DELETE ON TABLES FROM {API_ROLE}"
+    )
+    op.execute(
+        "ALTER DEFAULT PRIVILEGES IN SCHEMA public "  # noqa: S608 - API_ROLE is a constant
+        f"REVOKE USAGE, SELECT ON SEQUENCES FROM {API_ROLE}"
+    )
     # The role is left in place: other databases on the server may use it.
