@@ -1,0 +1,32 @@
+# Files owned by house-template-nextjs. A pull request that changes one gets a CI warning
+# (tools/check_template_owned.py): improve the template first, or label it template-candidate.
+# The product's own code in frontend/src is the project's, except these files.
+.node-version
+mk/nextjs.mk
+.claude/rules/nextjs.md
+.github/template-owned/nextjs.txt
+frontend/.gitignore
+frontend/CLAUDE.md
+frontend/.npmrc
+frontend/eslint.config.mjs
+frontend/next.config.ts
+frontend/tsconfig.json
+frontend/vitest.config.ts
+frontend/vitest.setup.ts
+frontend/next.config.test.ts
+frontend/playwright.config.ts
+frontend/e2e/headers.spec.ts
+frontend/scripts/e2e-docker.sh
+frontend/Dockerfile
+frontend/.dockerignore
+frontend/compose.yaml
+frontend/src/app/health/live/route.ts
+frontend/src/proxy.ts
+frontend/src/proxy.test.ts
+.github/workflows/publish-web.yml
+# fnmatch globs: [[] is a literal [.
+frontend/src/app/api/[[]...path]/route.ts
+frontend/src/lib/api/proxy.ts
+frontend/src/lib/api/proxy.test.ts
+frontend/src/lib/api/browser.ts
+frontend/src/lib/api/server.ts

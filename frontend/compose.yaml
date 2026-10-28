@@ -1,0 +1,45 @@
+# Owned by house-template-nextjs. Included by the root compose.yaml (house-template-base); `make
+# up-frontend` runs the frontend from its image on http://127.0.0.1:3000, as production would.
+# It starts the backend's services too (backend/compose.yaml) and calls the API inside Compose's
+# network. Nobody is signed in: the image is a production build, so DEV_USER doesn't apply.
+
+services:
+  web:
+    # Compose names the image after the project, so two projects never share one.
+    build: .
+    environment:
+      # The service name, not localhost: the API runs inside Compose's network.
+      API_BASE_URL: http://api:8000
+      CSP_CONNECT_SRC: ${CSP_CONNECT_SRC:-}
+    ports:
+      # Set WEB_PORT to run two projects side by side.
+      - "127.0.0.1:${WEB_PORT:-3000}:3000"
+    depends_on:
+      api:
+        condition: service_healthy
+    healthcheck:
+      # The slim image has no curl; Node is there.
+      test:
+        - CMD
+        - node
+        - --eval
+        - 'fetch("http://127.0.0.1:3000/health/live").then((r) => process.exit(r.ok ? 0 : 1), () => process.exit(1))'
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+      start_interval: 1s
+    develop:
+      # `docker compose watch`: rebuild the image when the app or its dependencies change.
+      # `make dev-frontend` (next dev on the host) reloads faster while writing code.
+      watch:
+        - action: rebuild
+          path: src
+        - action: rebuild
+          path: public
+        - action: rebuild
+          path: package.json
+        - action: rebuild
+          path: pnpm-lock.yaml
+        - action: rebuild
+          path: next.config.ts

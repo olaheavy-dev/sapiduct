@@ -1,0 +1,4 @@
+# Changes here will be overwritten by Copier; NEVER EDIT MANUALLY
+_commit: v0.3.0
+_src_path: gh:olaheavy-dev/house-template-nextjs
+backend: fastapi

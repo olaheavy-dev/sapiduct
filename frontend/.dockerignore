@@ -1,0 +1,16 @@
+# Owned by house-template-nextjs. Kept out of the image's build context: secrets, local installs
+# and build output (the image installs and builds its own), and what the image doesn't run.
+.env
+.env.*
+node_modules/
+.next/
+out/
+coverage/
+test-results/
+playwright-report/
+*.tsbuildinfo
+next-env.d.ts
+e2e/
+compose.yaml
+Dockerfile
+.dockerignore
