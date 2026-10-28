@@ -89,3 +89,38 @@ Why these ten: they cover the three things Sapiduct has to do well. Registries a
 ## Anti-references (carry over from the website, plus)
 
 Generic dark "developer terminal" pages; AI gradient blobs; intro loaders; testimonial walls with no customers; marketplace chrome (prices, carts, reviews) on a product that has none; dense grey-on-black tables with no hierarchy.
+
+---
+
+## Addendum: in-app screens (captured 2026-10-28)
+
+The first pass covered marketing and login pages only. This addendum covers the public in-app screens that could be viewed without an account. **Not viewed:** logged-in dashboards (Vercel, Supabase, Linear, Mintlify, MCPJam's hosted app, which asks to "Get started" first), the Udemy lesson player, and Mintlify's documentation (the page returned a DNS error). Observations come from screenshots in a window about 1568 px wide; small text was hard to read, so no measured values are given.
+
+### Smithery server page (smithery.ai/server/exa)
+- **Header:** logo, name, verified mark, publisher and "last deployed" time, a small score chip, then an orange "Add to toolbox" button and a split "Try now" button.
+- **Tabs with counts:** Tools (2), Resources (1), Prompts (1).
+- **Tool rows:** the tool name in monospace, a "read-only" badge, a one-line description, and a chevron that expands the input schema.
+- **Side column:** repository, homepage, published date, licence as plain label and value pairs.
+- **Take:** copy the tool row (name, read-only badge, one line, expandable) for the MCP server tab, and the label and value side column for collection facts.
+
+### Context7 library page (context7.com/vercel/next.js)
+- **Header card** with a green outline: name, verified mark, repository link, one-line description, a row of chips (Tokens, Snippets, Trust Score, Licence, Update time) and a rank chip with an Admin button.
+- **Tabs:** Context, Chat, Benchmark (with a score).
+- **Query box:** "Show doc for…" with a Code or Info toggle and a Show Results button.
+- **Result panel:** a Tokens field, then Raw, Copy and Link actions above a scrollable monospace block that shows the source URL of each snippet.
+- **Take:** facts as chips under the title; result and raw views side by side; the source URL shown above every returned snippet; copy, raw and link actions together.
+
+### Khan Academy course page (khanacademy.org, Intro to computer science: Python)
+- **Left rail:** the unit list with the current course highlighted.
+- **Main area:** breadcrumbs, title, an intro video with a plain-language blurb, then the unit's lessons in two columns, each with an icon for its type (video, article, exercise, challenge star).
+- **Take (CourseLens only):** a unit rail on the left, a lesson list with a type icon per row, and no commerce chrome.
+
+### MCPJam (marketing view of the playground, from the first pass)
+- **Dark app view** with a left rail, two models compared side by side with metrics and charts, and suggested prompts under the chat box.
+- **Take:** the playground layout of tool and input on one side and the request and result on the other, with raw view one click away.
+
+### What the prototype takes from these
+- Tool rows with a read-only badge (Smithery) on the MCP server tab.
+- Result, raw and source-citation views grouped together (Context7).
+- Facts as small chips on the collection header (Context7); the prototype shows them as stats and badges.
+- A unit rail plus a typed lesson list for the course module (Khan Academy).
