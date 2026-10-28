@@ -37,11 +37,11 @@ Users upload PDFs, Word files, Markdown and VTT transcripts; Sapiduct must read 
 
 ## Alternatives considered
 
-- **Celery, RQ or arq with Redis:** more features, plus a broker to run. Rejected for now.
-- **Procrastinate (Postgres-based queue library):** fits, but it is a dependency for something a table and one SQL clause provide; revisit if the queue needs scheduling or priorities.
+- **A separate task-queue system (Celery, RQ, arq):** more features, but a broker or Redis to run and monitor is more than a Postgres table needs for one person. Rejected for now.
+- **Procrastinate, a task queue library that uses Postgres (3.10.0, [PyPI](https://pypi.org/project/procrastinate/)):** fits the storage choice, but it is a dependency for something a table and one SQL clause provide; revisit if the queue needs scheduling or priorities.
 - **Parsing inside the request:** large files would hold requests open and block workers. Rejected.
 - **PyMuPDF:** strong PDF parsing but AGPL, which the licence allow-list rejects.
-- **Heavier document converters (such as Docling or Unstructured):** broader format support and optical character recognition, at the price of large dependency trees and models. Deferred.
+- **Broader document converters (Docling 2.144.0, MIT; Unstructured 0.27.35, Apache-2.0, per [PyPI](https://pypi.org/project/docling/)):** both pass the licence list; deferred until formats or scanned PDFs matter, because the four small parsers cover the first build.
 - **HNSW from the start:** faster at scale, but filtered approximate search can lose recall and tenancy is exactly the case the README flags.
 
 ## Sources
