@@ -92,6 +92,41 @@ export interface paths {
         patch: operations["rename_collection_v1_collections__collection_id__patch"];
         trace?: never;
     };
+    "/v1/collections/{collection_id}/tokens": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List Tokens */
+        get: operations["list_tokens_v1_collections__collection_id__tokens_get"];
+        put?: never;
+        /** Create Token */
+        post: operations["create_token_v1_collections__collection_id__tokens_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/collections/{collection_id}/tokens/{token_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Revoke Token */
+        delete: operations["revoke_token_v1_collections__collection_id__tokens__token_id__delete"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -147,6 +182,57 @@ export interface components {
             items: components["schemas"]["CollectionOut"][];
             /** Next Cursor */
             next_cursor: string | null;
+        };
+        /** Page[TokenInfo] */
+        Page_TokenInfo_: {
+            /** Items */
+            items: components["schemas"]["TokenInfo"][];
+            /** Next Cursor */
+            next_cursor: string | null;
+        };
+        /** TokenCreated */
+        TokenCreated: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Last4 */
+            last4: string;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /** Last Used At */
+            last_used_at: string | null;
+            /** Ends At */
+            ends_at: string | null;
+            /** Revoked At */
+            revoked_at: string | null;
+            /** Token */
+            token: string;
+        };
+        /** TokenInfo */
+        TokenInfo: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Last4 */
+            last4: string;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /** Last Used At */
+            last_used_at: string | null;
+            /** Ends At */
+            ends_at: string | null;
+            /** Revoked At */
+            revoked_at: string | null;
         };
         /** ValidationError */
         ValidationError: {
@@ -387,6 +473,101 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["CollectionOut"];
                 };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_tokens_v1_collections__collection_id__tokens_get: {
+        parameters: {
+            query?: {
+                limit?: number;
+                cursor?: string | null;
+            };
+            header?: never;
+            path: {
+                collection_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Page_TokenInfo_"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    create_token_v1_collections__collection_id__tokens_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                collection_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TokenCreated"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    revoke_token_v1_collections__collection_id__tokens__token_id__delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                collection_id: string;
+                token_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
             /** @description Validation Error */
             422: {
