@@ -16,7 +16,9 @@ All viewed on the published page in a desktop browser. **They were not saved int
 | Playground | Dark, light | Tool list and form, empty result panel |
 | Collections | Light | Three collection cards and a large empty area |
 
-**Not covered:** the phone width (375) and tablet width (768). Resizing the window did not change the viewport the screenshot tool captured, so those widths are unreviewed. Also not seen: documents, activity, course and the auth pages (they were checked only in code), and any hover, focus, error or loading state.
+**Not covered in round 1:** the phone width (375) and tablet width (768). Resizing the window did not change the viewport the in-browser screenshot tool captured, so those widths were unreviewed. Also not seen: documents, activity, course and the auth pages, and any hover, focus, error or loading state. Round 2 (below) fills most of this in with a different capture method.
+
+**Correction (round 2):** while setting up that method I briefly read a clipped phone screenshot of v1 as an overflow bug. It was not: headless Chrome has a minimum window width, so a 375px window renders wider and is then cropped. Phone widths are now captured inside an exact 375px frame, and v1's phone layout was never re-checked that way before it was replaced.
 
 ## Summary
 
@@ -27,7 +29,7 @@ The structure and the token system hold up: contrast is good in both themes, the
 1. **Screens open empty or half-empty.** The playground opens with a blank result panel and the one line "Run a tool to see…". The collections page is three small cards at the top and roughly two thirds empty space below, with a stray developer note caption left in. The brief says every screen opens in a realistic working state. _Fix: preload a completed search run in the playground; give the collections page real content (a next-step strip, recent activity across collections, index health) and remove the note._
 2. **The signature motif is generic.** Three dotted lines run into an empty rounded box and out to three pills. The box has no meaning, the lines carry no data, and it is a stock "inputs, processor, outputs" diagram. It is the only identity device in the design and it is not distinctive. _Fix: tie the motif to real state (documents by type, indexing progress, tools exposed) or replace it with a device that comes from what the product does, which is showing where an answer came from._
 3. **No hierarchy of action.** On the MCP server tab, Copy, Rotate and Revoke share one style, so a destructive action looks like a copy button. In Documents, the upload zone and the table compete. In the playground, "Run tool" is the same size as the secondary link. _Fix: one primary action per screen; a distinct, quieter-until-hover danger style; sizes that follow importance._
-4. **Phone and tablet layouts are unverified.** See above. _Fix: capture with a tool that can set the viewport, or ask the owner for phone screenshots, before any claim about responsiveness._
+4. **Phone and tablet layouts were unverified.** See above. _Fix: capture with a method that sets the viewport exactly before any claim about responsiveness. Done in round 2._
 
 ## Should Fix
 
@@ -62,3 +64,72 @@ The strongest idea already in the design is the citation: the product's promise 
 - **Real content at rest on every screen,** with the states (empty, loading, error, hover, focus) designed and shown.
 - **A control family** with a clear primary, a quiet secondary and a distinct danger style.
 - **Review loop:** build, capture, critique, adjust, at all three widths in both themes, before showing it.
+
+---
+
+# Round 2: prototype v2 (the annotated document)
+
+Reviewed: `prototype/index.html` (published version 3). Direction chosen by the owner: annotated document.
+
+## Screenshots Captured
+
+Saved in `.design/sapiduct/screenshots/`, captured with headless Chrome. Desktop widths load the page directly; phone widths load it inside an exact 375px frame (the page is 375 CSS pixels wide, the grey strip beside it is the frame's backdrop). The theme is forced with `?theme=light` or `?theme=dark`.
+
+| Screenshot | Width | Theme | Shows |
+| --- | --- | --- | --- |
+| `v2-landing-light-1280.png` | 1280 | Light | Hero, annotated answer with margin notes, steps, course mode card |
+| `v2-landing-light-375.png` | 375 | Light | The same page; notes sit under each statement |
+| `v2-collections-light-1280.png` | 1280 | Light | Table-of-contents list with dotted leaders and margin notes, recent calls |
+| `v2-documents-dark-375.png` | 375 | Dark | Document list with trace lines and the selected-document panel |
+| `v2-mcp-dark-1280.png` | 1280 | Dark | MCP server tab with numbered margin notes |
+| `v2-mcp-light-768.png` | 768 | Light | The same tab at tablet width; notes stack with a left rule |
+| `v2-playground-light-1280.png` | 1280 | Light | Tool list and form beside a result with marked sources |
+| `v2-playground-light-375.png`, `v2-playground-dark-375.png` | 375 | Light, dark | Playground stacked on a phone |
+| `v2-activity-dark-1280.png` | 1280 | Dark | Call log with the selected call beside it |
+| `v2-course-light-1280.png` | 1280 | Light | Unit rail, due-today card, sessions |
+| `v2-signin-light-1280.png`, `v2-signin-dark-1280.png` | 1280 | Light, dark | Sign in with the annotated-sentence panel |
+| `v2-states-light-1280.png` | 1280 | Light | Buttons, inputs, badges, trace lines, empty, loading, error, marks, toast |
+
+## What round 1 found, and what changed
+
+| Round 1 finding | Round 2 |
+| --- | --- |
+| Screens open empty (1) | The playground opens on a completed search; collections gets recent calls; documents opens with a document selected. Fixed. |
+| Generic motif (2) | Replaced by the numbered mark and its dotted leader to a margin note, used on every screen. The trace line shows work in progress. Fixed in direction; judge it on the page. |
+| No action hierarchy (3) | One control family: primary, secondary, ghost and a distinct danger style that fills on hover (Revoke). Shown on the States screen. Fixed. |
+| Phone and tablet unverified (4) | Captured at 375 and 768. No horizontal overflow seen on the screens captured. Fixed for those screens. |
+| No point of view (5) | The annotated document is the point of view. The risk remains that it is judged on taste; see below. |
+| Shell and panels blur in dark (6) | Panels are now inset (darker than the page in dark, darker still in light) and used only for machine strings and logs. Improved. |
+| Default-looking controls (7) | One family with default, hover, focus, disabled, loading and error shown. Improved; hover and focus are forced on the States page and were not exercised with a real pointer or keyboard. |
+| Small mono labels (8) | Fewer label styles, larger sizes; mono is used for machine strings. Improved. |
+| Landing holes (9) | The annotated answer is the hero; course mode has its own card; footer with the source link. Fixed. |
+| Type not exercised (10) | Fraunces carries statements, notes and numerals; marks use the display face. Improved. |
+
+## Found during round 2, and fixed
+
+1. The Result and Raw toggle was unreadable in the light theme (dark text on a dark segment).
+2. "Open passage" lost its button styling inside the serif notes.
+3. Leader lines also attached to notes nested inside cards; they now attach only to notes that sit beside their statement.
+4. The course card on the landing page was too narrow for its titles; it now has a wider column.
+5. The collection rail wrapped collection names; it now stacks name and mode.
+
+## Remaining issues
+
+### Should fix
+1. **The phone playground is long.** Tools, input and result stack in one column, so the result sits below the fold on a phone. Consider putting the result first after a run, or a sticky "Run" bar.
+2. **Query input is a one-line field.** A question longer than the field is cut off. A multi-line field for `query` would read better.
+3. **The brand panel on the auth pages is thin.** It shows one annotated sentence beside the form and is empty at the top and bottom. It could carry the three-step explanation or the connect line.
+4. **Notes carry a lot of the explanation.** On a phone they land under their block, which works, but on the MCP tab they are the only place the "shown once" token rule is stated. Consider repeating it next to the token field.
+
+### Could improve
+5. **Motion** is still limited to the mark lifting on hover, the trace line, and the toast. The one moment worth animating is a mark opening its source.
+6. **Not covered:** documents and activity at tablet width, course at 375, reduced motion, keyboard-only use, and the Raw view. Hover and focus were forced, not exercised.
+7. **Contrast** relies on the token checks (text secondary on secondary backgrounds, accent text on tinted note backgrounds); the tinted active-note background was not measured.
+
+## What works well
+
+- **The annotated answer.** It shows the product's promise in one view and is the strongest composition in the prototype, in both themes and at both widths.
+- **The table-of-contents collection list.** Dotted leaders and margin notes make a simple list distinctive without decoration.
+- **Margin notes as help.** Explanations sit beside the field they explain, and fall back under it on narrow screens.
+- **Inset only for machine strings.** The URL, token, snippet and logs are the only dark surfaces on the light shell, so the technical half is easy to find.
+- **One control family** with its states on a single page.
