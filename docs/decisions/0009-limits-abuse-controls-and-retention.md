@@ -67,6 +67,11 @@ The per-address demo limit uses the same table keyed by client address, and need
 - **No per-token limit:** a looping assistant could generate thousands of database queries a minute. Rejected.
 - **Unlimited retention:** unbounded growth of `calls`. Rejected.
 
+## Spike findings (issue #7)
+
+- The `rate_window` counter was tested with 12 simultaneous calls against a limit of 5: exactly 5 were admitted and 7 answered 429 with `Retry-After`.
+- The column is named `span`, not `window`, because `window` is a reserved word in PostgreSQL.
+
 ## Sources
 
 - house-template-fastapi v0.6.1 settings, upload limits and price table, read 2026-10-28: `backend/src/app/settings.py`, `backend/src/app/limits.py`, `backend/src/app/storage.py`, `backend/src/app/llm/prices.py`, https://github.com/olaheavy-dev/house-template-fastapi

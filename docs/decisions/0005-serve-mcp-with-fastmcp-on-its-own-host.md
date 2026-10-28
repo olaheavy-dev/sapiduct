@@ -21,7 +21,7 @@ Each collection needs a hosted MCP server that real clients (Claude Desktop, Cur
 5. **Origin validation.** The server rejects a request whose `Origin` header is present and not on an allowlist with 403, as the specification requires. Requests with no `Origin` (typical for desktop clients) pass to token authentication. The allowlist starts with the web app's origin; whether a browser-based tester such as MCPJam's hosted app calls servers directly from the browser (and so needs to be listed) is not confirmed and is checked in issue #7.
 6. **Bounded results.** Each tool has a stated maximum result size: `search` takes a `limit` up to a maximum, `list_sources` takes `limit` and `cursor` and returns the total and a next cursor, and `get_document` returns at most a stated number of characters with a continuation offset. The numbers are set in record 0009. A tool never returns an unbounded list.
 7. **Read-only tools.** `search`, `get_document` and `list_sources` read only; none of them changes or deletes anything.
-8. **Every call is recorded** in the `calls` table (record 0004) after the response is sent, with arguments capped in size, so the Activity tab and the limits both read one source.
+8. **Every call is recorded** in the `mcp_call` table (record 0004) in the same transaction as the tool's work, with arguments capped in size, so the Activity tab and the limits both read one source.
 9. **Authentication** is described in record 0006. FastMCP's own token-verification layer is given a custom verifier that looks tokens up in the database.
 
 ## Consequences
@@ -38,6 +38,13 @@ Each collection needs a hosted MCP server that real clients (Claude Desktop, Cur
 - **The official `mcp` SDK alone:** fewer dependencies, but FastMCP supplies the authentication hooks, FastAPI mounting and both protocol eras that this service needs, and it is built on that SDK.
 - **A path on the web host:** see decision 4.
 - **Session-based (handshake-only) server:** needs sticky sessions or shared session state. Rejected.
+
+## Spike findings (issue #7)
+
+- FastMCP 4.1.3 is the pinned version: the newest stable release at least a week old when the spike started. It added 40 packages, all under permissive licences. The slim package offers no saving for this use.
+- Authentication is a small ASGI guard in front of FastMCP, not FastMCP's `TokenVerifier`: `verify_token(token)` receives no request path, so it cannot bind a token to one collection's URL. The guard also does the Origin check, the rate limit and the uniform 401, before FastMCP sees the request.
+- The app serves `/mcp/{public_id}` with JSON responses and no sessions. Tool failures return a masked error; a failed call is recorded in a second transaction.
+- A request refused with 429 is not written as a call row: the rate-window counter already counts it.
 
 ## Sources
 
