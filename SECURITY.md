@@ -1,0 +1,19 @@
+# Security policy
+
+## Reporting a vulnerability
+
+Please report vulnerabilities privately through GitHub's private vulnerability reporting:
+[open a report](https://github.com/olaheavy-dev/sapiduct/security/advisories/new). Don't open a public issue.
+
+Include what you found, how to reproduce it, and the impact you expect. You'll get an acknowledgement within 3 working days and an assessment within 10. Fixes are released as soon as they're ready, and reporters are credited unless they ask not to be.
+
+## Supported versions
+
+Only the latest version on `main` (and the deployment built from it) receives security fixes.
+
+## How the project protects itself
+
+- Secret scanning with push protection; gitleaks on every commit.
+- Dependabot alerts and security updates; dependency review blocks vulnerable or unlicensed dependencies.
+- CodeQL and zizmor results gate merges; GitHub Actions are pinned to full commit SHAs.
+- Container images carry SLSA build provenance and an SBOM, verified before deploy: `gh attestation verify oci://ghcr.io/olaheavy-dev/sapiduct-<image>@<digest> --repo olaheavy-dev/sapiduct`.

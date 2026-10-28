@@ -1,0 +1,17 @@
+# Changes here will be overwritten by Copier; NEVER EDIT MANUALLY
+_commit: v0.6.0
+_src_path: gh:olaheavy-dev/house-template-base
+agent_kit: true
+container_images: true
+description: Your private knowledge as a hosted MCP server, with CourseLens as its
+    course module
+domain: sapiduct.olaheavy.dev
+github_org: olaheavy-dev
+license: all-rights-reserved
+owner_github: sunkanmi-olawuwo
+owner_name: Sunkanmi Olawuwo
+project_name: Sapiduct
+project_slug: sapiduct
+stacks:
+- fastapi
+- nextjs

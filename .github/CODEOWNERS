@@ -1,0 +1,7 @@
+# The owner reviews everything; governance, CI and agent configuration are owner-only to merge
+# (AGENTS.md, "When merging").
+*            @sunkanmi-olawuwo
+/.github/    @sunkanmi-olawuwo
+/.claude/    @sunkanmi-olawuwo
+/AGENTS.md   @sunkanmi-olawuwo
+/LICENSE     @sunkanmi-olawuwo
