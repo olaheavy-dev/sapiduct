@@ -18,6 +18,7 @@ from sqlalchemy import (
     DateTime,
     ForeignKeyConstraint,
     Index,
+    Integer,
     Text,
     UniqueConstraint,
     func,
@@ -69,6 +70,13 @@ class Document(Base):
     size_bytes: Mapped[int] = mapped_column(BigInteger)
     status: Mapped[str] = mapped_column(Text, server_default="queued")
     failure_reason: Mapped[str | None] = mapped_column(Text, default=None)
+    # Where the uploaded file is kept in object storage (a key the server chose, never a name).
+    object_key: Mapped[str | None] = mapped_column(Text, default=None)
+    # Chunks are written under a generation number; search reads only the published one
+    # (record 0008, decision 10). `indexed_at` is set when indexing first completes.
+    generation: Mapped[int] = mapped_column(Integer, server_default="0")
+    published_generation: Mapped[int] = mapped_column(Integer, server_default="0")
+    indexed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), default=None)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 
     __table_args__ = (
@@ -79,5 +87,7 @@ class Document(Base):
             ondelete="CASCADE",
         ),
         CheckConstraint("status IN ('queued', 'parsing', 'indexed', 'failed')", name="status"),
+        # What chunks and jobs point at: a document id only together with its collection and owner.
+        UniqueConstraint("id", "collection_id", "owner_id", name="uq_document_id_collection_owner"),
         Index("ix_document_collection_created", "collection_id", "created_at", "id"),
     )

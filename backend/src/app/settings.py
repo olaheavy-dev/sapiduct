@@ -141,6 +141,18 @@ class Settings(BaseSettings):
     mcp_list_default: int = Field(default=10, gt=0)
     mcp_document_max_chars: int = Field(default=20_000, gt=0)
 
+    # Ingestion (records 0008, 0009). The chunk size and overlap are provisional until retrieval
+    # is measured on the open test corpus.
+    ingest_chunk_chars: int = Field(default=1_600, ge=100)
+    ingest_chunk_overlap_chars: int = Field(default=200, ge=0)
+    ingest_batch_size: int = Field(default=100, gt=0)
+    ingest_lease_seconds: int = Field(default=300, gt=0)
+    ingest_max_attempts: int = Field(default=3, gt=0)
+    ingest_retry_seconds: int = Field(default=30, ge=0)
+    ingest_max_file_bytes: int = Field(default=25 * 1024 * 1024, gt=0)
+    ingest_max_pages: int = Field(default=1_000, gt=0)
+    ingest_max_chars: int = Field(default=5_000_000, gt=0)
+
     @model_validator(mode="after")
     def no_local_defaults_in_production(self) -> Settings:
         """Refuse to start in production on the local development credentials: a missing secret

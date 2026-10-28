@@ -18,14 +18,17 @@ from __future__ import annotations
 
 from app.collections import Collection, Document
 from app.db import Base
+from app.ingest.models import Chunk, IngestJob
 from app.llm.budget import LlmCall, LlmSpendDay, LlmSpendUserDay
 from app.mcp.models import AccessToken, McpCall, RateWindow
 
 __all__ = [
     "AccessToken",
     "Base",
+    "Chunk",
     "Collection",
     "Document",
+    "IngestJob",
     "LlmCall",
     "LlmSpendDay",
     "LlmSpendUserDay",

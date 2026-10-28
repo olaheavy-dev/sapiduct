@@ -50,6 +50,31 @@ async def api_url(database_url: str) -> AsyncIterator[str]:
     await admin.dispose()
 
 
+WORKER_LOGIN = "sapiduct_test_worker"
+
+
+@pytest.fixture(scope="module")
+async def worker_url(database_url: str) -> AsyncIterator[str]:
+    """A login that is a member of sapiduct_worker, the role that may claim ingestion jobs."""
+    admin = create_async_engine(database_url, poolclass=NullPool, isolation_level="AUTOCOMMIT")
+    async with admin.connect() as connection:
+        await connection.execute(text(f"DROP ROLE IF EXISTS {WORKER_LOGIN}"))
+        await connection.execute(
+            text(f"CREATE ROLE {WORKER_LOGIN} LOGIN PASSWORD '{PASSWORD}' IN ROLE sapiduct_worker")
+        )
+    await admin.dispose()
+    yield (
+        make_url(database_url)
+        .set(username=WORKER_LOGIN, password=PASSWORD)
+        .render_as_string(hide_password=False)
+    )
+    admin = create_async_engine(database_url, poolclass=NullPool, isolation_level="AUTOCOMMIT")
+    async with admin.connect() as connection:
+        await connection.execute(text(f"DROP OWNED BY {WORKER_LOGIN}"))
+        await connection.execute(text(f"DROP ROLE {WORKER_LOGIN}"))
+    await admin.dispose()
+
+
 @pytest.fixture
 async def owner_engine(database_url: str) -> AsyncIterator[AsyncEngine]:
     """The database's superuser: bypasses row-level security, so it can seed and clean up."""
