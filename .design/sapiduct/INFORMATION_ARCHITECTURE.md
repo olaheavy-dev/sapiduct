@@ -11,7 +11,7 @@ Routes are Next.js App Router paths. "Auth" means a signed-in user is required; 
   - Try the demo `/demo`: a read-only sample collection with the playground, built from openly licensed documents (public)
   - Connect guides `/docs/connect/claude-desktop` and `/docs/connect/cursor` (public): the same snippets the app shows, with the date each was last tested
   - Privacy `/privacy` and Terms `/terms` (public; linked from every auth page)
-- Auth pages (public, signed-in visitors are redirected to `/collections`)
+- Auth pages (public; signed-in visitors are redirected to `/collections`, except `/reset-password` and `/auth/callback`, which must accept the session a recovery link creates)
   - Sign in `/sign-in`
   - Sign up `/sign-up`
   - Forgot password `/forgot-password`
@@ -199,4 +199,4 @@ The template's `/api/*` proxy passes only a short list of request headers to the
 - **Identifiers:** `collectionId` in app URLs is the collection's internal id, so renaming a collection never breaks a link. The public MCP URL uses a separate, unguessable `publicId` (a short random string), so the URL does not reveal the id or the name; the access token is still required.
 - **Query parameters:** `?status=`, `?tool=`, `?range=` for Activity filters; `?cursor=` and `?limit=` for pagination; `?next=` on auth pages for the post-sign-in return path, accepted only for same-site paths. Nothing personal (email, tokens) ever appears in a URL.
 - **Indexing:** public pages are indexable; app, auth and demo-result pages are `noindex`.
-- **Redirects:** `/collections/[collectionId]` → `/documents`; signed-in visitors on auth pages → `/collections`; signed-out visitors on app pages → `/sign-in?next=...`.
+- **Redirects:** `/collections/[collectionId]` → `/documents`; signed-in visitors on auth pages → `/collections`, except `/reset-password` and `/auth/callback`: opening a recovery link signs the user in before they set a new password, so those two accept a signed-in session and a recovery session reaches the password form; signed-out visitors on app pages → `/sign-in?next=...`.
