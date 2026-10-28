@@ -346,7 +346,7 @@ async def test_the_database_refuses_a_blank_name_even_without_the_api(
 
 
 async def test_the_application_role_can_use_every_runtime_table(
-    owner_engine: AsyncEngine,
+    owner_engine: AsyncEngine, api_url: str
 ) -> None:
     """The model budget and agent checkpoints are not tenant tables, but the API reads and writes
     them with the same login; a restricted role that lacked them would fail on the first model
