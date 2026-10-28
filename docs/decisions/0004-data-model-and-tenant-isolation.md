@@ -23,8 +23,8 @@ Facts that shape the choice:
    - `jobs` (ingestion queue): see record 0008.
 2. **Two layers of isolation, both tested.**
    - *Application layer:* every query goes through helpers that take the owner id and filter on it; there is no query path without it.
-   - *Database layer:* RLS is enabled **and forced** on every tenant table, with one policy per table, `owner_id = current_setting('app.owner_id', true)::uuid`, for both `USING` and `WITH CHECK`. The application role is neither a superuser nor `BYPASSRLS`. If the setting is missing, the comparison is null and no rows match, so a forgotten setting fails closed.
-3. **How the owner is set.** The owner id is set for the transaction, not the connection, so a pooled connection never carries one user's id to another request. The mechanism that re-applies it after each commit is chosen in the tenant-isolation spike (issue #6); the requirement is a test that fails if any statement runs without it.
+   - *Database layer:* RLS is enabled **and forced** on every tenant table, with one policy per table, `owner_id = current_setting('app.owner_id', true)::uuid`, for both `USING` and `WITH CHECK`. The application role is neither a superuser nor `BYPASSRLS`. `current_setting(name, true)` returns NULL when the setting is missing, so a forgotten setting matches no rows and fails closed ([PostgreSQL 18 docs, 9.28 System Administration Functions](https://www.postgresql.org/docs/current/functions-admin.html)).
+3. **How the owner is set.** The owner id is set for the transaction, not the connection (`set_config(name, value, true)` applies only during the current transaction, per the same page), so a pooled connection never carries one user's id to another request. The mechanism that re-applies it after each commit is chosen in the tenant-isolation spike (issue #6); the requirement is a test that fails if any statement runs without it.
 4. **The MCP path uses the same layers.** After a token is verified (record 0006), the server sets the owner id from the token's collection and filters on that collection as well.
 5. **Pagination.** Every list is keyset-paginated on `(created_at desc, id desc)` with a cursor, through the template's `Page[T]` helper; totals and status counts come from the database, not from the page being shown.
 6. **Deletion.** Deleting a collection deletes its documents, chunks, tokens, activity, jobs and stored files in one transaction plus a storage cleanup job; deleting an account does the same for every collection. A foreign key with `ON DELETE CASCADE` carries the database part.
@@ -47,4 +47,5 @@ Facts that shape the choice:
 
 - PostgreSQL 18 documentation, Row Security Policies (PostgreSQL 18.6), read 2026-10-28: https://www.postgresql.org/docs/current/ddl-rowsecurity.html
 - This repository's database session code, read 2026-10-28: `backend/src/app/db.py` (house-template-fastapi v0.6.1).
+- PostgreSQL 18 documentation, System Administration Functions (`current_setting`, `set_config`), read 2026-10-28: https://www.postgresql.org/docs/current/functions-admin.html
 - Template pagination (`Page[T]`, limits 1 to 100): `house-template-fastapi` README, read 2026-10-28: https://github.com/olaheavy-dev/house-template-fastapi
