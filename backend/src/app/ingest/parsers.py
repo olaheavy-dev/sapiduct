@@ -24,8 +24,9 @@ from pypdf.errors import PyPdfError
 
 from app.ingest.types import KINDS, Limits, ParseError, Section
 
-HEADING = re.compile(r"^ {0,3}(#{1,6})[ \t]+(.+?)[ \t]*#*[ \t]*$")
-FENCE = re.compile(r"^ {0,3}(```|~~~)")
+# A closing run of hashes counts only after whitespace, so "# C#" is the heading "C#".
+HEADING = re.compile(r"^ {0,3}(#{1,6})[ \t]+(.+?)(?:[ \t]+#+)?[ \t]*$")
+FENCE = re.compile(r"^ {0,3}(`{3,}|~{3,})(.*)$")
 WORD_HEADING = re.compile(r"^Heading (\d)$")
 
 
@@ -57,11 +58,21 @@ def parse_markdown(data: bytes, limits: Limits) -> list[Section]:
     path: list[tuple[int, str]] = []
     buffer: list[str] = []
     first = 1
-    fenced = False
+    fence: str | None = None  # the opening fence, while inside a code block
     for number, line in enumerate(_decode(data).split("\n"), start=1):
-        if FENCE.match(line):
-            fenced = not fenced
-        match = None if fenced else HEADING.match(line)
+        marker = FENCE.match(line)
+        if fence is None:
+            # A backtick fence's info string cannot itself contain a backtick.
+            if marker and not (marker.group(1)[0] == "`" and "`" in marker.group(2)):
+                fence = marker.group(1)
+        elif (
+            marker
+            and marker.group(1)[0] == fence[0]
+            and len(marker.group(1)) >= len(fence)
+            and not marker.group(2).strip()
+        ):
+            fence = None
+        match = None if fence is not None or marker else HEADING.match(line)
         if match:
             _push(out, buffer, tuple(t for _, t in path), first, number - 1)
             buffer, first = [], number

@@ -95,12 +95,13 @@ def chunk(
             if pending.units and pending.size + 2 + len(unit.text) > target_chars:
                 out.append(_emit(pending, len(out)))
                 carried: list[_Unit] = []
-                total = 0
                 for old in reversed(pending.units):
-                    if total + len(old.text) > overlap_chars:
+                    if _Pending([old, *carried]).size > overlap_chars:
                         break
                     carried.insert(0, old)
-                    total += len(old.text)
+                # The next unit must still fit beside what is carried.
+                while carried and _Pending(carried).size + 2 + len(unit.text) > target_chars:
+                    carried.pop(0)
                 pending = _Pending(carried)
                 fresh = 0
             pending.units.append(unit)

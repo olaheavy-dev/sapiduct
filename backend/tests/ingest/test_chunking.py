@@ -94,3 +94,24 @@ def test_unreasonable_settings_are_refused(target: int, overlap: int) -> None:
 def test_positions_are_dense_and_start_at_zero() -> None:
     chunks = chunk(parse("md", samples.MARKDOWN.encode()), target_chars=120, overlap_chars=20)
     assert [c.position for c in chunks] == list(range(len(chunks)))
+
+
+def test_carried_overlap_never_pushes_a_chunk_past_the_target() -> None:
+    # 50, 30 and 100 characters with a target of 100: carrying the 30 beside the 100 would make 132.
+    section = Section("\n\n".join(["a" * 50, "b" * 30, "c" * 100]), page=1)
+    chunks = chunk([section], target_chars=100, overlap_chars=40)
+    assert max(len(c.text) for c in chunks) <= 100
+    assert "c" * 100 in chunks[-1].text
+
+
+def test_the_target_holds_for_many_shapes_of_paragraph() -> None:
+    import random
+
+    rng = random.Random(7)  # noqa: S311 - a seeded shuffle for a test, not security
+    for _ in range(200):
+        paragraphs = ["x" * rng.randint(1, 140) for _ in range(rng.randint(1, 12))]
+        target = rng.randint(100, 300)
+        chunks = chunk(
+            [Section("\n\n".join(paragraphs), page=1)], target, rng.randint(0, target // 2 - 1)
+        )
+        assert all(len(c.text) <= target for c in chunks), (paragraphs, target)

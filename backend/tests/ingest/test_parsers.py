@@ -137,3 +137,19 @@ def test_an_unknown_kind_is_refused() -> None:
 def test_empty_files_fail_with_a_reason(kind: str) -> None:
     with pytest.raises(ParseError):
         parse(kind, b"   \n\n  ")
+
+
+def test_a_literal_trailing_hash_belongs_to_the_heading() -> None:
+    sections = parse("md", b"# C#\nA programming language.\n\n## Notes ##\nClosed heading.")
+    assert [s.heading_path for s in sections] == [("C#",), ("C#", "Notes")]
+
+
+@pytest.mark.parametrize(
+    ("opening", "inner_fence"),
+    [("~~~python", "```"), ("````", "```"), ("```", "~~~")],
+)
+def test_a_code_block_is_closed_only_by_a_matching_fence(opening: str, inner_fence: str) -> None:
+    source = f"# Real\n\n{opening}\n{inner_fence}\n# this is code\n{opening[0] * 4}\n\nafter\n"
+    sections = parse("md", source.encode())
+    assert [s.heading_path for s in sections] == [("Real",)]
+    assert "# this is code" in sections[0].text
