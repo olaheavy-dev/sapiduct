@@ -12,6 +12,8 @@ Hard-to-reverse decisions get a numbered record in this folder (template: [0001]
 | [0004](0004-data-model-and-tenant-isolation.md) | Data model and tenant isolation | Proposed |
 | [0005](0005-serve-mcp-with-fastmcp-on-its-own-host.md) | Serve MCP with FastMCP, stateless, on its own host | Proposed |
 | [0006](0006-access-tokens.md) | Access tokens for collection servers | Proposed |
+| [0007](0007-sign-in-with-supabase-auth.md) | Sign in with GitHub or Google through Supabase Auth | Proposed |
+| [0008](0008-ingestion-and-search.md) | Ingestion pipeline and search | Proposed |
 
 ## Register
 
