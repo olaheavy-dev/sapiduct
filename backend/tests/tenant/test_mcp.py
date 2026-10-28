@@ -285,3 +285,167 @@ async def test_tool_calls_are_recorded_without_the_token(setup: Setup) -> None:
         rows = (await session.execute(text("SELECT tool, status, arguments FROM mcp_call"))).all()
     assert [(r[0], r[1]) for r in rows] == [("search", "ok")]
     assert token["token"] not in rows[0][2]
+
+
+async def test_a_real_mcp_client_lists_the_tools_and_reads_a_collection(
+    api_url: str, owner_engine: AsyncEngine
+) -> None:
+    """FastMCP's own client over the whole path: handshake, tool listing, a tool call."""
+    import httpx2
+    from fastmcp import Client
+    from fastmcp.client.transports import StreamableHttpTransport
+
+    app = create_app(build_settings(api_url))
+    async with LifespanManager(app) as manager:
+        transport = httpx.ASGITransport(app=manager.app)
+        async with httpx.AsyncClient(transport=transport, base_url="http://test") as web:
+            s = Setup(web, owner_engine)
+            mine = await make_collection(s, "alice")
+            await add_document(s, "alice", mine["id"], "lecture-1.pdf")
+            token = await make_token(s, "alice", mine["id"])
+            pid = await public_id(s, mine["id"])
+
+        def factory(
+            headers: dict[str, str] | None = None,
+            timeout: httpx2.Timeout | None = None,
+            auth: httpx2.Auth | None = None,
+            **extra: Any,
+        ) -> httpx2.AsyncClient:
+            return httpx2.AsyncClient(
+                follow_redirects=bool(extra.get("follow_redirects", False)),
+                transport=httpx2.ASGITransport(app=manager.app),
+                headers=headers,
+                timeout=timeout or httpx2.Timeout(30),
+                auth=auth,
+            )
+
+        mcp_transport = StreamableHttpTransport(
+            f"http://test/mcp/{pid}",
+            headers={"Authorization": f"Bearer {token['token']}"},
+            httpx_client_factory=factory,
+        )
+        async with Client(mcp_transport) as client:
+            tools = await client.list_tools()
+            assert {t.name for t in tools} == {"search", "get_document", "list_sources"}
+            assert all(t.annotations and t.annotations.read_only_hint for t in tools)
+            listed = await client.call_tool("list_sources", {})
+            assert listed.data["sources"][0]["name"] == "lecture-1.pdf"
+
+
+def tool_error(response: httpx.Response) -> bool:
+    """True when the tool answered with an error result (the call itself still returns 200)."""
+    assert response.status_code == 200, response.text
+    text_body = response.text
+    if response.headers["content-type"].startswith("text/event-stream"):
+        text_body = next(
+            line[5:].strip() for line in text_body.splitlines() if line.startswith("data:")
+        )
+    payload = json.loads(text_body)
+    return "error" in payload or bool(payload.get("result", {}).get("isError"))
+
+
+async def ready(s: Setup, owner: str = "alice") -> tuple[dict[str, Any], str, str]:
+    mine = await make_collection(s, owner)
+    token = await make_token(s, owner, mine["id"])
+    return mine, await public_id(s, mine["id"]), str(token["token"])
+
+
+async def test_list_sources_pages_through_every_document_once(setup: Setup) -> None:
+    mine, pid, token = await ready(setup)
+    for n in range(7):
+        await add_document(setup, "alice", mine["id"], f"doc-{n}.pdf")
+    seen: list[str] = []
+    cursor: str | None = None
+    for _ in range(5):
+        arguments: dict[str, Any] = {"limit": 3}
+        if cursor:
+            arguments["cursor"] = cursor
+        page = result_of(await post(setup, pid, call("list_sources", arguments), token))
+        assert page["total"] == 7
+        seen += [s["name"] for s in page["sources"]]
+        cursor = page["next_cursor"]
+        if cursor is None:
+            break
+    assert sorted(seen) == [f"doc-{n}.pdf" for n in range(7)]
+    assert len(set(seen)) == 7
+
+
+@pytest.mark.parametrize("limit", [0, -1, 26, 1000])
+async def test_list_sources_refuses_a_limit_outside_its_bounds(setup: Setup, limit: int) -> None:
+    _, pid, token = await ready(setup)
+    response = await post(setup, pid, call("list_sources", {"limit": limit}), token)
+    assert tool_error(response)
+
+
+async def test_a_forged_cursor_is_refused_not_trusted(setup: Setup) -> None:
+    _, pid, token = await ready(setup)
+    response = await post(setup, pid, call("list_sources", {"cursor": "not-a-cursor"}), token)
+    assert tool_error(response)
+
+
+@pytest.mark.parametrize("arguments", [{"query": ""}, {"query": "   "}, {"query": "x" * 501}])
+async def test_search_refuses_an_empty_or_oversized_query(
+    setup: Setup, arguments: dict[str, Any]
+) -> None:
+    _, pid, token = await ready(setup)
+    assert tool_error(await post(setup, pid, call("search", arguments), token))
+
+
+async def test_search_never_returns_more_than_its_maximum(setup: Setup) -> None:
+    mine, pid, token = await ready(setup)
+    for n in range(15):
+        await add_document(setup, "alice", mine["id"], f"doc-{n}.pdf")
+    got = result_of(await post(setup, pid, call("search", {"query": "entropy"}), token))
+    assert len(got["results"]) == 5  # the default
+    assert tool_error(await post(setup, pid, call("search", {"query": "e", "limit": 11}), token))
+
+
+async def test_get_document_is_bounded_and_continues_with_an_offset(setup: Setup) -> None:
+    mine, pid, token = await ready(setup)
+    await add_document(setup, "alice", mine["id"], "big.pdf")
+    async with AsyncSession(setup.engine) as session:
+        document_id = str(await session.scalar(text("SELECT id FROM document")))
+    first = result_of(
+        await post(setup, pid, call("get_document", {"document_id": document_id}), token)
+    )
+    assert len(first["text"]) == 20000
+    assert first["next_offset"] == 20000
+    second = result_of(
+        await post(
+            setup,
+            pid,
+            call("get_document", {"document_id": document_id, "offset": first["next_offset"]}),
+            token,
+        )
+    )
+    assert second["offset"] == 20000
+    assert tool_error(await post(setup, pid, call("get_document", {"document_id": "nope"}), token))
+
+
+async def test_a_tool_that_fails_inside_is_recorded_as_an_error(setup: Setup) -> None:
+    # Bad arguments are refused before the tool runs and are not logged; a failure inside is.
+    _, pid, token = await ready(setup)
+    missing = "00000000-0000-0000-0000-000000000000"
+    await post(setup, pid, call("get_document", {"document_id": missing}), token)
+    async with AsyncSession(setup.engine) as session:
+        rows = (await session.execute(text("SELECT tool, status FROM mcp_call"))).all()
+    assert [tuple(r) for r in rows] == [("get_document", "error")]
+
+
+async def test_a_rate_limited_request_is_not_written_as_a_call(setup: Setup) -> None:
+    _, pid, token = await ready(setup)
+    for _ in range(7):  # the fixture's limit is 5 a minute
+        await post(setup, pid, call("list_sources"), token)
+    async with AsyncSession(setup.engine) as session:
+        calls = await session.scalar(text("SELECT count(*) FROM mcp_call"))
+    assert calls == 5
+
+
+async def test_the_token_never_appears_in_the_logs(
+    setup: Setup, caplog: pytest.LogCaptureFixture, capsys: pytest.CaptureFixture[str]
+) -> None:
+    _, pid, token = await ready(setup)
+    await post(setup, pid, call("list_sources"), token)
+    await post(setup, pid, call("list_sources"), token + "x")
+    out = capsys.readouterr()
+    assert token not in caplog.text + out.out + out.err
