@@ -56,6 +56,16 @@ Users upload PDFs, Word files, Markdown, plain text, HTML and VTT transcripts; S
 - **Broader document converters (Docling 2.144.0, MIT; Unstructured 0.27.35, Apache-2.0, per [PyPI](https://pypi.org/project/docling/)):** both pass the licence list; deferred until formats or scanned PDFs matter, because the four small parsers cover the first build.
 - **HNSW from the start:** faster at scale, but filtered approximate search can lose recall and tenancy is exactly the case the README flags.
 
+## Spike findings, queue and worker (issue #8)
+
+- The queue is the `ingest_job` table, claimed by `claim_ingest_job(lease_seconds)`: a SECURITY DEFINER function owned by a narrow role (`sapiduct_queue`) that sees only the queue table, built like the token lookup in record 0004. A worker serves every owner, so it cannot name one before it has a job; after the claim it names the owner and every query goes through row-level security. EXECUTE goes only to `sapiduct_worker`; the API role is refused (tested).
+- The worker role is a member of the API role plus that EXECUTE grant. Record 0004's separate, narrower worker role waits for the worker's own container.
+- `FOR UPDATE SKIP LOCKED` is tested by holding a lock on the oldest job and checking a claim takes the next one without waiting. Without `SKIP LOCKED` the results are still correct (PostgreSQL re-checks a locked row once it is released), so the difference is only waiting.
+- One live job per document is enforced by a partial unique index, so asking twice queues once.
+- A job that keeps killing its worker is failed by the attempt count: each claim adds one, and past the limit the next claim fails the document with a stated reason instead of trying again.
+- Retry delay grows as attempts times `INGEST_RETRY_SECONDS`; the error noted on a retried job is the exception's type name only.
+- Parsing still runs in a thread inside the worker. The credential-free parser service (decision 4) needs a Compose change that is awaiting the owner's approval.
+
 ## Sources
 
 - house-template-fastapi v0.6.1 (storage, model gateway, Compose, embedding default), read 2026-10-28: https://github.com/olaheavy-dev/house-template-fastapi
