@@ -22,7 +22,7 @@ Two facts make the choice of source matter:
 4. **Supabase's documentation server is decided at the auth issue (#9)**, restricted to its docs tool group only. The server's database tools are not connected.
 5. **The MCP specification is read as Markdown from modelcontextprotocol.io** (append `.md` to a page), so no server is needed. The record that fixes the MCP revision to implement is part of issue #5.
 6. **Every decision record states** the library versions and the specification revision it was written against, and the date each source was read, next to the link in its Sources section.
-7. **`.mcp.json` is owner-only:** `.github/CODEOWNERS` covers it. A new tool server is a new thing the agents trust, so the owner approves each one by merging the PR that adds it (`AGENTS.md`, rule 3).
+7. **`.mcp.json` is owner-only to merge**, like the other agent configuration `AGENTS.md` lists. A new tool server is a new thing the agents trust, so the owner approves each one (`AGENTS.md`, rule 3). `.github/CODEOWNERS` lists the file so the owner is assigned as reviewer. **This is a rule agents follow, not a technical block:** the checked-in ruleset (`.github/rulesets/main.json`) sets `require_code_owner_review` to `false` and requires zero approving reviews, so CODEOWNERS alone cannot stop a merge. What does enforce it for agents is their permission settings, which ask before `git push` and `gh pr merge` (`.claude/settings.json`). Making it a hard block would mean requiring owner review on every pull request, which conflicts with the workflow where agents merge clean pull requests, so a path-specific required check is recorded as a template candidate instead.
 
 ### How the risks are handled
 
@@ -31,7 +31,7 @@ Two facts make the choice of source matter:
 | Text from a docs source contains instructions to the agent | The hooks and permission settings the template installs apply whatever the text says (no push to `main`, secret reads denied, risky shell commands blocked). The docs server is read-only and queries carry library and API names, never keys or customer data. Advice taken from docs is checked against the pinned version and goes through tests and review like any change. |
 | A hosted server changes, is compromised or shuts down | Only the maintainers' own server is used. Decisions depend on recorded versions, URLs and read dates, not on a server staying the same. The Markdown pages are the fallback, so work continues if the server is down. |
 | The server sees what the agent asks | Queries contain no secrets or customer data. The server is the library maintainers' own. |
-| A new tool server widens what the agents trust | Owner-only through CODEOWNERS and the PR gate (decision 7). |
+| A new tool server widens what the agents trust | Owner-only to merge as a rule (decision 7), backed by the agents' ask-before-push and ask-before-merge permissions. Not a technical block on a human with merge access; see decision 7. |
 
 ## Consequences
 
