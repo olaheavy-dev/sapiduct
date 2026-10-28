@@ -34,7 +34,19 @@ Every number below is a **setting with this default**, read from configuration a
 | Playground chat (issue #24) | 20 messages and 0.25 US dollars per user per day, one message per two seconds, 5 model steps per message | Spends the template's per-user budget; built last and needs the owner's approval. |
 | Demo collection (read-only, no sign-in) | 20 calls per minute per client address | An unauthenticated surface needs its own limit. |
 
-**How the per-token rate is counted.** By counting the token's own rows in `calls` for the last minute and the last day, using an index on `(token_id, created_at)`. This needs no cache or broker and is correct across workers; the cost is one indexed count per call, which the spike (issue #7) measures. The per-address demo limit needs the real client address from the reverse proxy; the header to trust is configured and tested in issue #16, since trusting the wrong one lets anyone spoof it.
+**How the per-token rate is admitted, atomically.** Counting rows in `calls` cannot enforce a ceiling when workers run in parallel: several can each see 59 calls and admit a 60th before any new row is visible. So admission is one atomic statement per window against a small counter table, `rate_windows(token_id, owner_id, window, window_start, count)` with a unique key on `(token_id, window, window_start)`, and a row-level-security policy like the other tenant tables (record 0004):
+
+```sql
+INSERT INTO rate_windows (token_id, owner_id, window, window_start, count)
+VALUES (:token, :owner, :window, :start, 1)
+ON CONFLICT (token_id, window, window_start)
+DO UPDATE SET count = rate_windows.count + 1 WHERE rate_windows.count < :limit
+RETURNING count;
+```
+
+PostgreSQL guarantees an atomic insert-or-update outcome for `ON CONFLICT DO UPDATE`, even under high concurrency, and `RETURNING` yields a row only when one was inserted or updated, so no returned row means the limit is reached ([PostgreSQL 18 INSERT](https://www.postgresql.org/docs/current/sql-insert.html), read 2026-10-28). The day window is admitted first, then the minute window, in one short transaction that is **committed before the tool runs**; if either returns no row the transaction is rolled back, so a rejected call leaves both counters unchanged, and the answer is HTTP 429 with `Retry-After` set to the seconds until that window ends. Fixed windows allow a burst of up to twice the minute limit across a window boundary; that is accepted for a ceiling meant to stop runaway loops, not to meter usage. Old rows are deleted daily, so the table stays small and rate limiting does not depend on the activity table or its retention. Issue #7's spike must include a test that fires many concurrent requests at one token and shows that exactly the limit is admitted.
+
+The per-address demo limit uses the same table keyed by client address, and needs the real client address from the reverse proxy; the header to trust is configured and tested in issue #16, since trusting the wrong one lets anyone spoof it.
 
 **Embedding spend.** At 0.02 dollars per million tokens, a full 2,000-document collection averaging 10,000 tokens per document (an assumption to check in the spike) is 20 million tokens, about 0.40 dollars. Embedding shares the template's daily budget, so an upload burst stops at the cap; documents then wait as `queued` with a message that indexing resumes when the budget resets.
 
@@ -44,12 +56,13 @@ Every number below is a **setting with this default**, read from configuration a
 
 - A user can hit a limit, so each one has a plain message and appears in the interface where it applies (the prototype's upload dialog already shows the size limit).
 - 429s from the per-token limit are visible in Activity as errors with their own reason.
-- Counting `calls` rows couples rate limiting to the activity table and its retention; the retention job must not delete rows younger than the daily window.
+- Admission costs one short transaction with one or two upserts per MCP call; the spike (issue #7) measures it against the search budget in record 0010.
 - Nothing here sets prices or plans for users; a paid tier is a separate decision.
 
 ## Alternatives considered
 
 - **In-memory counters per worker:** cheap but inconsistent across workers and reset by a restart.
+- **Counting recent rows in `calls`:** simple, but concurrent requests can all admit a call at the same count, so it cannot enforce a ceiling. Rejected.
 - **Redis for rate limiting:** accurate and fast, at the price of a service to run. Deferred.
 - **No per-token limit:** a looping assistant could generate thousands of database queries a minute. Rejected.
 - **Unlimited retention:** unbounded growth of `calls`. Rejected.
@@ -58,4 +71,5 @@ Every number below is a **setting with this default**, read from configuration a
 
 - house-template-fastapi v0.6.1 settings, upload limits and price table, read 2026-10-28: `backend/src/app/settings.py`, `backend/src/app/limits.py`, `backend/src/app/storage.py`, `backend/src/app/llm/prices.py`, https://github.com/olaheavy-dev/house-template-fastapi
 - Supabase pricing, read 2026-10-28: https://supabase.com/pricing
+- PostgreSQL 18 documentation, INSERT (`ON CONFLICT DO UPDATE`, `RETURNING`), read 2026-10-28: https://www.postgresql.org/docs/current/sql-insert.html
 - The design prototype's sample figures: `.design/sapiduct/prototype/index.html` and `.design/sapiduct/DESIGN_REVIEW.md`.
