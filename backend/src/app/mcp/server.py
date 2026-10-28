@@ -18,6 +18,7 @@ import uuid
 from collections.abc import Awaitable, Callable
 from typing import Annotated, Any
 
+import structlog
 from fastmcp import FastMCP
 from fastmcp.exceptions import ToolError
 from fastmcp.server.dependencies import get_http_request
@@ -32,6 +33,8 @@ from app.mcp.guard import Tenant
 from app.mcp.models import McpCall
 from app.settings import Settings
 from app.tenancy import bind_owner
+
+log = structlog.get_logger()
 
 INSTRUCTIONS = (
     "Search and read the documents in one collection. Every tool only reads; none changes or "
@@ -90,11 +93,17 @@ async def run_tool[R](
             await _record(session, tenant, name, arguments, "ok", started, summary)
             await session.commit()
             return result
-    except ToolError as error:
-        async with sessionmaker() as session:
-            bind_owner(session, tenant.owner_id)
-            await _record(session, tenant, name, arguments, "error", started, str(error))
-            await session.commit()
+    except Exception as error:
+        # A refusal the tool chose to show is summarised as written; anything else (a database
+        # timeout, a bug) by its type only, so nothing internal reaches the Activity log.
+        summary = str(error) if isinstance(error, ToolError) else type(error).__name__
+        try:
+            async with sessionmaker() as session:
+                bind_owner(session, tenant.owner_id)
+                await _record(session, tenant, name, arguments, "error", started, summary)
+                await session.commit()
+        except Exception:
+            log.warning("mcp_call_not_recorded", tool=name)
         raise
 
 
@@ -119,12 +128,13 @@ def build_server(settings: Settings) -> FastMCP:
         ] = None,
     ) -> dict[str, Any]:
         """Find passages in this collection that match a question. Read-only."""
-        text_query = query.strip()
-        if not 1 <= len(text_query) <= 500:
-            raise ToolError("query must be between 1 and 500 characters.")
-        count = _limit(limit, settings.mcp_search_default, settings.mcp_search_max)
 
         async def work(session: AsyncSession, tenant: Tenant) -> tuple[dict[str, Any], str]:
+            # Validation is inside the recorded call, so a rejected call shows in Activity.
+            text_query = query.strip()
+            if not 1 <= len(text_query) <= 500:
+                raise ToolError("query must be between 1 and 500 characters.")
+            count = _limit(limit, settings.mcp_search_default, settings.mcp_search_max)
             rows = (
                 await session.scalars(
                     select(Document)
@@ -147,7 +157,7 @@ def build_server(settings: Settings) -> FastMCP:
             ]
             return {"results": results}, f"{len(results)} passages"
 
-        return await run_tool("search", {"query": text_query, "limit": count}, work)
+        return await run_tool("search", {"query": query, "limit": limit}, work)
 
     @mcp.tool(annotations=READ_ONLY)
     async def get_document(
@@ -159,12 +169,12 @@ def build_server(settings: Settings) -> FastMCP:
         ] = 0,
     ) -> dict[str, Any]:
         """Read one document from this collection, in bounded pieces. Read-only."""
-        try:
-            wanted = uuid.UUID(document_id)
-        except ValueError:
-            raise ToolError("document_id is not valid.") from None
 
         async def work(session: AsyncSession, tenant: Tenant) -> tuple[dict[str, Any], str]:
+            try:
+                wanted = uuid.UUID(document_id)
+            except ValueError:
+                raise ToolError("document_id is not valid.") from None
             row = await session.scalar(
                 select(Document).where(
                     Document.id == wanted,
@@ -207,9 +217,9 @@ def build_server(settings: Settings) -> FastMCP:
         ] = None,
     ) -> dict[str, Any]:
         """List the documents in this collection, newest first, a page at a time. Read-only."""
-        count = _limit(limit, settings.mcp_list_default, settings.mcp_list_max)
 
         async def work(session: AsyncSession, tenant: Tenant) -> tuple[dict[str, Any], str]:
+            count = _limit(limit, settings.mcp_list_default, settings.mcp_list_max)
             scope = (
                 Document.collection_id == tenant.collection_id,
                 Document.owner_id == tenant.owner_id,
@@ -257,6 +267,6 @@ def build_server(settings: Settings) -> FastMCP:
                 f"{len(shown)} of {total or 0} sources",
             )
 
-        return await run_tool("list_sources", {"limit": count, "cursor": cursor}, work)
+        return await run_tool("list_sources", {"limit": limit, "cursor": cursor}, work)
 
     return mcp

@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import asyncio
 import json
+import uuid
 from collections.abc import AsyncIterator
 from dataclasses import dataclass
 from typing import Any
@@ -422,14 +423,44 @@ async def test_get_document_is_bounded_and_continues_with_an_offset(setup: Setup
     assert tool_error(await post(setup, pid, call("get_document", {"document_id": "nope"}), token))
 
 
-async def test_a_tool_that_fails_inside_is_recorded_as_an_error(setup: Setup) -> None:
-    # Bad arguments are refused before the tool runs and are not logged; a failure inside is.
+@pytest.mark.parametrize(
+    ("tool", "arguments"),
+    [
+        ("get_document", {"document_id": "00000000-0000-0000-0000-000000000000"}),
+        ("get_document", {"document_id": "not-a-uuid"}),
+        ("search", {"query": "   "}),
+        ("list_sources", {"limit": 0}),
+        ("list_sources", {"cursor": "forged"}),
+    ],
+)
+async def test_a_rejected_tool_call_is_recorded_as_an_error(
+    setup: Setup, tool: str, arguments: dict[str, Any]
+) -> None:
     _, pid, token = await ready(setup)
-    missing = "00000000-0000-0000-0000-000000000000"
-    await post(setup, pid, call("get_document", {"document_id": missing}), token)
+    await post(setup, pid, call(tool, arguments), token)
     async with AsyncSession(setup.engine) as session:
         rows = (await session.execute(text("SELECT tool, status FROM mcp_call"))).all()
-    assert [tuple(r) for r in rows] == [("get_document", "error")]
+    assert [tuple(r) for r in rows] == [(tool, "error")]
+
+
+async def test_an_unexpected_failure_inside_a_tool_is_recorded_without_its_detail(
+    setup: Setup, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    _, pid, token = await ready(setup)
+
+    async def broken(*_: Any, **__: Any) -> None:
+        raise RuntimeError("secret internal detail")
+
+    monkeypatch.setattr(AsyncSession, "scalar", broken)
+    response = await post(
+        setup, pid, call("get_document", {"document_id": str(uuid.uuid4())}), token
+    )
+    assert "secret internal detail" not in response.text
+    async with AsyncSession(setup.engine) as session:
+        rows = (
+            await session.execute(text("SELECT tool, status, result_summary FROM mcp_call"))
+        ).all()
+    assert [tuple(r) for r in rows] == [("get_document", "error", "RuntimeError")]
 
 
 async def test_a_rate_limited_request_is_not_written_as_a_call(setup: Setup) -> None:
