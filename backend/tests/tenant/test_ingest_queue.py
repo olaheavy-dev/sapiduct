@@ -342,10 +342,9 @@ async def test_a_batch_applied_twice_writes_nothing_the_second_time(
     from app.ingest.types import Chunk as Parsed
 
     collection = await seed(owner_engine, "alice", "Notes")
-    document = await add_document(
-        owner_engine, store, collection, "a.txt", "txt", b"x", queue=False
-    )
-    job = worker.Claimed(uuid.uuid4(), "alice", document.id, collection.id, 1)
+    document = await add_document(owner_engine, store, collection, "a.txt", "txt", b"x")
+    job = await worker.claim(sessions, lease=300)
+    assert job is not None
     batch = [Parsed(0, "one", "line 1"), Parsed(1, "two", "line 2")]
     await worker._write_batch(sessions, job, 1, batch)
     await worker._write_batch(sessions, job, 1, batch)
@@ -578,3 +577,125 @@ async def test_a_claim_does_not_wait_behind_a_job_another_worker_has_locked(
         await holder.rollback()
     assert taken is not None
     assert taken.document_id == second.id
+
+
+async def test_a_worker_that_lost_its_claim_can_change_nothing(
+    owner_engine: AsyncEngine,
+    sessions: async_sessionmaker[AsyncSession],
+    store: Storage,
+    storage_settings: Settings,
+) -> None:
+    from app.ingest.types import Chunk as Parsed
+
+    settings = make_settings(storage_settings)
+    collection = await seed(owner_engine, "alice", "Notes")
+    document = await add_document(owner_engine, store, collection, "a.md", "md", long_markdown("a"))
+    slow = await worker.claim(sessions, lease=300)
+    assert slow is not None
+    assert await worker._start(sessions, slow, settings) is not None  # generation 1, then it stalls
+    async with AsyncSession(owner_engine) as session:
+        await session.execute(
+            update(IngestJob).values(locked_until=func.now() - text("interval '1 second'"))
+        )
+        await session.commit()
+    await worker.run_once(sessions, store, settings)  # another worker finishes the job
+    done = await state(owner_engine, document)
+    assert (done["status"], done["generation"], done["published"]) == ("indexed", 2, 2)
+
+    stale = [
+        worker._start(sessions, slow, settings),
+        worker._write_batch(sessions, slow, 1, [Parsed(0, "stale", "p. 1")]),
+        worker._finish(sessions, slow, 1),
+        worker._give_up(sessions, slow, "stale failure"),
+        worker._retry(sessions, slow, settings, "Crash"),
+    ]
+    for attempt in stale:
+        with pytest.raises(worker.LeaseLost):
+            await attempt
+    assert await state(owner_engine, document) == done  # not one row changed
+
+
+async def test_a_stale_worker_found_out_midway_stops_quietly(
+    owner_engine: AsyncEngine,
+    sessions: async_sessionmaker[AsyncSession],
+    store: Storage,
+    storage_settings: Settings,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    settings = make_settings(storage_settings)
+    collection = await seed(owner_engine, "alice", "Notes")
+    document = await add_document(owner_engine, store, collection, "a.md", "md", long_markdown("a"))
+
+    async def takeover(*_: Any, **__: Any) -> None:
+        async with AsyncSession(owner_engine) as session:  # someone else took the job
+            await session.execute(update(IngestJob).values(attempts=IngestJob.attempts + 1))
+            await session.commit()
+        raise worker.LeaseLost
+
+    monkeypatch.setattr(worker, "_write_batch", takeover)
+    assert await worker.run_once(sessions, store, settings) is True
+    info = await state(owner_engine, document)
+    assert info["status"] == "parsing"  # untouched by the stale worker's error handling
+
+
+async def test_a_retry_of_a_partial_first_index_keeps_the_earlier_batches_searchable(
+    owner_engine: AsyncEngine,
+    sessions: async_sessionmaker[AsyncSession],
+    store: Storage,
+    storage_settings: Settings,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    settings = make_settings(storage_settings)
+    collection = await seed(owner_engine, "alice", "Notes")
+    document = await add_document(owner_engine, store, collection, "a.md", "md", long_markdown("a"))
+    with monkeypatch.context() as patch:
+        crash_after_batches(patch, allowed=1)
+        await worker.run_once(sessions, store, settings)
+    first = await state(owner_engine, document)
+    assert published(first) == [0, 1]
+
+    # The retry fails before writing anything: the earlier batches must still be there.
+    async def unreadable(*_: Any, **__: Any) -> bytes:
+        raise Crash("storage down")
+
+    with monkeypatch.context() as patch:
+        patch.setattr(store, "get", unreadable)
+        await worker.run_once(sessions, store, settings)
+    retried = await state(owner_engine, document)
+    assert retried["published"] == first["published"]
+    assert published(retried) == [0, 1]
+
+    await worker.run_once(sessions, store, settings)  # a good retry replaces them at the end
+    done = await state(owner_engine, document)
+    assert done["status"] == "indexed"
+    assert {g for g, _ in done["chunks"]} == {done["published"]}
+    assert published(done) == list(range(len(done["chunks"])))
+
+
+async def test_a_stale_worker_is_stopped_while_the_new_one_is_still_running(
+    owner_engine: AsyncEngine,
+    sessions: async_sessionmaker[AsyncSession],
+    store: Storage,
+    storage_settings: Settings,
+) -> None:
+    from app.ingest.types import Chunk as Parsed
+
+    settings = make_settings(storage_settings)
+    collection = await seed(owner_engine, "alice", "Notes")
+    await add_document(owner_engine, store, collection, "a.md", "md", long_markdown("a"))
+    slow = await worker.claim(sessions, lease=300)
+    assert slow is not None
+    async with AsyncSession(owner_engine) as session:
+        await session.execute(
+            update(IngestJob).values(locked_until=func.now() - text("interval '1 second'"))
+        )
+        await session.commit()
+    current = await worker.claim(sessions, lease=300)  # the job is "running" again, attempt 2
+    assert current is not None
+    assert (slow.attempts, current.attempts) == (1, 2)
+    with pytest.raises(worker.LeaseLost):
+        await worker._finish(sessions, slow, 1)
+    with pytest.raises(worker.LeaseLost):
+        await worker._write_batch(sessions, slow, 1, [Parsed(0, "stale", "p. 1")])
+    await worker._write_batch(sessions, current, 1, [Parsed(0, "fresh", "p. 1")])  # allowed
+    assert await worker._start(sessions, current, settings) is not None

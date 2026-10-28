@@ -52,7 +52,35 @@ class Claimed:
     owner_id: str
     document_id: uuid.UUID
     collection_id: uuid.UUID
-    attempts: int
+    attempts: int  # also the claim's fencing token: each claim of a job adds one
+    lease_seconds: int = 300
+
+
+class LeaseLost(Exception):
+    """This worker's claim was taken over (its lease ran out and another worker claimed the job).
+    It must stop at once and write nothing more."""
+
+
+async def _hold(session: AsyncSession, job: Claimed) -> None:
+    """Fence a transaction to this worker's claim, and renew the lease.
+
+    The update matches only the job's current claim (running, and the attempt number this worker
+    was given). It also locks the row until the transaction ends, so nobody can claim the job
+    between this check and the writes that follow. A worker that lost its claim matches nothing
+    and stops (PostgreSQL docs, UPDATE and explicit row locks).
+    """
+    held = await session.scalar(
+        update(IngestJob)
+        .where(
+            IngestJob.id == job.job_id,
+            IngestJob.status == "running",
+            IngestJob.attempts == job.attempts,
+        )
+        .values(locked_until=func.now() + func.make_interval(0, 0, 0, 0, 0, 0, job.lease_seconds))
+        .returning(IngestJob.id)
+    )
+    if held is None:
+        raise LeaseLost
 
 
 async def enqueue(session: AsyncSession, document: Document) -> bool:
@@ -75,7 +103,9 @@ async def claim(sessionmaker: async_sessionmaker[AsyncSession], lease: int) -> C
     async with sessionmaker() as session:
         row = (await session.execute(_CLAIM, {"lease": lease})).first()
         await session.commit()
-    return Claimed(*row) if row else None
+    if row is None:
+        return None
+    return Claimed(row[0], row[1], row[2], row[3], row[4], lease_seconds=lease)
 
 
 def _parse_and_chunk(kind: str, data: bytes, settings: Settings) -> list[ParsedChunk]:
@@ -95,6 +125,7 @@ async def _write_batch(
 ) -> None:
     async with sessionmaker() as session:
         bind_owner(session, job.owner_id)
+        await _hold(session, job)
         await session.execute(
             pg_insert(Chunk)
             .values(
@@ -124,6 +155,7 @@ async def _start(
     gone."""
     async with sessionmaker() as session:
         bind_owner(session, job.owner_id)
+        await _hold(session, job)
         doc = await session.scalar(
             select(Document).where(
                 Document.id == job.document_id, Document.owner_id == job.owner_id
@@ -143,9 +175,10 @@ async def _start(
         doc.generation = generation
         doc.status = "parsing"
         doc.failure_reason = None
-        if doc.indexed_at is None:
-            # First indexing: publish at once so finished batches are searchable, and drop the
-            # chunks of any earlier attempt.
+        if doc.published_generation == 0:
+            # Nothing is searchable yet: publish the new generation at once so finished batches
+            # can be found. Anything already published (a finished index, or the finished
+            # batches of an earlier attempt) stays until the new generation replaces it.
             doc.published_generation = generation
             await session.execute(
                 delete(Chunk).where(Chunk.document_id == doc.id, Chunk.generation != generation)
@@ -161,6 +194,7 @@ async def _finish(
     """Publish the generation, drop every other one, and close the job: one transaction."""
     async with sessionmaker() as session:
         bind_owner(session, job.owner_id)
+        await _hold(session, job)
         await session.execute(
             update(Document)
             .where(Document.id == job.document_id)
@@ -189,6 +223,7 @@ async def _give_up(
 ) -> None:
     async with sessionmaker() as session:
         bind_owner(session, job.owner_id)
+        await _hold(session, job)
         published = (
             select(Document.published_generation)
             .where(Document.id == job.document_id)
@@ -223,6 +258,7 @@ async def _retry(
         return
     async with sessionmaker() as session:
         bind_owner(session, job.owner_id)
+        await _hold(session, job)
         await session.execute(
             update(Document).where(Document.id == job.document_id).values(status="queued")
         )
@@ -273,10 +309,16 @@ async def run_once(
     if job is None:
         return False
     try:
-        await _process(sessionmaker, storage, settings, job)
-    except ParseError as error:
-        await _give_up(sessionmaker, job, str(error))
-    except Exception as error:
-        log.warning("ingest_job_failed", job_id=str(job.job_id), error=type(error).__name__)
-        await _retry(sessionmaker, job, settings, type(error).__name__)
+        try:
+            await _process(sessionmaker, storage, settings, job)
+        except ParseError as error:
+            await _give_up(sessionmaker, job, str(error))
+        except LeaseLost:
+            raise
+        except Exception as error:
+            log.warning("ingest_job_failed", job_id=str(job.job_id), error=type(error).__name__)
+            await _retry(sessionmaker, job, settings, type(error).__name__)
+    except LeaseLost:
+        # Another worker owns the job now; whatever it does is what counts.
+        log.warning("ingest_lease_lost", job_id=str(job.job_id))
     return True

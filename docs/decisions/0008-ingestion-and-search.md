@@ -64,6 +64,8 @@ Users upload PDFs, Word files, Markdown, plain text, HTML and VTT transcripts; S
 - One live job per document is enforced by a partial unique index, so asking twice queues once.
 - A job that keeps killing its worker is failed by the attempt count: each claim adds one, and past the limit the next claim fails the document with a stated reason instead of trying again.
 - Retry delay grows as attempts times `INGEST_RETRY_SECONDS`; the error noted on a retried job is the exception's type name only.
+- Every transaction that changes anything first runs a fence: an update that matches only the job's current claim (status running, and the attempt number the worker was given) and renews its lease, locking the row until the transaction ends. A worker whose lease ran out and whose job was claimed again matches nothing, raises `LeaseLost` and writes nothing more, so two deliveries of one job can never publish or delete each other's chunks. Tests cover a stale worker both after the new worker finished and while it is still running.
+- A retry after a partial first index builds hidden like a re-index: while anything is published the new generation stays hidden until it replaces it, so a retry that fails before its first batch leaves the earlier batches searchable.
 - Parsing still runs in a thread inside the worker. The credential-free parser service (decision 4) needs a Compose change that is awaiting the owner's approval.
 
 ## Sources
