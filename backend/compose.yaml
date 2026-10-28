@@ -1,0 +1,114 @@
+# Owned by house-template-fastapi. Included by the root compose.yaml (house-template-base), so
+# `make db-up` and `make storage-up` start the local services for `make dev`; `make up` runs the
+# whole backend from its image (migrate once, then the API), as production would.
+# Local credentials only; production gets its URLs and keys from its environment.
+
+services:
+  db:
+    # pgvector 0.8.7 on PostgreSQL 18, pinned by digest (Dependabot updates it).
+    image: pgvector/pgvector:0.8.7-pg18-trixie@sha256:9d9c930220cb9bf2f956d10a8f909cf9973d9672ca0278aef2c1e6facccad2e0
+    environment:
+      POSTGRES_USER: app
+      POSTGRES_PASSWORD: app
+      POSTGRES_DB: app
+    ports:
+      # Set DB_PORT (and the port in DATABASE_URL) to run two projects' databases side by side.
+      - "127.0.0.1:${DB_PORT:-5432}:5432"
+    volumes:
+      # PostgreSQL 18 images keep data under /var/lib/postgresql/18/docker: mount the parent.
+      - db-data:/var/lib/postgresql
+    healthcheck:
+      # Over TCP, not the socket: on first start the image runs a temporary socket-only server
+      # while it initialises, and a socket check would pass before the real server is up.
+      test: ["CMD-SHELL", "pg_isready -h 127.0.0.1 -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+      start_interval: 1s
+    shm_size: 256mb
+
+  storage:
+    # RustFS 1.0.4 (S3-compatible; MinIO stopped publishing images), pinned by digest.
+    image: rustfs/rustfs:1.0.4@sha256:ed9210d6411d77ffceb70d94b964a3cb7d225983368bc25bebe01e995293dcc2
+    environment:
+      RUSTFS_ACCESS_KEY: app-storage
+      RUSTFS_SECRET_KEY: app-storage-secret
+    ports:
+      # Set STORAGE_PORT (and the port in STORAGE_ENDPOINT_URL) to run two projects side by side.
+      - "127.0.0.1:${STORAGE_PORT:-9000}:9000"
+      # The web console, signed in with the keys above.
+      - "127.0.0.1:${STORAGE_CONSOLE_PORT:-9001}:9001"
+    volumes:
+      # The image runs as UID 10001 and owns /data; a named volume keeps that ownership.
+      - storage-data:/data
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://127.0.0.1:9000/health"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+      start_interval: 1s
+
+  # Applies migrations once, then exits; the API starts only if it succeeded. Production runs the
+  # same image with the same command as a one-off job before each rollout.
+  migrate:
+    # Both services build the same Dockerfile (the second build is cached): Compose names the
+    # image after the project, so two projects never share one.
+    build: .
+    command: ["alembic", "upgrade", "heads"]
+    environment: &api-environment
+      APP_ENV: local
+      LOG_JSON: "false"
+      # Service names, not localhost: these run inside Compose's network.
+      DATABASE_URL: postgresql+psycopg://app:app@db:5432/app
+      STORAGE_ENDPOINT_URL: http://storage:9000
+      # Presigned URLs go to browsers on this machine, which reach the storage here.
+      STORAGE_PUBLIC_ENDPOINT_URL: http://localhost:${STORAGE_PORT:-9000}
+    env_file:
+      # Keys and other settings from backend/.env, when there is one; the values above win.
+      - path: .env
+        required: false
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: "no"
+
+  api:
+    build: .
+    environment: *api-environment
+    env_file:
+      - path: .env
+        required: false
+    ports:
+      # Set API_PORT to run two projects side by side.
+      - "127.0.0.1:${API_PORT:-8000}:8000"
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+      db:
+        condition: service_healthy
+    healthcheck:
+      # The slim image has no curl; Python is there.
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health/live', timeout=3)"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+      start_interval: 1s
+    develop:
+      # `docker compose watch`: rebuild the image when the app or its dependencies change.
+      # `make dev` (fastapi dev on the host) reloads faster while writing code.
+      watch:
+        - action: rebuild
+          path: src
+        - action: rebuild
+          path: migrations
+        - action: rebuild
+          path: pyproject.toml
+        - action: rebuild
+          path: uv.lock
+
+volumes:
+  db-data:
+  storage-data:

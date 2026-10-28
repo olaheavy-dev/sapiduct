@@ -1,0 +1,52 @@
+# syntax=docker/dockerfile:1
+# Owned by house-template-fastapi. The API image, following uv's Docker guide
+# (https://docs.astral.sh/uv/guides/integration/docker/): dependencies and the app are installed
+# into a virtualenv from the lockfile in a build stage, and only that virtualenv, the migrations
+# and pyproject.toml (which holds the FastAPI and Alembic settings) reach the final image. It runs
+# as a non-root user. Base images are pinned by digest; Dependabot updates them.
+
+FROM ghcr.io/astral-sh/uv:0.13.5@sha256:32a7bb39b496babbd997b0a39a4d66c126bdaf5661b302bf6f06abda8deca6ff AS uv
+
+FROM python:3.14-slim-trixie@sha256:35caba83af2fe6da9a5d922f9b0156f21d1246a48278c58a08bd253303ba42e8 AS build
+COPY --from=uv /uv /bin/uv
+# Bytecode compiled at build time (the final image can't write it as a non-root user); the
+# image's own Python, never a downloaded one; no dev dependencies.
+ENV UV_COMPILE_BYTECODE=1 \
+    UV_LINK_MODE=copy \
+    UV_PYTHON_DOWNLOADS=0 \
+    UV_NO_DEV=1
+WORKDIR /app
+# Dependencies first, in their own layer: it is rebuilt only when the lockfile changes.
+RUN --mount=type=cache,target=/root/.cache/uv \
+    --mount=type=bind,source=uv.lock,target=uv.lock \
+    --mount=type=bind,source=pyproject.toml,target=pyproject.toml \
+    uv sync --locked --no-install-project --no-editable
+COPY . /app
+# --no-editable: the app is installed into the virtualenv, so the source isn't needed at runtime.
+RUN --mount=type=cache,target=/root/.cache/uv \
+    uv sync --locked --no-editable
+
+FROM python:3.14-slim-trixie@sha256:35caba83af2fe6da9a5d922f9b0156f21d1246a48278c58a08bd253303ba42e8
+RUN groupadd --system --gid 10001 app \
+    && useradd --system --uid 10001 --gid app --no-create-home --shell /usr/sbin/nologin app
+WORKDIR /app
+COPY --from=build /app/.venv /app/.venv
+COPY pyproject.toml /app/pyproject.toml
+COPY migrations /app/migrations
+# UVICORN_* set uvicorn's options. On SIGTERM it stops accepting connections and gives requests
+# in flight this long to finish: keep it under the platform's grace period (30 s on Kubernetes)
+# and above LLM_TIMEOUT_SECONDS for answers worth finishing. FORWARDED_ALLOW_IPS: the proxies
+# whose X-Forwarded-* headers to trust; set it to the load balancer's addresses.
+ENV PATH="/app/.venv/bin:$PATH" \
+    PYTHONUNBUFFERED=1 \
+    APP_ENV=production \
+    LOG_JSON=true \
+    UVICORN_TIMEOUT_GRACEFUL_SHUTDOWN=25 \
+    FORWARDED_ALLOW_IPS=127.0.0.1
+USER 10001:10001
+EXPOSE 8000
+# One process per container: scale with replicas. Migrations run separately (`alembic upgrade
+# heads`, the compose file's migrate service), never at start-up in every replica. uvicorn
+# directly rather than `fastapi run`: its options (graceful shutdown) come from UVICORN_*, and the
+# app writes the access log itself as JSON.
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--no-access-log"]
