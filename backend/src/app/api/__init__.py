@@ -24,8 +24,9 @@ from __future__ import annotations
 
 from fastapi import APIRouter
 
-from app.api import collections, me
+from app.api import collections, me, tokens
 
 router = APIRouter(prefix="/v1")
 router.include_router(me.router)
 router.include_router(collections.router)
+router.include_router(tokens.router)
