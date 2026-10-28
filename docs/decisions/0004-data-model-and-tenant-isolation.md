@@ -49,6 +49,11 @@ Facts that shape the choice:
 - **One schema or database per user:** strong isolation, but migrations, pooling and cost grow with the number of users. Rejected for a solo-run service.
 - **Policies that join to `collections` for ownership:** avoids the repeated column, but the docs warn about races with sub-selects. Rejected.
 
+## Spike findings (issue #7)
+
+- The lookup function is owned by a dedicated role, `sapiduct_resolver`, which is neither a superuser nor `BYPASSRLS` and has its own narrow policies on the token and collection tables. An owner that bypasses row-level security would have defeated the point, and the table owner is itself bound by forced row-level security. The function runs with that role's rights, so it can read only what its policies allow.
+- Tests connect as a login that inherits `sapiduct_api`, and a mutation check (removing each layer in turn) shows every layer's test fails without it.
+
 ## Sources
 
 - PostgreSQL 18 documentation, Row Security Policies (PostgreSQL 18.6), read 2026-10-28: https://www.postgresql.org/docs/current/ddl-rowsecurity.html

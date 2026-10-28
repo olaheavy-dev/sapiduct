@@ -124,6 +124,23 @@ class Settings(BaseSettings):
     langsmith_hide_inputs: bool = False
     langsmith_hide_outputs: bool = False
 
+    # MCP servers (records 0005, 0006, 0009). Every limit is a setting with a default, never a
+    # constant. The MCP endpoint of a collection is `{mcp_path_prefix}/{public_id}`.
+    mcp_path_prefix: str = "/mcp"
+    # Origins allowed to call the MCP endpoint from a browser. A request with no Origin header
+    # (desktop assistants, scripts) is not affected; one with an Origin not listed gets a 403.
+    mcp_allowed_origins: list[str] = []
+    mcp_rate_per_minute: int = Field(default=60, gt=0)
+    mcp_rate_per_day: int = Field(default=10_000, gt=0)
+    # How long the old token keeps working after a rotation.
+    mcp_rotation_overlap_seconds: int = Field(default=3_600, ge=0)
+    # Most results one tool call may return, and how many it returns when asked for none.
+    mcp_search_max: int = Field(default=10, gt=0)
+    mcp_search_default: int = Field(default=5, gt=0)
+    mcp_list_max: int = Field(default=25, gt=0)
+    mcp_list_default: int = Field(default=10, gt=0)
+    mcp_document_max_chars: int = Field(default=20_000, gt=0)
+
     @model_validator(mode="after")
     def no_local_defaults_in_production(self) -> Settings:
         """Refuse to start in production on the local development credentials: a missing secret

@@ -14,6 +14,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.trustedhost import TrustedHostMiddleware
 from fastapi.telemetry import TelemetryConfig
+from fastmcp.utilities.lifespan import combine_lifespans
 
 from app import api, db, health
 from app.limits import BodyLimit, SecurityHeaders
@@ -21,6 +22,7 @@ from app.llm import checkpoints
 from app.llm.errors import install_model_error_handlers
 from app.llm.gateway import Gateway
 from app.log import REQUEST_ID_HEADER, configure_logging, request_context
+from app.mcp import build_mcp
 from app.problems import UnhandledErrors, install_problem_handlers
 from app.settings import Settings, get_settings
 from app.storage import Storage
@@ -80,8 +82,9 @@ def create_app(
     settings = settings or get_settings()
     configure_logging(settings)
     docs = settings.docs_on
+    mcp = build_mcp(settings)
     app = FastAPI(
-        lifespan=lifespan,
+        lifespan=combine_lifespans(lifespan, mcp.lifespan),
         docs_url="/docs" if docs else None,
         redoc_url=None,
         openapi_url="/openapi.json" if docs else None,
@@ -112,6 +115,8 @@ def create_app(
         app.add_middleware(TrustedHostMiddleware, allowed_hosts=settings.allowed_hosts)
     app.include_router(health.router)
     app.include_router(api.router)
+    # Each collection's MCP server: {prefix}/{public id}, behind the guard (app/mcp/guard.py).
+    app.mount(settings.mcp_path_prefix, mcp.asgi)
     health.add_readiness_check(app, "database", lambda: _database_ready(app))
     if settings.storage_bucket:
         health.add_readiness_check(app, "storage", lambda: app.state.storage.ping())

@@ -11,7 +11,7 @@ An assistant authenticates to one collection's server with a bearer token the us
 1. **Format.** `sap_` followed by `secrets.token_urlsafe(32)`. The `sap_` prefix lets secret scanners and users recognise it.
 2. **Storage.** Only a SHA-256 digest of the token is stored (`token_hash`, unique), plus a short display prefix and the last four characters for the masked view. The plain token is shown once, at creation or rotation, and is never written to logs or the `calls` table.
    - *Reasoning, not from a cited source:* the token is a random 256-bit value, so an attacker cannot guess it from its digest the way they can guess a human password; a slow password hash would add cost to every MCP call without adding protection.
-3. **Verification.** A custom `TokenVerifier` hashes the presented token, looks it up by `token_hash` with a constant-time comparison of the result, and returns the token only if it is neither revoked nor past its end of life, **and** the token's collection matches the `public_id` in the URL. It returns nothing otherwise. The specification requires a 401 for an invalid or expired token; the spike (issue #7) confirms what FastMCP sends for a rejected token and adds the `WWW-Authenticate: Bearer` header if it is missing. A valid token used against another collection's URL gets the same 401, so a response never reveals that another collection exists.
+3. **Verification.** A guard in front of FastMCP (see record 0005) hashes the presented token, looks it up by `token_hash` in SQL (an indexed equality on a 256-bit digest, which leaves nothing for a timing attack to learn about the token itself), and returns the token only if it is neither revoked nor past its end of life, **and** the token's collection matches the `public_id` in the URL. It returns nothing otherwise. The specification requires a 401 for an invalid or expired token; the spike (issue #7) confirms what FastMCP sends for a rejected token and adds the `WWW-Authenticate: Bearer` header if it is missing. A valid token used against another collection's URL gets the same 401, so a response never reveals that another collection exists.
 4. **Per-call lookup, no cache.** Each call does one indexed lookup, so a revocation takes effect on the next call.
 5. **Rotation.** Rotating creates a new token and sets the old token's end of life to now plus an overlap period (its length is set in record 0009 and stated in the dialog). Revoking sets the end of life to now.
 6. **Header only.** A token in the query string or request body is not read. The configuration snippets and guides use the `Authorization` header only.
@@ -32,6 +32,11 @@ An assistant authenticates to one collection's server with a bearer token the us
 - **JWT access tokens:** verifiable without a database lookup, but revocation would need a deny list and the per-call lookup is cheap. Rejected for now.
 - **API keys per user, not per collection:** a leaked key would expose every collection. Rejected.
 - **Storing the token encrypted so it can be shown again:** requires key management and widens what a database leak exposes. Rejected.
+
+## Spike findings (issue #7)
+
+- The guard rejects a missing, malformed, unknown, revoked, expired or wrong-collection token with the same 401 and `WWW-Authenticate: Bearer`, and ignores a token sent in the query string. Tests cover each case.
+- Creating a token takes a row lock on the collection, so two simultaneous rotations cannot exceed two active tokens; the old token gets an end time of the rotation overlap.
 
 ## Sources
 
